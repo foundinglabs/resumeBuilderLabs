@@ -1,0 +1,636 @@
+/* Enhanced Template Styling System - Based on Reactive-Resume */
+
+/* Advanced Color Palette System */
+@layer base {
+  :root {
+    /* Enhanced Color System - Zinc based palette */
+    --zinc-50: 250 250 250;
+    --zinc-100: 244 244 245;
+    --zinc-200: 228 228 231;
+    --zinc-300: 212 212 216;
+    --zinc-400: 161 161 170;
+    --zinc-500: 113 113 122;
+    --zinc-600: 82 82 91;
+    --zinc-700: 63 63 70;
+    --zinc-800: 39 39 42;
+    --zinc-900: 24 24 27;
+    --zinc-950: 9 9 11;
+
+    /* Professional Color System */
+    --blue-50: 239 246 255;
+    --blue-100: 219 234 254;
+    --blue-200: 191 219 254;
+    --blue-300: 147 197 253;
+    --blue-400: 96 165 250;
+    --blue-500: 59 130 246;
+    --blue-600: 37 99 235;
+    --blue-700: 29 78 216;
+    --blue-800: 30 64 175;
+    --blue-900: 30 58 138;
+
+    /* Enhanced Template Color Variables */
+    --template-background: rgb(var(--zinc-50));
+    --template-foreground: rgb(var(--zinc-900));
+    --template-primary: rgb(var(--blue-600));
+    --template-primary-accent: rgb(var(--blue-700));
+    --template-primary-foreground: rgb(var(--zinc-50));
+    --template-muted: rgb(var(--zinc-500));
+    --template-muted-foreground: rgb(var(--zinc-600));
+    --template-border: rgb(var(--zinc-200));
+    --template-accent: rgb(var(--zinc-100));
+    --template-sidebar-bg: rgb(var(--zinc-50));
+    
+    /* Enhanced spacing and sizing */
+    --template-padding: 16px;
+    --template-gap: 12px;
+    --template-border-radius: 6px;
+    --template-section-spacing: 20px;
+  }
+
+  .dark {
+    --template-background: rgb(var(--zinc-950));
+    --template-foreground: rgb(var(--zinc-50));
+    --template-primary: rgb(var(--blue-400));
+    --template-primary-accent: rgb(var(--blue-300));
+    --template-primary-foreground: rgb(var(--zinc-950));
+    --template-muted: rgb(var(--zinc-400));
+    --template-muted-foreground: rgb(var(--zinc-300));
+    --template-border: rgb(var(--zinc-800));
+    --template-accent: rgb(var(--zinc-800));
+    --template-sidebar-bg: rgb(var(--zinc-900));
+  }
+}
+
+/* Enhanced Template Base Styles */
+.reactive-resume-template {
+  /* ATS-Optimized Font Stack */
+  font-family: 'Calibri', 'Arial', 'Helvetica', 'Segoe UI', sans-serif;
+  font-variant-ligatures: none;
+  font-feature-settings: "kern" 1, "liga" 0;
+  
+  /* Enhanced readability */
+  line-height: 1.5;
+  letter-spacing: 0.005em;
+  color: var(--template-foreground);
+  background-color: var(--template-background);
+  
+  /* Improved text rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Enhanced Typography Hierarchy */
+.reactive-resume-template h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 0.5rem;
+  color: var(--template-foreground);
+}
+
+.reactive-resume-template h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.3;
+  margin-bottom: 0.5rem;
+  color: var(--template-foreground);
+}
+
+.reactive-resume-template h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-bottom: 0.375rem;
+  color: var(--template-foreground);
+}
+
+.reactive-resume-template h4 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-bottom: 0.25rem;
+  color: var(--template-primary);
+  border-bottom: 1px solid var(--template-border);
+  padding-bottom: 0.125rem;
+}
+
+.reactive-resume-template h5,
+.reactive-resume-template h6 {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-bottom: 0.25rem;
+  color: var(--template-foreground);
+}
+
+/* Enhanced Section Styling */
+.reactive-resume-template section {
+  margin-bottom: var(--template-section-spacing);
+}
+
+.reactive-resume-template section:last-child {
+  margin-bottom: 0;
+}
+
+/* Enhanced Grid Layouts */
+.reactive-resume-template .grid {
+  display: grid;
+  gap: var(--template-gap);
+}
+
+.reactive-resume-template .grid-cols-1 { grid-template-columns: repeat(1, 1fr); }
+.reactive-resume-template .grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+.reactive-resume-template .grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+
+/* Enhanced Flex Layouts */
+.reactive-resume-template .flex {
+  display: flex;
+}
+
+.reactive-resume-template .flex-col {
+  flex-direction: column;
+}
+
+.reactive-resume-template .items-start { align-items: flex-start; }
+.reactive-resume-template .items-center { align-items: center; }
+.reactive-resume-template .items-end { align-items: flex-end; }
+
+.reactive-resume-template .justify-start { justify-content: flex-start; }
+.reactive-resume-template .justify-center { justify-content: center; }
+.reactive-resume-template .justify-between { justify-content: space-between; }
+.reactive-resume-template .justify-end { justify-content: flex-end; }
+
+/* Enhanced Spacing System */
+.reactive-resume-template .space-y-1 > * + * { margin-top: 0.25rem; }
+.reactive-resume-template .space-y-2 > * + * { margin-top: 0.5rem; }
+.reactive-resume-template .space-y-3 > * + * { margin-top: 0.75rem; }
+.reactive-resume-template .space-y-4 > * + * { margin-top: 1rem; }
+.reactive-resume-template .space-y-6 > * + * { margin-top: 1.5rem; }
+
+.reactive-resume-template .space-x-1 > * + * { margin-left: 0.25rem; }
+.reactive-resume-template .space-x-2 > * + * { margin-left: 0.5rem; }
+.reactive-resume-template .space-x-4 > * + * { margin-left: 1rem; }
+
+.reactive-resume-template .gap-x-1 { column-gap: 0.25rem; }
+.reactive-resume-template .gap-x-1\.5 { column-gap: 0.375rem; }
+.reactive-resume-template .gap-x-2 { column-gap: 0.5rem; }
+.reactive-resume-template .gap-x-4 { column-gap: 1rem; }
+.reactive-resume-template .gap-x-6 { column-gap: 1.5rem; }
+
+.reactive-resume-template .gap-y-0\.5 { row-gap: 0.125rem; }
+.reactive-resume-template .gap-y-1 { row-gap: 0.25rem; }
+.reactive-resume-template .gap-y-1\.5 { row-gap: 0.375rem; }
+.reactive-resume-template .gap-y-2 { row-gap: 0.5rem; }
+.reactive-resume-template .gap-y-3 { row-gap: 0.75rem; }
+
+/* Enhanced Color Classes */
+.reactive-resume-template .text-primary { color: var(--template-primary); }
+.reactive-resume-template .text-muted { color: var(--template-muted); }
+.reactive-resume-template .text-foreground { color: var(--template-foreground); }
+
+.reactive-resume-template .bg-primary { background-color: var(--template-primary); }
+.reactive-resume-template .bg-accent { background-color: var(--template-accent); }
+.reactive-resume-template .bg-background { background-color: var(--template-background); }
+
+.reactive-resume-template .border-primary { border-color: var(--template-primary); }
+.reactive-resume-template .border-border { border-color: var(--template-border); }
+
+/* Enhanced Component Styles */
+
+/* Rating Component Enhancement */
+.reactive-resume-template .rating-container {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.reactive-resume-template .rating-dot {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 0.125rem;
+  border: 2px solid var(--template-primary);
+  transition: background-color 0.2s ease;
+}
+
+.reactive-resume-template .rating-dot.filled {
+  background-color: var(--template-primary);
+}
+
+.reactive-resume-template .rating-bar {
+  position: relative;
+  height: 0.625rem;
+  width: 100%;
+  border-radius: 0.125rem;
+  background-color: rgba(var(--zinc-200), 0.4);
+  overflow: hidden;
+}
+
+.reactive-resume-template .rating-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background-color: var(--template-primary);
+  border-radius: 0.125rem;
+  transition: width 0.3s ease;
+}
+
+/* Link Enhancement */
+.reactive-resume-template .link-container {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  color: var(--template-primary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.reactive-resume-template .link-container:hover {
+  color: var(--template-primary-accent);
+  text-decoration: underline;
+}
+
+.reactive-resume-template .link-icon {
+  color: var(--template-primary);
+  font-size: 0.875rem;
+}
+
+/* Enhanced Section Headers */
+.reactive-resume-template .section-header {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--template-primary);
+  border-bottom: 1px solid var(--template-border);
+  padding-bottom: 0.125rem;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.reactive-resume-template .section-header.sidebar {
+  color: var(--template-primary);
+  border-bottom-color: var(--template-primary);
+}
+
+/* Enhanced Contact Information */
+.reactive-resume-template .contact-item {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  margin-bottom: 0.375rem;
+}
+
+.reactive-resume-template .contact-icon {
+  color: var(--template-primary);
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+/* Enhanced Layout Components */
+.reactive-resume-template .sidebar {
+  background-color: rgba(var(--zinc-100), 0.3);
+  padding: var(--template-padding);
+}
+
+.reactive-resume-template .main {
+  padding: var(--template-padding);
+}
+
+/* Enhanced Sidebar Styles */
+.reactive-resume-template .group\/sidebar .section-header {
+  color: var(--template-primary);
+}
+
+.reactive-resume-template .group\/sidebar .text-primary {
+  color: var(--template-primary);
+}
+
+/* Enhanced Responsive Design */
+@media print {
+  .reactive-resume-template {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  
+  .reactive-resume-template .template-container {
+    box-shadow: none;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .reactive-resume-template section {
+    margin-bottom: 16px;
+  }
+}
+
+/* Enhanced Wysiwyg Content */
+.reactive-resume-template .wysiwyg {
+  line-height: 1.5;
+  color: var(--template-foreground);
+}
+
+.reactive-resume-template .wysiwyg p {
+  margin: 0 0 0.5rem 0;
+}
+
+.reactive-resume-template .wysiwyg ul,
+.reactive-resume-template .wysiwyg ol {
+  margin: 0 0 0.5rem 0;
+  padding-left: 1.25rem;
+}
+
+.reactive-resume-template .wysiwyg li {
+  margin-bottom: 0.25rem;
+}
+
+.reactive-resume-template .wysiwyg a {
+  color: var(--template-primary);
+  text-decoration: none;
+}
+
+.reactive-resume-template .wysiwyg a:hover {
+  text-decoration: underline;
+}
+
+/* Enhanced Picture/Avatar Styling */
+.reactive-resume-template .picture-container {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--template-border-radius);
+  overflow: hidden;
+  border: 2px solid var(--template-border);
+  flex-shrink: 0;
+}
+
+.reactive-resume-template .picture-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Enhanced Professional Styling */
+.reactive-resume-template .professional-border {
+  border: 1px solid var(--template-border);
+  border-radius: var(--template-border-radius);
+  padding: 0.75rem;
+  background-color: rgba(var(--zinc-50), 0.5);
+}
+
+/* Enhanced Text Utilities */
+.reactive-resume-template .text-xs { font-size: 0.75rem; }
+.reactive-resume-template .text-sm { font-size: 0.875rem; }
+.reactive-resume-template .text-base { font-size: 1rem; }
+.reactive-resume-template .text-lg { font-size: 1.125rem; }
+.reactive-resume-template .text-xl { font-size: 1.25rem; }
+.reactive-resume-template .text-2xl { font-size: 1.5rem; }
+
+.reactive-resume-template .font-normal { font-weight: 400; }
+.reactive-resume-template .font-medium { font-weight: 500; }
+.reactive-resume-template .font-semibold { font-weight: 600; }
+.reactive-resume-template .font-bold { font-weight: 700; }
+
+.reactive-resume-template .text-left { text-align: left; }
+.reactive-resume-template .text-center { text-align: center; }
+.reactive-resume-template .text-right { text-align: right; }
+
+/* Enhanced Border Utilities */
+.reactive-resume-template .border { border-width: 1px; }
+.reactive-resume-template .border-b { border-bottom-width: 1px; }
+.reactive-resume-template .border-t { border-top-width: 1px; }
+.reactive-resume-template .border-l { border-left-width: 1px; }
+.reactive-resume-template .border-r { border-right-width: 1px; }
+
+.reactive-resume-template .rounded { border-radius: 0.25rem; }
+.reactive-resume-template .rounded-sm { border-radius: 0.125rem; }
+.reactive-resume-template .rounded-md { border-radius: 0.375rem; }
+.reactive-resume-template .rounded-lg { border-radius: 0.5rem; }
+
+/* Enhanced Padding/Margin Utilities */
+.reactive-resume-template .p-0 { padding: 0; }
+.reactive-resume-template .p-1 { padding: 0.25rem; }
+.reactive-resume-template .p-2 { padding: 0.5rem; }
+.reactive-resume-template .p-3 { padding: 0.75rem; }
+.reactive-resume-template .p-4 { padding: 1rem; }
+.reactive-resume-template .p-6 { padding: 1.5rem; }
+
+.reactive-resume-template .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+.reactive-resume-template .px-4 { padding-left: 1rem; padding-right: 1rem; }
+.reactive-resume-template .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+
+.reactive-resume-template .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+.reactive-resume-template .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+.reactive-resume-template .py-6 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+.reactive-resume-template .py-7 { padding-top: 1.75rem; padding-bottom: 1.75rem; }
+
+.reactive-resume-template .pb-0\.5 { padding-bottom: 0.125rem; }
+.reactive-resume-template .pb-5 { padding-bottom: 1.25rem; }
+.reactive-resume-template .pt-6 { padding-top: 1.5rem; }
+
+.reactive-resume-template .mb-2 { margin-bottom: 0.5rem; }
+.reactive-resume-template .mb-4 { margin-bottom: 1rem; }
+
+/* Enhanced Flex Utilities */
+.reactive-resume-template .flex-1 { flex: 1 1 0%; }
+.reactive-resume-template .flex-wrap { flex-wrap: wrap; }
+.reactive-resume-template .shrink-0 { flex-shrink: 0; }
+
+/* Enhanced Width/Height Utilities */
+.reactive-resume-template .w-full { width: 100%; }
+.reactive-resume-template .h-2\.5 { height: 0.625rem; }
+.reactive-resume-template .size-1 { width: 0.25rem; height: 0.25rem; }
+.reactive-resume-template .size-3 { width: 0.75rem; height: 0.75rem; }
+
+/* Enhanced Position Utilities */
+.reactive-resume-template .relative { position: relative; }
+.reactive-resume-template .absolute { position: absolute; }
+.reactive-resume-template .inset-y-0 { top: 0; bottom: 0; }
+.reactive-resume-template .left-0 { left: 0; }
+
+/* Enhanced Overflow Utilities */
+.reactive-resume-template .overflow-hidden { overflow: hidden; }
+
+/* Enhanced Display Utilities */
+.reactive-resume-template .hidden { display: none; }
+.reactive-resume-template .inline-block { display: inline-block; }
+.reactive-resume-template .block { display: block; }
+
+/* Enhanced Column Utilities */
+.reactive-resume-template .col-span-2 { grid-column: span 2 / span 2; }
+.reactive-resume-template .col-span-3 { grid-column: span 3 / span 3; }
+
+/* Enhanced Opacity Utilities */
+.reactive-resume-template .opacity-50 { opacity: 0.5; }
+
+/* Enhanced Transition Utilities */
+.reactive-resume-template .transition-colors { transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out; }
+/* Enhanced Transition Utilities */
+.reactive-resume-template .transition-colors { transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out; }
+.reactive-resume-template .transition-opacity { transition: opacity 0.15s ease-in-out; }
+
+/* Enhanced Modern Section Headers */
+.reactive-resume-template .section-header-modern {
+  position: relative;
+  display: inline-block;
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+}
+
+.reactive-resume-template .section-header-modern::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 60%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--template-primary), transparent);
+  border-radius: 2px;
+}
+
+/* Enhanced Gradient Utilities */
+.reactive-resume-template .bg-gradient-to-b {
+  background: linear-gradient(to bottom, var(--template-primary), transparent);
+}
+
+.reactive-resume-template .bg-gradient-to-r {
+  background: linear-gradient(to right, var(--template-primary), transparent);
+}
+
+/* Enhanced Shadow Utilities */
+.reactive-resume-template .shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.reactive-resume-template .shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Enhanced Modern Card Components */
+.reactive-resume-template .modern-card {
+  background-color: rgba(var(--zinc-50), 0.8);
+  border: 1px solid var(--template-border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.reactive-resume-template .modern-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Enhanced Date Badge */
+.reactive-resume-template .date-badge {
+  background-color: var(--template-accent);
+  color: var(--template-primary);
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  border: 1px solid var(--template-border);
+}
+
+/* Enhanced Skills Tags */
+.reactive-resume-template .skill-tag {
+  background-color: rgba(var(--blue-100), 0.8);
+  color: var(--template-primary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid rgba(var(--blue-200), 0.8);
+}
+
+/* Enhanced Grid Auto-fit */
+.reactive-resume-template .grid-auto-fit {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Enhanced Hover Effects */
+.reactive-resume-template .hover-lift {
+  transition: transform 0.2s ease;
+}
+
+.reactive-resume-template .hover-lift:hover {
+  transform: translateY(-2px);
+}
+
+/* Enhanced Professional Borders */
+.reactive-resume-template .border-accent {
+  border-color: var(--template-accent);
+}
+
+.reactive-resume-template .border-l-4 {
+  border-left-width: 4px;
+}
+
+.reactive-resume-template .border-r-4 {
+  border-right-width: 4px;
+}
+
+/* Enhanced Background Utilities */
+.reactive-resume-template .bg-gradient-primary {
+  background: linear-gradient(135deg, var(--template-primary), rgba(var(--blue-600), 0.8));
+}
+
+.reactive-resume-template .bg-pattern {
+  background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.15) 1px, transparent 0);
+  background-size: 20px 20px;
+}
+
+/* Enhanced Text Shadows */
+.reactive-resume-template .text-shadow {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.reactive-resume-template .text-shadow-lg {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Enhanced List Styling */
+.reactive-resume-template .list-disc {
+  list-style-type: disc;
+  margin-left: 1.25rem;
+}
+
+.reactive-resume-template .list-decimal {
+  list-style-type: decimal;
+  margin-left: 1.25rem;
+}
+
+/* Enhanced Focus States */
+.reactive-resume-template a:focus,
+.reactive-resume-template button:focus {
+  outline: 2px solid var(--template-primary);
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+}
+
+/* Enhanced Responsive Typography */
+@media screen and (max-width: 640px) {
+  .reactive-resume-template .text-responsive-xl {
+    font-size: 1.5rem;
+  }
+  
+  .reactive-resume-template .text-responsive-lg {
+    font-size: 1.25rem;
+  }
+}
+
+@media screen and (min-width: 641px) {
+  .reactive-resume-template .text-responsive-xl {
+    font-size: 2rem;
+  }
+  
+  .reactive-resume-template .text-responsive-lg {
+    font-size: 1.5rem;
+  }
+}

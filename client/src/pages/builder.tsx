@@ -1,0 +1,877 @@
+import { useState, useEffect } from "react";
+import { Link, useParams, useLocation } from "wouter";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { ArrowLeft, Download, Save, Sparkles, Upload, Briefcase, Palette } from "lucide-react";
+import { ResumeForm } from "@/components/resume-form";
+import { ResumePreview } from "@/components/resume-preview";
+import { ResumeUpload } from "@/components/resume-upload";
+import { PhotoUpload } from "@/components/photo-upload";
+import { DownloadModal } from "@/components/download-modal";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { allTemplates, getTemplateById, getTemplateJsonData } from "@/utils/template-integration";
+import { useArtboardStore } from "@/store/artboard-store";
+import type { Resume } from "@shared/schema";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { defaultResume } from '@/lib/default-resume';
+import { mapResumeGeniusToReactiveResume } from '@/utils/reactive-resume-mapper';
+
+export interface ResumeData {
+  personalInfo: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    address?: string;
+  };
+  summary: string;
+  careerObjective?: string;
+  experience: Array<{
+    title: string;
+    company: string;
+    startDate: string;
+    endDate: string;
+    description: string;
+    location?: string;
+    employment_type?: string;
+  }>;
+  education: Array<{
+    degree: string;
+    school: string;
+    graduationYear: string;
+    gpa?: string;
+    field_of_study?: string;
+    location?: string;
+    honors?: string;
+  }>;
+  skills: string[];
+  projectSkills?: string[];
+  template: string;
+  field?: string; // Industry/field of work
+  
+  // Comprehensive fields from Gemini API structure
+  metadata?: {
+    parser_version?: string;
+    confidence_score?: number;
+    is_ats_compatible?: boolean;
+    word_count?: number;
+    language?: string;
+    layout_type?: string;
+  };
+  
+  // Professional links and online presence
+  socialLinks?: {
+    linkedin?: string;
+    github?: string;
+    portfolio?: string;
+    website?: string;
+  };
+  
+  // Projects and achievements
+  projects?: Array<{
+    title: string;
+    description: string;
+    technologies?: string[];
+    link?: string;
+    duration?: string;
+  }>;
+  
+  // Awards and recognition
+  awards?: Array<{
+    title: string;
+    issuer: string;
+    date: string;
+    description?: string;
+  }>;
+  
+  // Publications
+  publications?: Array<{
+    title: string;
+    publisher: string;
+    date: string;
+    link?: string;
+  }>;
+  
+  // Languages spoken
+  languages?: Array<{
+    language: string;
+    proficiency: string;
+  }>;
+  
+  // Certifications and licenses
+  certifications?: Array<{
+    name: string;
+    issuer: string;
+    date: string;
+    expiry?: string;
+    credential_id?: string;
+  }>;
+  
+  // Additional courses and training
+  courses?: Array<{
+    title: string;
+    provider: string;
+    date: string;
+    duration?: string;
+  }>;
+  
+  // Internships (separate from full-time experience)
+  internships?: Array<{
+    title: string;
+    company: string;
+    startDate: string;
+    endDate: string;
+    description: string;
+    location?: string;
+  }>;
+  
+  // Freelance work
+  freelanceWork?: Array<{
+    title: string;
+    client: string;
+    startDate: string;
+    endDate: string;
+    description: string;
+    technologies?: string[];
+  }>;
+  
+  // Volunteer experience
+  volunteerWork?: Array<{
+    role: string;
+    organization: string;
+    startDate: string;
+    endDate: string;
+    description: string;
+  }>;
+  
+  // Soft skills (separate from technical skills)
+  softSkills?: string[];
+  
+  // Technical skills breakdown
+  technicalSkills?: {
+    programming_languages?: string[];
+    frameworks?: string[];
+    tools?: string[];
+    databases?: string[];
+    cloud_platforms?: string[];
+  };
+  
+  atsScore?: number;
+}
+
+const initialResumeData: ResumeData = {
+  personalInfo: {
+    firstName: "John",
+    lastName: "Doe",
+    email: "john.doe@email.com",
+    phone: "(555) 123-4567",
+    address: "San Francisco, CA",
+  },
+  summary: "Experienced software engineer with 5+ years of expertise in full-stack development. Passionate about creating scalable solutions and leading technical teams to deliver high-quality products.",
+  careerObjective: "To leverage my technical and leadership skills to build impactful software solutions that enhance user experience and business performance in a growth-focused organization.",
+  experience: [{
+    title: "Senior Software Engineer",
+    company: "Tech Solutions Inc.",
+    startDate: "2022",
+    endDate: "Present",
+    description: "Led development of microservices architecture\nManaged team of 4 junior developers\nImproved application performance by 40%",
+    location: "San Francisco, CA",
+    employment_type: "Full-time",
+  }],
+  education: [{
+    degree: "Bachelor of Science in Computer Science",
+    school: "University of California, Berkeley",
+    graduationYear: "2019",
+    gpa: "3.8",
+    field_of_study: "Computer Science",
+    location: "Berkeley, CA",
+    honors: "Magna Cum Laude",
+  }],
+  skills: ["JavaScript", "React", "Node.js", "Python", "SQL", "AWS", "Docker", "Git"],
+  projectSkills: ["React", "Redux", "MongoDB", "GraphQL", "Express.js"],
+  template: "classic",
+  field: "",
+  socialLinks: {
+    linkedin: "https://linkedin.com/in/johndoe",
+    github: "https://github.com/johndoe",
+    portfolio: "https://johndoe.dev",
+    website: "https://johndoe.dev",
+  },
+  projects: [
+    {
+      title: "Multi-vendor Marketplace Backend",
+      description: "Built RESTful APIs and payment processing infrastructure for scalable e-commerce platform serving 1000+ vendors.",
+      technologies: ["Node.js", "Express", "MongoDB", "Stripe API", "Redis", "JWT"],
+      role: "Backend Developer",
+      link: "https://ecommerce-demo.dev",
+      duration: "8 months",
+      startDate: "2022-03",
+      endDate: "2022-10",
+    },
+    {
+      title: "E-commerce Platform",
+      description: "Developed scalable backend services and integrated Stripe payments for a multi-vendor marketplace.",
+      technologies: ["Node.js", "MongoDB", "Express", "Stripe API"],
+      link: "https://ecommerce-demo.dev",
+      duration: "2022"
+    },
+  ],
+  awards: [
+    {
+      title: "Top Innovator Award",
+      issuer: "TechConf 2023",
+      date: "2023",
+      description: "Awarded for developing a real-time code collaboration tool.",
+    },
+    {
+      title: "Employee of the Year",
+      issuer: "Tech Solutions Inc.",
+      date: "2022",
+      description: "Recognized for outstanding performance and leadership.",
+    },
+  ],
+  publications: [
+    {
+      title: "Optimizing React Apps for Performance",
+      publisher: "DevTech Journal",
+      date: "2022-10",
+      link: "https://devtechjournal.com/react-optimization",
+    },
+    {
+      title: "Microservices in Node.js",
+      publisher: "Code Magazine",
+      date: "2021-06",
+      link: "https://codemag.com/microservices-nodejs",
+    },
+  ],
+  languages: [
+    {
+      language: "English",
+      proficiency: "Native",
+    },
+    {
+      language: "Spanish",
+      proficiency: "Professional",
+    },
+  ],
+  certifications: [
+    {
+      name: "AWS Certified Developer – Associate",
+      issuer: "Amazon Web Services",
+      date: "2023",
+      credential_id: "AWS-123456"
+    },
+    {
+      name: "Certified Kubernetes Application Developer",
+      issuer: "Cloud Native Computing Foundation",
+      date: "2022",
+      credential_id: "CKAD-654321"
+    },
+  ],
+  courses: [
+    {
+      title: "Advanced JavaScript Concepts",
+      provider: "Udemy",
+      date: "2022",
+    },
+    {
+      title: "Docker & Kubernetes for Developers",
+      provider: "Coursera",
+      date: "2023",
+    },
+  ],
+  internships: [
+    {
+      company: "DevLaunchpad",
+      title: "Software Engineering Intern",
+      startDate: "2018-06",
+      endDate: "2018-08",
+      location: "Remote",
+      description: "Built internal tools using React and Firebase\nContributed to open-source bug fixes\nLearned agile practices and SCRUM",
+    },
+  ],
+  freelanceWork: [
+    {
+      client: "StartUply",
+      title: "Freelance Web Developer",
+      startDate: "2021-01",
+      endDate: "2021-05",
+      description: "Developed a landing page and blog for a SaaS startup\nHandled mobile responsiveness and SEO optimization",
+    },
+  ],
+  volunteerWork: [
+    {
+      organization: "CodeForGood",
+      role: "Volunteer Mentor",
+      startDate: "2020",
+      endDate: "Present",
+      description: "Mentor young developers on Git, open-source, and JavaScript\nContributed to community education workshops",
+    },
+  ],
+  softSkills: [
+    "Team Leadership",
+    "Communication",
+    "Problem Solving",
+    "Adaptability",
+    "Time Management",
+  ],
+  technicalSkills: {
+    programming_languages: ["JavaScript", "Python", "TypeScript", "SQL"],
+    frameworks: ["React", "Node.js", "Express", "Next.js"],
+    tools: ["Git", "Docker", "Postman", "VS Code"],
+    databases: ["MongoDB", "PostgreSQL", "Firebase"],
+    cloud_platforms: ["AWS", "Vercel", "Heroku"],
+  },
+};
+
+// Industry/Field options for targeted resume generation
+const INDUSTRY_OPTIONS = [
+  { value: "software-engineering", label: "Software Engineering", icon: "💻" },
+  { value: "data-science", label: "Data Science & Analytics", icon: "📊" },
+  { value: "marketing", label: "Marketing & Digital Marketing", icon: "📢" },
+  { value: "finance", label: "Finance & Banking", icon: "💰" },
+  { value: "healthcare", label: "Healthcare & Medical", icon: "🏥" },
+  { value: "education", label: "Education & Teaching", icon: "📚" },
+  { value: "sales", label: "Sales & Business Development", icon: "🤝" },
+  { value: "design", label: "Design & Creative", icon: "🎨" },
+  { value: "engineering", label: "Engineering (Non-Software)", icon: "⚙️" },
+  { value: "hr", label: "Human Resources", icon: "👥" },
+  { value: "consulting", label: "Consulting", icon: "💼" },
+  { value: "operations", label: "Operations & Project Management", icon: "📋" },
+  { value: "legal", label: "Legal & Law", icon: "⚖️" },
+  { value: "research", label: "Research & Development", icon: "🔬" },
+  { value: "customer-service", label: "Customer Service & Support", icon: "🎧" },
+  { value: "other", label: "Other", icon: "🌟" }
+];
+
+// Helper function to check if template supports photos
+const templateSupportsPhoto = (templateId: string): boolean => {
+  // Templates that support photos based on the search results
+  const photoSupportedTemplates = [
+    'bronzor', 'glalie', 'rhyhorn', 'pikachu', 'nosepass', 
+    'chikorita', 'ditto', 'kakuna', 'onyx', 'gengar', 
+    'azurill', 'leafish'
+  ];
+  return photoSupportedTemplates.includes(templateId);
+};
+
+// Ensures basics object is always present
+function ensureBasics(resumeData: any) {
+  if (resumeData.basics) return resumeData;
+  return {
+    ...resumeData,
+    basics: {
+      name: resumeData.personalInfo?.firstName && resumeData.personalInfo?.lastName
+        ? `${resumeData.personalInfo.firstName} ${resumeData.personalInfo.lastName}`
+        : '',
+      email: resumeData.personalInfo?.email || '',
+      phone: resumeData.personalInfo?.phone || '',
+      headline: resumeData.summary || '',
+      location: resumeData.personalInfo?.address || '',
+    }
+  };
+}
+
+// Ensures sections object is always present and normalized
+function mapTopLevelToSections(resumeData: any) {
+  const sections = resumeData.sections || {};
+  return {
+    ...resumeData,
+    sections: {
+      ...sections,
+      experience: {
+        ...(sections.experience || {}),
+        items: sections.experience?.items || resumeData.experience || [],
+        visible: sections.experience?.visible !== false,
+      },
+      education: {
+        ...(sections.education || {}),
+        items: sections.education?.items || (resumeData.education || []).map((edu: any) => typeof edu === 'string' ? { degree: edu } : edu),
+        visible: sections.education?.visible !== false,
+      },
+      skills: {
+        ...(sections.skills || {}),
+        items: sections.skills?.items || (resumeData.skills || []).map((name: any) => typeof name === 'string' ? { name } : name),
+        visible: sections.skills?.visible !== false,
+      },
+      projects: {
+        ...(sections.projects || {}),
+        items: sections.projects?.items || resumeData.projects || [],
+        visible: sections.projects?.visible !== false,
+      },
+      languages: {
+        ...(sections.languages || {}),
+        items: sections.languages?.items || (resumeData.languages || []).map((lang: any) => typeof lang === 'string' ? { name: lang } : lang),
+        visible: sections.languages?.visible !== false,
+      },
+      interests: {
+        ...(sections.interests || {}),
+        items: sections.interests?.items || (resumeData.interests || []).map((interest: any) => typeof interest === 'string' ? { name: interest } : interest),
+        visible: sections.interests?.visible !== false,
+      },
+      summary: {
+        ...(sections.summary || {}),
+        content: sections.summary?.content || resumeData.summary || '',
+        visible: sections.summary?.visible !== false,
+      },
+      awards: {
+        ...(sections.awards || {}),
+        items: sections.awards?.items || resumeData.awards || [],
+        visible: sections.awards?.visible !== false,
+      },
+      certifications: {
+        ...(sections.certifications || {}),
+        items: sections.certifications?.items || resumeData.certifications || [],
+        visible: sections.certifications?.visible !== false,
+      },
+      publications: {
+        ...(sections.publications || {}),
+        items: sections.publications?.items || resumeData.publications || [],
+        visible: sections.publications?.visible !== false,
+      },
+      volunteer: {
+        ...(sections.volunteer || {}),
+        items: sections.volunteer?.items || resumeData.volunteerWork || [],
+        visible: sections.volunteer?.visible !== false,
+      },
+      references: {
+        ...(sections.references || {}),
+        items: sections.references?.items || resumeData.references || [],
+        visible: sections.references?.visible !== false,
+      },
+      // Add more sections as needed
+    },
+  };
+}
+
+export default function Builder() {
+  const { id } = useParams<{ id: string }>();
+  const [location] = useLocation();
+  
+  // Parse URL search parameters
+  const urlParams = new URLSearchParams(location.split('?')[1] || '');
+  const templateParam = urlParams.get('template');
+  const sourceParam = urlParams.get('source');
+  
+  const [resumeData, setResumeData] = useState<ResumeData>(() => {
+    // Load from localStorage if available
+    const saved = localStorage.getItem('resume_builder_data');
+   
+    if (saved) {
+      try {
+        const parsedData = JSON.parse(saved);
+        // If URL has template parameter, use that template
+        if (templateParam) {
+          return { ...parsedData, template: templateParam };
+        }
+        // If no template, default to classic
+        return { ...parsedData, template: parsedData.template || 'classic' };
+      } catch {
+        return { ...initialResumeData, template: templateParam || 'classic' };
+      }
+    }
+    return { ...initialResumeData, template: templateParam || 'classic' };
+  });
+  
+  const [title, setTitle] = useState(() => {
+    const savedTitle = localStorage.getItem('resume_builder_title');
+    return savedTitle || 'My Resume';
+  });
+  const [showUpload, setShowUpload] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const setArtboardResume = useArtboardStore((state) => state.setResume);
+
+  // Reset scroll position on component mount
+  useEffect(() => {
+    // Clear any URL hash and scroll to top
+    if (window.location.hash) {
+      window.history.replaceState(null, '', window.location.pathname);
+    }
+    window.scrollTo(0, 0);
+  }, []);
+  // Sync resumeData to global store on mount and every change
+  useEffect(() => {
+    // Check if current template is a Reactive-Resume template
+    const isReactiveResumeTemplate = ['azurill', 'bronzor', 'chikorita', 'ditto', 'gengar', 'glalie', 'kakuna', 'leafish', 'nosepass', 'onyx', 'pikachu', 'rhyhorn'].includes(resumeData.template);
+    
+    if (isReactiveResumeTemplate) {
+      // For Reactive-Resume templates, use the proper data mapping
+      try {
+        // Ensure address is always a string for compatibility
+        const compatibleData = {
+          ...resumeData,
+          personalInfo: {
+            ...resumeData.personalInfo,
+            address: resumeData.personalInfo.address || ''
+          }
+        };
+        const mappedData = mapResumeGeniusToReactiveResume(compatibleData, resumeData.template);
+        setArtboardResume(mappedData);
+      } catch (error) {
+        console.error('Error mapping data for Reactive-Resume template:', error);
+        // Fallback to original mapping
+        const normalized = mapTopLevelToSections(ensureBasics(resumeData));
+        setArtboardResume(normalized);
+      }
+    } else {
+      // For custom templates, use the original mapping
+      const normalized = mapTopLevelToSections(ensureBasics(resumeData));
+      setArtboardResume(normalized);
+    }
+  }, [resumeData, setArtboardResume]);
+
+  // Load template data when template parameter changes
+  useEffect(() => {
+    if (templateParam && sourceParam) {
+      const selectedTemplate = getTemplateById(templateParam);
+      if (selectedTemplate) {
+        // Show notification about template selection
+        toast({
+          title: "Template Selected",
+          description: `${selectedTemplate.name} template loaded successfully!`,
+        });
+        
+        // If it's a reactive-resume template, try to load template data
+        if (selectedTemplate.isReactiveResume) {
+          getTemplateJsonData(selectedTemplate).then(templateData => {
+            if (templateData) {
+              console.log('Template data loaded:', templateData);
+              // You can process template data here if needed
+            }
+          }).catch(error => {
+            console.warn('Could not load template data:', error);
+          });
+        }
+      }
+    }
+  }, [templateParam, sourceParam, toast]);
+
+  // Fetch existing resume if editing
+  const { data: existingResume, isLoading } = useQuery<Resume>({
+    queryKey: ["/api/resumes", id],
+    enabled: !!id,
+  });
+
+  // Load existing resume data
+  useEffect(() => {
+    if (existingResume) {
+      setTitle(existingResume.title);
+      setResumeData({
+        personalInfo: existingResume.personalInfo as any,
+        summary: existingResume.summary || "",
+        experience: existingResume.experience as any,
+        education: existingResume.education as any,
+        skills: existingResume.skills as any,
+        template: existingResume.template,
+        field: (existingResume as any).field || "",
+      });
+    }
+  }, [existingResume]);
+
+  // Save resume mutation
+  const saveMutation = useMutation({
+    mutationFn: async (data: { title: string; resumeData: ResumeData }) => {
+      const payload = {
+        title: data.title,
+        template: data.resumeData.template,
+        personalInfo: data.resumeData.personalInfo,
+        summary: data.resumeData.summary,
+        experience: data.resumeData.experience,
+        education: data.resumeData.education,
+        skills: data.resumeData.skills,
+        field: data.resumeData.field,
+      };
+
+      if (id) {
+        return await apiRequest("PUT", `/api/resumes/${id}`, payload);
+      } else {
+        return await apiRequest("POST", "/api/resumes", payload);
+      }
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Resume saved successfully!",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/resumes"] });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to save resume. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSave = () => {
+    localStorage.setItem('resume_builder_data', JSON.stringify(resumeData));
+    localStorage.setItem('resume_builder_title', title);
+    toast({
+      title: "Success",
+      description: "Resume saved!",
+    });
+  };
+
+  // Handle uploaded resume parsing
+  const handleParseComplete = (parsedData: Partial<ResumeData>) => {
+    setResumeData(prev => ({
+      ...prev,
+      ...parsedData,
+      // Merge experience and education arrays properly
+      experience: parsedData.experience?.length ? parsedData.experience : prev.experience,
+      education: parsedData.education?.length ? parsedData.education : prev.education,
+      skills: parsedData.skills?.length ? parsedData.skills : prev.skills,
+    }));
+    setShowUpload(false);
+    toast({
+      title: "Success",
+      description: "Resume data extracted and filled automatically!",
+    });
+  };
+
+  const handleParseError = (error: string) => {
+    toast({
+      title: "Upload Error",
+      description: error,
+      variant: "destructive",
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-slate-600">Loading resume...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-50 pt-16 overflow-x-hidden">
+      {/* Navigation */}
+      <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b border-slate-200">
+        <div className="w-[95vw] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <Link href="/" className="flex items-center text-blue-600 hover:text-blue-700 text-sm sm:text-base">
+              <ArrowLeft className="mr-1 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+              <span className="font-medium hidden sm:inline">Back to Home</span>
+              <span className="font-medium sm:hidden">Back</span>
+            </Link>
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <Button
+                onClick={handleSave}
+                disabled={saveMutation.isPending}
+                variant="outline"
+                className="font-medium text-xs sm:text-sm px-2 sm:px-4 py-2 sm:py-2"
+              >
+                <Save className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">{saveMutation.isPending ? "Saving..." : "Save"}</span>
+                <span className="sm:hidden">{saveMutation.isPending ? "..." : "Save"}</span>
+              </Button>
+              <DownloadModal resumeData={resumeData}>
+                <Button className="bg-blue-600 hover:bg-blue-700 font-medium text-xs sm:text-sm px-2 sm:px-4 py-2 sm:py-2">
+                  <Download className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Download Resume</span>
+                  <span className="sm:hidden">Download</span>
+                </Button>
+              </DownloadModal>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <div className="w-[95vw] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-slate-800">Resume Builder</h1>
+          <p className="text-slate-600 mt-2">Create your professional resume with live preview</p>
+        </div>
+
+        {/* Stacked layout: Form on top, Preview full width below */}
+        <div className="flex flex-col lg:flex-row gap-2 overflow-x-hidden">
+          {/* Form Panel */}
+          <div className="w-full lg:w-2/5 overflow-x-hidden mb-4 lg:mb-0">
+            <Card className="bg-white shadow-lg">
+              <CardContent className="p-8">
+                <div className="mb-6">
+                  <label htmlFor="title" className="block text-sm font-medium text-slate-700 mb-2">
+                    Resume Title
+                  </label>
+                  <input
+                    id="title"
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="My Resume"
+                  />
+                </div>
+
+                {/* Industry/Field Selection */}
+                <div className="mb-6">
+                  <Label htmlFor="field" className="block text-sm font-medium text-slate-700 mb-2">
+                    <Briefcase className="inline h-4 w-4 mr-1" />
+                    Professional Field
+                  </Label>
+                  <Select
+                    value={resumeData.field ? resumeData.field : undefined}
+                    onValueChange={(value) => setResumeData(prev => ({ ...prev, field: value }))}
+                  >
+                    <SelectTrigger className="w-full text-gray-700">
+                      <SelectValue placeholder="Select your professional field for targeted content" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {INDUSTRY_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          <span className="flex items-center">
+                            <span className="mr-2">{option.icon}</span>
+                            {option.label}
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-slate-500 mt-1">
+                    This helps generate relevant content and skills for your industry
+                  </p>
+                </div>
+
+                {/* Upload Section */}
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-lg font-medium text-slate-700">Quick Start</h3>
+                    {!showUpload && (
+                      <Button
+                        onClick={() => setShowUpload(true)}
+                        variant="outline"
+                        size="sm"
+                        className="text-blue-600 border-blue-600 hover:bg-blue-50"
+                      >
+                        <Upload className="mr-2 h-4 w-4" />
+                        Upload Resume
+                      </Button>
+                    )}
+                  </div>
+                  
+                  {showUpload && (
+                    <div className="mb-4">
+                      <ResumeUpload
+                        onParseComplete={handleParseComplete}
+                        onError={handleParseError}
+                      />
+                    </div>
+                  )}
+                </div>
+                
+                {/* Photo Upload Section - Only show for templates with photo support */}
+                {templateSupportsPhoto(resumeData.template) && (
+                  <div className="mb-6">
+                    <PhotoUpload />
+                  </div>
+                )}
+                
+                
+                <ResumeForm 
+                  resumeData={resumeData}
+                  onChange={setResumeData}
+                />
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Live Preview Panel - Full Width */}
+          <div className="w-full lg:w-3/5 overflow-x-hidden">
+            <Card className="bg-white shadow-lg h-fit flex flex-col items-center">
+              <CardContent className="p-8 md:p-12 w-full">
+                <div className="mb-4 flex items-center justify-between w-full max-w-3xl mx-auto">
+                  <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold text-slate-800">Live Preview</h2>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xs sm:text-sm text-slate-500">Template:</span>
+                    <Select
+                      value={resumeData.template}
+                      onValueChange={(value) => {
+                        try {
+                          console.log('Template selection changed to:', value);
+                          setResumeData(prev => ({ ...prev, template: value }));
+                        } catch (error) {
+                          console.error('Error changing template:', error);
+                          toast({
+                            title: "Template Error",
+                            description: "Failed to change template. Please try again.",
+                            variant: "destructive",
+                          });
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="w-32 sm:w-48 md:w-56 max-w-full text-xs sm:text-sm px-2 py-1 sm:px-3 sm:py-2 rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <SelectValue placeholder="Choose a template" />
+                      </SelectTrigger>
+                      <SelectContent className="w-32 sm:w-48 md:w-56 max-w-full rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none overflow-auto max-h-[40vh] sm:max-h-[50vh] text-xs sm:text-sm">
+                        <div className="px-2 sm:px-3 py-1 sm:py-2 text-xs font-medium text-slate-500 uppercase tracking-wide">
+                          Custom Templates
+                        </div>
+                        {allTemplates.filter(t => !t.isReactiveResume).map((template) => (
+                          <SelectItem key={template.id} value={template.id} className="w-full truncate px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm">
+                            <span className="flex items-center truncate">
+                              <span className="w-2 h-2 sm:w-3 sm:h-3 rounded-full mr-1 sm:mr-2 flex-shrink-0" style={{
+                                backgroundColor: template.color?.includes('slate') ? '#64748b' : 
+                                               template.color?.includes('blue') ? '#3b82f6' :
+                                               template.color?.includes('pink') ? '#ec4899' :
+                                               template.color?.includes('emerald') ? '#10b981' :
+                                               template.color?.includes('yellow') ? '#f59e0b' :
+                                               '#8b5cf6'
+                              }}></span>
+                              <span className="truncate">{template.name}</span>
+                            </span>
+                          </SelectItem>
+                        ))}
+                        <div className="px-2 sm:px-3 py-1 sm:py-2 text-xs font-medium text-slate-500 uppercase tracking-wide border-t mt-1 pt-2">
+                          Premium Templates
+                        </div>
+                        {allTemplates.filter(t => t.isReactiveResume).map((template) => (
+                          <SelectItem key={template.id} value={template.id} className="w-full truncate px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm">
+                            <span className="flex items-center truncate">
+                              <span className="w-2 h-2 sm:w-3 sm:h-3 rounded-full mr-1 sm:mr-2 flex-shrink-0" style={{
+                                backgroundColor: template.color?.includes('blue') ? '#3b82f6' :
+                                               template.color?.includes('gray') ? '#6b7280' :
+                                               template.color?.includes('green') ? '#10b981' :
+                                               template.color?.includes('purple') ? '#8b5cf6' :
+                                               template.color?.includes('indigo') ? '#6366f1' :
+                                               template.color?.includes('cyan') ? '#06b6d4' :
+                                               template.color?.includes('yellow') ? '#f59e0b' :
+                                               template.color?.includes('emerald') ? '#10b981' :
+                                               template.color?.includes('stone') ? '#78716c' :
+                                               template.color?.includes('slate') ? '#64748b' :
+                                               template.color?.includes('amber') ? '#f59e0b' :
+                                               '#fb7185'
+                              }}></span>
+                              <span className="truncate">⭐ {template.name}</span>
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="w-full flex justify-center">
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 md:px-2 md:py-8 shadow-md w-full max-w-none overflow-auto">
+                    <ErrorBoundary fallback={<div className="text-red-500 p-4">Preview error - Template may have issues</div>}>
+                      <ResumePreview resumeData={resumeData} />
+                    </ErrorBoundary>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

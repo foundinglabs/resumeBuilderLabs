@@ -1,0 +1,49 @@
+{
+  "basics": {
+    "name": "John Doe",
+    "label": "Software Engineer",
+    "email": "john.doe@email.com",
+    "phone": "(555) 123-4567",
+    "url": "",
+    "summary": "Experienced software engineer with expertise in full-stack development.",
+    "location": {
+      "address": "",
+      "postalCode": "",
+      "city": "San Francisco",
+      "countryCode": "US",
+      "region": "CA"
+    },
+    "profiles": []
+  },
+  "work": [],
+  "volunteer": [],
+  "education": [],
+  "awards": [],
+  "certificates": [],
+  "publications": [],
+  "skills": [],
+  "languages": [],
+  "interests": [],
+  "references": [],
+  "projects": [],
+  "meta": {
+    "template": "pikachu",
+    "layout": [
+      [
+        [
+          "basics"
+        ],
+        [
+          "work",
+          "education",
+          "skills"
+        ]
+      ]
+    ],
+    "theme": {
+      "background": "#ffffff",
+      "text": "#000000",
+      "primary": "#f59e0b"
+    }
+  }
+}

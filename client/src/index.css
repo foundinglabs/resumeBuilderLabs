@@ -1,0 +1,388 @@
+/* Phosphor Icons for Reactive-Resume templates */
+@import url('https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css');
+@import url('https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css');
+
+/* ATS-Friendly Fonts Import */
+@import url('https://fonts.googleapis.com/css2?family=Calibri:wght@400;500;600;700&family=Arial:wght@400;500;600;700&family=Times+New+Roman:wght@400;500;600;700&display=swap');
+
+/* Enhanced Template Styling System - Based on Reactive-Resume */
+@import url('./styles/enhanced-template-styles.css');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(20, 14.3%, 4.1%);
+  --muted: hsl(60, 4.8%, 95.9%);
+  --muted-foreground: hsl(25, 5.3%, 44.7%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(20, 14.3%, 4.1%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(20, 14.3%, 4.1%);
+  --border: hsl(20, 5.9%, 90%);
+  --input: hsl(20, 5.9%, 90%);
+  --primary: hsl(207, 90%, 54%);
+  --primary-foreground: hsl(211, 100%, 99%);
+  --secondary: hsl(60, 4.8%, 95.9%);
+  --secondary-foreground: hsl(24, 9.8%, 10%);
+  --accent: hsl(60, 4.8%, 95.9%);
+  --accent-foreground: hsl(24, 9.8%, 10%);
+  --destructive: hsl(0, 84.2%, 60.2%);
+  --destructive-foreground: hsl(60, 9.1%, 97.8%);
+  --ring: hsl(20, 14.3%, 4.1%);
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: hsl(240, 10%, 3.9%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 64.9%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 10%, 3.9%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 3.7%, 15.9%);
+  --input: hsl(240, 3.7%, 15.9%);
+  --primary: hsl(207, 90%, 54%);
+  --primary-foreground: hsl(211, 100%, 99%);
+  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(240, 3.7%, 15.9%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(240, 4.9%, 83.9%);
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  }
+}
+
+@layer components {
+  .animate-blob {
+    animation: blob 7s infinite;
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-slideInUp {
+    animation: slideInUp 0.5s ease-out;
+  }
+
+  .animate-fadeInUp {
+    animation: fadeInUp 0.6s ease-out;
+  }
+
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+}
+
+@keyframes blob {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes slideInUp {
+  0% {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0px);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0px);
+    opacity: 1;
+  }
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(60, 4.8%, 95.9%);
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(25, 5.3%, 44.7%);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(20, 14.3%, 4.1%);
+}
+
+/* Print styles for PDF generation */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  #resume-preview {
+    transform: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+  }
+}
+
+
+/* Reactive-Resume Template Specific Styles */
+.reactive-resume-template {
+  /* ATS-Friendly Font Stack */
+  font-family: 'Calibri', 'Arial', 'Helvetica Neue', 'Helvetica', sans-serif;
+  font-variant-ligatures: none;
+  
+  /* Enhanced readability settings */
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+  
+  /* Template-specific color variables - ATS-friendly high contrast */
+  --template-primary: hsl(220, 85%, 45%);
+  --template-foreground: hsl(0, 0%, 15%);
+  --template-muted: hsl(0, 0%, 45%);
+  --template-light-gray: hsl(0, 0%, 95%);
+  --template-medium-gray: hsl(0, 0%, 75%);
+}
+
+.reactive-resume-template .text-primary {
+  color: var(--template-primary);
+}
+
+.reactive-resume-template .border-primary {
+  border-color: var(--template-primary);
+}
+
+.reactive-resume-template .bg-primary {
+  background-color: var(--template-primary);
+}
+
+.reactive-resume-template .prose {
+  max-width: none;
+}
+
+.reactive-resume-template .prose-foreground {
+  color: var(--template-foreground);
+}
+
+/* Wysiwyg content styling */
+.reactive-resume-template .wysiwyg {
+  max-width: none;
+  color: var(--template-foreground);
+}
+
+.reactive-resume-template .wysiwyg h1,
+.reactive-resume-template .wysiwyg h2,
+.reactive-resume-template .wysiwyg h3,
+.reactive-resume-template .wysiwyg h4,
+.reactive-resume-template .wysiwyg h5,
+.reactive-resume-template .wysiwyg h6 {
+  margin-bottom: 0.5rem;
+  margin-top: 0;
+}
+
+.reactive-resume-template .wysiwyg p {
+  margin-bottom: 0.5rem;
+  margin-top: 0;
+  line-height: 1.5;
+}
+
+.reactive-resume-template .wysiwyg a {
+  word-break: break-all;
+}
+
+.reactive-resume-template .wysiwyg ol,
+.reactive-resume-template .wysiwyg ul {
+  margin-bottom: 0.5rem;
+  margin-top: 0;
+}
+
+.reactive-resume-template .wysiwyg li {
+  margin-bottom: 0.5rem;
+  margin-top: 0;
+  line-height: 1.5;
+}
+
+.reactive-resume-template .wysiwyg img {
+  margin-bottom: 0.5rem;
+  margin-top: 0;
+}
+
+.reactive-resume-template .wysiwyg hr {
+  margin-bottom: 0.5rem;
+  margin-top: 0;
+}
+
+/* Icon visibility controls */
+.reactive-resume-template [data-page].hide-icons .ph {
+  display: none;
+}
+
+.reactive-resume-template [data-page].underline-links a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Template layout improvements */
+.reactive-resume-template .template-container {
+  /* A4 paper dimensions */
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  /* padding: 14mm; */
+  background: white;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  position: relative;
+  
+  /* Ensure proper text rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Group styling for sidebar/main layout */
+.reactive-resume-template .group-main-block {
+  display: none;
+}
+
+.reactive-resume-template .group-sidebar-flex {
+  display: none;
+}
+
+.reactive-resume-template .main .group-main-block {
+  display: block;
+}
+
+.reactive-resume-template .sidebar .group-sidebar-flex {
+  display: flex;
+}
+
+/* Ensure proper spacing and typography */
+.reactive-resume-template h1, 
+.reactive-resume-template h2, 
+.reactive-resume-template h3, 
+.reactive-resume-template h4, 
+.reactive-resume-template h5, 
+.reactive-resume-template h6 {
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.reactive-resume-template a {
+  text-decoration: none;
+}
+
+.reactive-resume-template a:hover {
+  text-decoration: underline;
+}
+.reactive-resume-template a{
+  /* color:var(--template-primary) ; */
+}
+
+/* Print optimization */
+@media print {
+  .reactive-resume-template .template-container {
+    box-shadow: none;
+    margin: 0;
+    width: 100%;
+    min-height: auto;
+  }
+}
+
+/* ATS-Friendly Typography Classes */
+.reactive-resume-template h1, 
+.reactive-resume-template h2, 
+.reactive-resume-template h3, 
+.reactive-resume-template h4 {
+  font-family: 'Calibri', 'Arial', 'Helvetica Neue', 'Helvetica', sans-serif;
+  font-weight: 600;
+  color: var(--template-foreground);
+  letter-spacing: 0.02em;
+}
+
+.reactive-resume-template .text-body {
+  font-family: 'Calibri', 'Arial', 'Helvetica Neue', 'Helvetica', sans-serif;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--template-foreground);
+}
+
+.reactive-resume-template .text-serif {
+  font-family: 'Times New Roman', 'Times', serif;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--template-foreground);
+}
+
+.reactive-resume-template .text-contact {
+  font-family: 'Arial', 'Helvetica Neue', 'Helvetica', sans-serif;
+  font-weight: 400;
+  font-size: 0.95em;
+  color: var(--template-muted);
+}
+
+/* Enhanced readability for different screen sizes */
+@media screen and (max-width: 768px) {
+  .reactive-resume-template {
+    font-size: 14px;
+    line-height: 1.7;
+  }
+}
+
+@media screen and (min-width: 769px) {
+  .reactive-resume-template {
+    font-size: 16px;
+    line-height: 1.6;
+  }
+}

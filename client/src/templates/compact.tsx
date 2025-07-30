@@ -1,0 +1,385 @@
+import React, { Fragment } from "react";
+import { useArtboardStore } from "../store/artboard-store";
+import type { TemplateProps } from "../types/template";
+import type {
+  SectionKey,
+  SectionWithItem,
+  CustomSectionGroup,
+} from "../utils/reactive-resume-schema";
+import { cn, isEmptyString, isUrl, sanitize } from "../utils/reactive-resume-utils";
+
+// Icon map for section headers
+const iconMap: Record<string, string> = {
+  summary: "ph-user",
+  experience: "ph-briefcase",
+  projects: "ph-code",
+  education: "ph-student",
+  skills: "ph-star",
+  languages: "ph-globe",
+  interests: "ph-heart",
+  awards: "ph-trophy",
+  certifications: "ph-clipboard-text",
+  publications: "ph-newspaper",
+  volunteer: "ph-hand-heart",
+  references: "ph-chat-circle-text",
+};
+
+// Header Component (Reduced padding)
+const Header = () => {
+  const basics = useArtboardStore((state) => state?.resume?.basics);
+  return (
+    <div className="flex flex-col md:flex-row md:items-center md:justify-between py-2 border-b border-green-200 mb-4">
+      <div className="text-xl md:text-2xl font-bold text-green-800">{basics?.name || "Alex Smith"}</div>
+      <div className="flex flex-wrap gap-x-3 mt-1 text-green-600 text-sm md:mt-0">
+        {basics?.email && (
+          <span className="flex items-center gap-1">
+            <i className="ph ph-bold ph-at" />
+            <span>{basics.email}</span>
+          </span>
+        )}
+        {basics?.phone && (
+          <span className="flex items-center gap-1">
+            <i className="ph ph-bold ph-phone" />
+            <span>{basics.phone}</span>
+          </span>
+        )}
+        {basics?.location && (
+          <span className="flex items-center gap-1">
+            <i className="ph ph-bold ph-map-pin" />
+            <span>{basics.location}</span>
+          </span>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Section Title with Icon
+const SectionTitle = ({ section }: { section: string }) => (
+  <h2 className="text-green-700 font-semibold text-xs md:text-sm uppercase mb-2 mt-4 flex items-center gap-1">
+    {iconMap[section] && <i className={cn(`ph ph-bold ${iconMap[section]}`, "text-green-600 text-xs")} />}
+    {section.charAt(0).toUpperCase() + section.slice(1)}
+  </h2>
+);
+
+// Generic Section Component
+const Section = <T extends { visible?: boolean; id?: string }>({
+  section,
+  children,
+  className,
+}: {
+  section: SectionWithItem<T> | CustomSectionGroup;
+  children?: (item: T) => React.ReactNode;
+  className?: string;
+}) => {
+  if (!section?.visible || !('items' in section) || section.items.length === 0) return null;
+
+  const visibleItems = section.items.filter((item) =>
+    typeof item.visible === 'undefined' ? true : item.visible
+  );
+
+  if (visibleItems.length === 0) return null;
+
+  return (
+    <section id={'id' in section ? section.id : section.name} className="mt-2">
+      <div className="mb-1 font-bold text-green-700">
+        <h4 className="text-sm">{section.name}</h4>
+      </div>
+      <div
+        className={cn("grid gap-x-4 gap-y-2", className)}
+        style={{ gridTemplateColumns: `repeat(${'columns' in section ? section.columns || 1 : 1}, 1fr)` }}
+      >
+        {visibleItems.map((item) => (
+          <div
+            key={item.id || Math.random()}
+            className="relative space-y-1 border-l-2 border-green-200 pl-3"
+          >
+            {children?.(item as T)}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+};
+
+// Map Section to Component
+const mapSectionToComponent = (section: SectionKey) => {
+  const resumeData = useArtboardStore((state) => state.resume);
+  const sec = resumeData?.sections?.[section];
+  if (!sec) return null;
+
+  switch (section) {
+    case "summary":
+      if (!sec?.visible || isEmptyString(sec?.content)) return null;
+      return (
+        <section key="summary" id={sec.id} className="mt-2">
+          <div className="mb-1 font-bold text-green-700">
+            <h4 className="text-sm">{sec.name}</h4>
+          </div>
+          <div
+            className="prose prose-green max-w-none text-xs text-slate-700"
+            dangerouslySetInnerHTML={{ __html: sanitize(sec.content) }}
+          />
+        </section>
+      );
+
+    case "experience":
+      return (
+        <Section<any> section={sec} key="experience">
+          {(item) => (
+            <div>
+              <div className="font-bold text-slate-800 text-xs sm:text-sm">{item.position}</div>
+              <div className="text-green-700 text-xs">{item.company}{item.location && ` (${item.location})`}</div>
+              <div className="text-xs text-green-400">{item.date}</div>
+              {item.summary && (
+                <div
+                  className="text-xs text-slate-700 mt-0.5 wysiwyg"
+                  dangerouslySetInnerHTML={{ __html: sanitize(item.summary) }}
+                />
+              )}
+            </div>
+          )}
+        </Section>
+      );
+
+    case "projects":
+      return (
+        <Section<any> section={sec} key="projects">
+          {(item) => (
+            <div>
+              <div className="font-bold text-slate-800 text-xs sm:text-sm">{item.name}</div>
+              {item.description && (
+                <div
+                  className="text-xs text-slate-700 mt-0.5 wysiwyg"
+                  dangerouslySetInnerHTML={{ __html: sanitize(item.description) }}
+                />
+              )}
+              {item.technologies && Array.isArray(item.technologies) && item.technologies.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {item.technologies.map((tech: string, idx: number) => (
+                    <span
+                      key={idx}
+                      className="inline-block bg-green-100 text-green-800 text-[10px] px-1.5 py-0.5 rounded"
+                    >
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              )}
+              <div className="text-xs text-green-400 mt-0.5">{item.date}</div>
+              {item.url && (
+                <a
+                  href={typeof item.url === 'string' ? item.url : item.url.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="break-all text-[11px] text-green-600 underline hover:text-green-800"
+                >
+                  {typeof item.url === 'string'
+                    ? item.url
+                    : item.url.label || item.url.href}
+                </a>
+              )}
+            </div>
+          )}
+        </Section>
+      );
+
+    case "education":
+      return (
+        <Section<any> section={sec} key="education">
+          {(item) => (
+            <div>
+              <div className="font-bold text-slate-800 text-xs sm:text-sm">
+                {item.degree}{item.field_of_study && `, ${item.field_of_study}`}
+              </div>
+              <div className="text-green-700 text-xs">{item.school}</div>
+              <div className="text-xs text-green-400">{item.graduationYear}</div>
+              {item.gpa && <div className="text-xs text-slate-600">GPA: {item.gpa}</div>}
+              {item.location && <div className="text-xs text-slate-600">{item.location}</div>}
+              {item.honors && <div className="text-xs text-slate-600">{item.honors}</div>}
+            </div>
+          )}
+        </Section>
+      );
+
+    case "skills":
+      return (
+        <div key="skills" className="mt-2">
+          <div className="mb-1 font-bold text-green-700">
+            <h4 className="text-sm">{sec.name}</h4>
+          </div>
+          <div className="flex flex-wrap gap-1">
+            {sec.items
+              .filter((item: any) => item.visible !== false)
+              .map((item: any) => (
+                <span
+                  key={item.id || Math.random()}
+                  className="inline-block bg-green-100 text-green-800 text-[10px] px-2 py-0.5 rounded"
+                >
+                  {item.name}
+                </span>
+              ))}
+          </div>
+        </div>
+      );
+
+    case "languages":
+      return (
+        <Section<any> section={sec} key="languages">
+          {(item) => (
+            <div>
+              <div className="font-bold text-slate-800 text-xs">{item.name}</div>
+              {item.level && <div className="text-green-700 text-xs">{item.level}</div>}
+              {item.description && <div className="text-xs text-slate-600">{item.description}</div>}
+            </div>
+          )}
+        </Section>
+      );
+
+    case "interests":
+      return (
+        <Section<any> section={sec} key="interests">
+          {(item) => (
+            <div>
+              <div className="font-bold text-slate-800 text-xs">{item.name}</div>
+              {Array.isArray(item.keywords) && item.keywords.length > 0 && (
+                <div className="text-xs text-slate-600">{item.keywords.join(', ')}</div>
+              )}
+            </div>
+          )}
+        </Section>
+      );
+
+    case "awards":
+      return (
+        <Section<any> section={sec} key="awards">
+          {(item) => (
+            <div>
+              <div className="font-bold text-slate-800 text-xs">{item.title}</div>
+              <div className="text-green-700 text-xs">{item.awarder}</div>
+              <div className="text-xs text-green-400">{item.date}</div>
+              {item.description && (
+                <div
+                  className="text-xs text-slate-700 mt-0.5 wysiwyg"
+                  dangerouslySetInnerHTML={{ __html: sanitize(item.description) }}
+                />
+              )}
+            </div>
+          )}
+        </Section>
+      );
+
+    case "certifications":
+      return (
+        <Section<any> section={sec} key="certifications">
+          {(item) => (
+            <div>
+              <div className="font-bold text-slate-800 text-xs">{item.name}</div>
+              <div className="text-green-700 text-xs">{item.issuer}</div>
+              <div className="text-xs text-green-400">{item.date}</div>
+              {item.description && (
+                <div
+                  className="text-xs text-slate-700 mt-0.5 wysiwyg"
+                  dangerouslySetInnerHTML={{ __html: sanitize(item.description) }}
+                />
+              )}
+            </div>
+          )}
+        </Section>
+      );
+
+    case "publications":
+      return (
+        <Section<any> section={sec} key="publications">
+          {(item) => (
+            <div>
+              <div className="font-bold text-slate-800 text-xs">{item.title}</div>
+              <div className="text-green-700 text-xs">{item.publisher}</div>
+              <div className="text-xs text-green-400">{item.date}</div>
+              {item.link && (
+                <a
+                  href={item.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="break-all text-[11px] text-green-600 underline hover:text-green-800"
+                >
+                  {item.link}
+                </a>
+              )}
+            </div>
+          )}
+        </Section>
+      );
+
+    case "volunteer":
+      return (
+        <Section<any> section={sec} key="volunteer">
+          {(item) => (
+            <div>
+              <div className="font-bold text-slate-800 text-xs">{item.role}</div>
+              <div className="text-green-700 text-xs">{item.organization}</div>
+              <div className="text-xs text-green-400">{item.date}</div>
+              {item.description && (
+                <div
+                  className="text-xs text-slate-700 mt-0.5 wysiwyg"
+                  dangerouslySetInnerHTML={{ __html: sanitize(item.description) }}
+                />
+              )}
+            </div>
+          )}
+        </Section>
+      );
+
+    case "references":
+      return (
+        <Section<any> section={sec} key="references">
+          {(item) => (
+            <div>
+              <div className="font-bold text-slate-800 text-xs">{item.name}</div>
+              <div className="text-green-700 text-xs">{item.reference}</div>
+              {item.description && (
+                <div
+                  className="text-xs text-slate-700 mt-0.5 wysiwyg"
+                  dangerouslySetInnerHTML={{ __html: sanitize(item.description) }}
+                />
+              )}
+            </div>
+          )}
+        </Section>
+      );
+
+    default:
+      return (
+        <Section<any> section={sec} key={section}>
+          {(item) => (
+            <div className="text-xs text-slate-700">
+              {Object.entries(item).map(([key, value]) => (
+                <div key={key} className="mb-0.5">
+                  <strong className="text-slate-800">{key}:</strong> {String(value)}
+                </div>
+              ))}
+            </div>
+          )}
+        </Section>
+      );
+  }
+};
+
+// Main Template - Reduced padding, wider than before
+export const Compact = ({ columns, isFirstPage = false }: TemplateProps) => {
+  const [main] = columns;
+
+  return (
+    <div className="bg-white text-slate-900 w-full max-w-4xl mx-auto p-3 md:p-4 print:p-3">
+      {isFirstPage && <Header />}
+      <div className="space-y-3">
+        {main.map((section: SectionKey) => (
+          <Fragment key={section}>
+            <SectionTitle section={section as string} />
+            {mapSectionToComponent(section)}
+          </Fragment>
+        ))}
+      </div>
+    </div>
+  );
+};

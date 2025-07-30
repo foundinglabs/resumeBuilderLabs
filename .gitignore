@@ -1,0 +1,53 @@
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Platform-specific files
+.env
+.replit
+replit.md
+attached_assets/
+
+# Documentation files (optional - keep if you want them in git)
+AI_Documentation_Package.md
+API_CLEANUP.md
+DEPLOYMENT.md
+NODE_ENV_GUIDE.md
+TEMPLATE_MIGRATION_SUMMARY.md
+
+# Asset files
+attached_assets/
+
+# Test files
+test/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# Dependency directories
+node_modules/
+jspm_packages/
