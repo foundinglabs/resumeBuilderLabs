@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, FileText, Palette, Sparkles, Edit, Check, Target, Star } from "lucide-react";
 import { allTemplates, getCustomTemplates, getReactiveResumeTemplates, getTemplatePreviewUrl } from "@/utils/template-integration";
+import { LoginSignupButton } from "@/components/LoginSignupButton";
 
 export default function Home() {
   return (
@@ -24,6 +25,7 @@ export default function Home() {
               <Link href="/text-extractor" className="text-slate-600 hover:text-blue-600 transition-colors">
                 Text Extractor
               </Link>
+              <LoginSignupButton />
               <Link href="/builder">
                 <Button 
                   className="bg-blue-600 hover:bg-blue-700"

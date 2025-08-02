@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { LoginSignupButton } from '@/components/LoginSignupButton';
 import { processFile, validateFile, type FileProcessingResult } from '@/lib/file-processing';
 import { refineResumeWithGemini, type RefinedResumeData } from '@/lib/gemini-api';
 
@@ -845,6 +846,7 @@ export default function ATSAnalysis() {
                 <Link href="/builder" className="text-slate-600 hover:text-blue-600 transition-colors">Resume Builder</Link>
                 <Link href="/ats-analysis" className="text-slate-600 hover:text-blue-600 transition-colors">ATS Analysis</Link>
                 <Link href="/text-extractor" className="text-slate-600 hover:text-blue-600 transition-colors">Text Extractor</Link>
+                <LoginSignupButton />
                 <span className="text-slate-600 hover:text-blue-600 transition-colors cursor-pointer">Help</span>
               </div>
             </div>
@@ -919,10 +921,10 @@ export default function ATSAnalysis() {
 
         {/* Upload Section */}
         {!analysis && (
-          <Card className="max-w-2xl mx-auto mb-8">
-            <CardContent className="p-8">
+          <Card className="max-w-2xl mx-auto mb-6 sm:mb-8">
+            <CardContent className="p-4 sm:p-6 lg:p-8">
               <div
-                className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                className={`border-2 border-dashed rounded-lg p-4 sm:p-6 lg:p-8 text-center transition-colors ${
                   isDragging
                     ? 'border-blue-500 bg-blue-50'
                     : 'border-slate-300 hover:border-slate-400'
@@ -932,24 +934,24 @@ export default function ATSAnalysis() {
                 onDragEnter={() => setIsDragging(true)}
                 onDragLeave={() => setIsDragging(false)}
               >
-                <div className="flex flex-col items-center space-y-4">
-                  <div className="p-4 bg-blue-100 rounded-full">
-                    <Target className="h-8 w-8 text-blue-600" />
+                <div className="flex flex-col items-center space-y-3 sm:space-y-4">
+                  <div className="p-3 sm:p-4 bg-blue-100 rounded-full">
+                    <Target className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
                   </div>
                   
                   {isAnalyzing ? (
-                    <div className="space-y-3">
-                      <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
-                      <p className="text-slate-600">Analyzing your resume...</p>
-                      <p className="text-sm text-slate-500">This may take a few moments</p>
+                    <div className="space-y-2 sm:space-y-3">
+                      <div className="animate-spin w-6 h-6 sm:w-8 sm:h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
+                      <p className="text-slate-600 text-sm sm:text-base">Analyzing your resume...</p>
+                      <p className="text-xs sm:text-sm text-slate-500">This may take a few moments</p>
                     </div>
                   ) : (
                     <>
                       <div className="space-y-2">
-                        <h3 className="text-lg font-semibold text-slate-700">
+                        <h3 className="text-base sm:text-lg font-semibold text-slate-700">
                           Upload Your Resume
                         </h3>
-                        <p className="text-slate-500">
+                        <p className="text-slate-500 text-sm sm:text-base">
                           Drag and drop your resume file here, or click to browse
                         </p>
                         <p className="text-xs text-slate-400">
@@ -959,7 +961,7 @@ export default function ATSAnalysis() {
 
                       <Button
                         onClick={() => document.getElementById('file-input')?.click()}
-                        className="bg-blue-600 hover:bg-blue-700"
+                        className="bg-blue-600 hover:bg-blue-700 text-sm sm:text-base"
                       >
                         <Upload className="mr-2 h-4 w-4" />
                         Choose File
@@ -980,7 +982,7 @@ export default function ATSAnalysis() {
               {error && (
                 <Alert className="mt-4 border-red-200 bg-red-50">
                   <AlertCircle className="h-4 w-4 text-red-600" />
-                  <AlertDescription className="text-red-700">
+                  <AlertDescription className="text-red-700 text-sm sm:text-base">
                     {error}
                   </AlertDescription>
                 </Alert>
@@ -988,9 +990,9 @@ export default function ATSAnalysis() {
 
               {uploadedFile && !error && (
                 <div className="mt-4 flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <FileText className="h-5 w-5 text-slate-500" />
-                    <span className="text-sm font-medium text-slate-700">
+                  <div className="flex items-center space-x-2 sm:space-x-3">
+                    <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-slate-500" />
+                    <span className="text-xs sm:text-sm font-medium text-slate-700 truncate">
                       {uploadedFile.name}
                     </span>
                   </div>
@@ -998,7 +1000,7 @@ export default function ATSAnalysis() {
                     variant="ghost"
                     size="sm"
                     onClick={handleReset}
-                    className="text-slate-500 hover:text-slate-700"
+                    className="text-slate-500 hover:text-slate-700 text-xs sm:text-sm"
                   >
                     Remove
                   </Button>

@@ -1,6 +1,7 @@
 import { Link } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { ResumeTextExtractor } from "@/components/resume-text-extractor";
+import { LoginSignupButton } from "@/components/LoginSignupButton";
 
 export default function TextExtractor() {
   return (
@@ -17,6 +18,7 @@ export default function TextExtractor() {
               <Link href="/builder">
                 <span className="text-slate-600 hover:text-slate-800 font-medium">Resume Builder</span>
               </Link>
+              <LoginSignupButton />
             </div>
           </div>
         </div>

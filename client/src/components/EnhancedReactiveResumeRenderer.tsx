@@ -4,7 +4,7 @@ import { getTemplate } from '../templates';
 import { useArtboardStore } from '../store/artboard-store';
 import type { Template } from "../utils/reactive-resume-utils";
 import type { SectionKey } from '../utils/reactive-resume-schema';
-import mapResumeGeniusToReactiveResume from '../utils/reactive-resume-mapper';
+import { mapResumeGeniusToReactiveResume } from '../utils/reactive-resume-mapper';
 
 interface ReactiveResumeRendererProps {
   resumeData: any; // ResumeGenius data structure
@@ -47,24 +47,42 @@ export const EnhancedReactiveResumeRenderer: React.FC<ReactiveResumeRendererProp
           throw new Error(`Invalid template ID: ${templateId}. Valid templates are: ${validTemplates.join(', ')}`);
         }
 
-        // Check if the data is already in Reactive-Resume format
+        console.log('EnhancedReactiveResumeRenderer - Input data:', resumeData);
+        
+        // Check if data is already in Reactive-Resume format
         const isReactiveResumeFormat = resumeData && 
           resumeData.basics && 
           resumeData.sections && 
-          resumeData.metadata;
-
-        let mappedData;
+          resumeData.metadata &&
+          typeof resumeData.basics === 'object' &&
+          typeof resumeData.sections === 'object' &&
+          typeof resumeData.metadata === 'object' &&
+          // Additional check to ensure it's not just the initial structure
+          resumeData.basics.name &&
+          Object.keys(resumeData.sections).length > 0;
         
+        console.log('EnhancedReactiveResumeRenderer - Is Reactive-Resume format:', isReactiveResumeFormat);
+        
+        let mappedData;
         if (isReactiveResumeFormat) {
           // Data is already in Reactive-Resume format
           mappedData = resumeData;
+          console.log('Using existing Reactive-Resume format data');
         } else {
           // Data is in ResumeGenius format, need to map it
           console.log('Mapping ResumeGenius data to Reactive-Resume format');
-          mappedData = mapResumeGeniusToReactiveResume(resumeData, templateId);
+          try {
+            mappedData = mapResumeGeniusToReactiveResume(resumeData, templateId);
+          } catch (error) {
+            console.error('Error mapping data:', error);
+            // Fallback to using the original data
+            mappedData = resumeData;
+          }
         }
 
-        // Just validate the data structure
+        console.log('EnhancedReactiveResumeRenderer - Mapped data:', mappedData);
+
+        // Validate mapped data structure
         if (!mappedData || !mappedData.basics || !mappedData.sections || !mappedData.metadata) {
           throw new Error('Invalid Reactive-Resume data structure. Data should be pre-mapped.');
         }

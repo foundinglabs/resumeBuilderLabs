@@ -11,6 +11,7 @@ import { ResumePreview } from "@/components/resume-preview";
 import { ResumeUpload } from "@/components/resume-upload";
 import { PhotoUpload } from "@/components/photo-upload";
 import { DownloadModal } from "@/components/download-modal";
+import { LoginSignupButton } from "@/components/LoginSignupButton";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { allTemplates, getTemplateById, getTemplateJsonData } from "@/utils/template-integration";
@@ -378,8 +379,9 @@ function ensureBasics(resumeData: any) {
 
 // Ensures sections object is always present and normalized
 function mapTopLevelToSections(resumeData: any) {
+  console.log('mapTopLevelToSections input:', resumeData);
   const sections = resumeData.sections || {};
-  return {
+  const result = {
     ...resumeData,
     sections: {
       ...sections,
@@ -446,6 +448,8 @@ function mapTopLevelToSections(resumeData: any) {
       // Add more sections as needed
     },
   };
+  console.log('mapTopLevelToSections output:', result);
+  return result;
 }
 
 export default function Builder() {
@@ -683,6 +687,7 @@ export default function Builder() {
                   <span className="sm:hidden">Download</span>
                 </Button>
               </DownloadModal>
+              <LoginSignupButton />
             </div>
           </div>
         </div>

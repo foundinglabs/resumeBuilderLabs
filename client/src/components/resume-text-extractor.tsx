@@ -1,9 +1,11 @@
-import React, { useState, useCallback } from 'react';
-import { Upload, FileText, Copy, Download, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
+import React, { useState, useCallback, useRef } from 'react';
+import { Upload, FileText, Copy, Download, AlertCircle, CheckCircle2, Loader2, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/hooks/useAuth';
 
 // Import production-ready file processing
 import { processFile, validateFile, FileProcessingResult } from '@/lib/file-processing';
@@ -239,6 +241,11 @@ export function ResumeTextExtractor({ className = '' }: ResumeTextExtractorProps
   const [detectedSections, setDetectedSections] = useState<Array<{ section: string; content: string; startIndex: number }>>([]);
   const [error, setError] = useState<string>('');
   const [showSections, setShowSections] = useState(false);
+  const [processingError, setProcessingError] = useState<string>('');
+  const [copiedText, setCopiedText] = useState<string>('');
+  const [copiedJSON, setCopiedJSON] = useState<string>('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { user, signIn } = useAuth();
 
 
   // Handle file drop
@@ -325,6 +332,11 @@ export function ResumeTextExtractor({ className = '' }: ResumeTextExtractorProps
 
   // Download text as file
   const handleDownloadText = () => {
+    if (!user) {
+      alert('Please log in to download extracted text.');
+      return;
+    }
+
     if (extractedText) {
       const blob = new Blob([extractedText], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
@@ -340,6 +352,11 @@ export function ResumeTextExtractor({ className = '' }: ResumeTextExtractorProps
 
   // Download as JSON format
   const handleDownloadJSON = () => {
+    if (!user) {
+      alert('Please log in to download structured data.');
+      return;
+    }
+
     if (extractedText && detectedSections) {
       const contactInfo = extractContactInfo(extractedText);
       const experiences = extractExperienceSection(extractedText);
@@ -464,6 +481,14 @@ export function ResumeTextExtractor({ className = '' }: ResumeTextExtractorProps
     setShowSections(false);
   };
 
+  const handleSignIn = async () => {
+    try {
+      await signIn();
+    } catch (error) {
+      console.error('Sign-in error:', error);
+    }
+  };
+
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Upload Section */}
@@ -563,18 +588,32 @@ export function ResumeTextExtractor({ className = '' }: ResumeTextExtractorProps
               <Copy className="mr-2 h-4 w-4" />
               Copy Text
             </Button>
-            <Button onClick={handleDownloadText} variant="outline">
-              <Download className="mr-2 h-4 w-4" />
-              Download TXT
-            </Button>
+            {user ? (
+              <Button onClick={handleDownloadText} variant="outline">
+                <Download className="mr-2 h-4 w-4" />
+                Download TXT
+              </Button>
+            ) : (
+              <Button onClick={handleSignIn} variant="outline" className="border-orange-200 bg-orange-50 text-orange-700 hover:bg-orange-100">
+                <Lock className="mr-2 h-4 w-4" />
+                Login to Download TXT
+              </Button>
+            )}
             <Button onClick={handleCopyJSON} variant="outline">
               <Copy className="mr-2 h-4 w-4" />
               Copy JSON
             </Button>
-            <Button onClick={handleDownloadJSON} variant="outline">
-              <Download className="mr-2 h-4 w-4" />
-              Download JSON
-            </Button>
+            {user ? (
+              <Button onClick={handleDownloadJSON} variant="outline">
+                <Download className="mr-2 h-4 w-4" />
+                Download JSON
+              </Button>
+            ) : (
+              <Button onClick={handleSignIn} variant="outline" className="border-orange-200 bg-orange-50 text-orange-700 hover:bg-orange-100">
+                <Lock className="mr-2 h-4 w-4" />
+                Login to Download JSON
+              </Button>
+            )}
             {detectedSections.length > 0 && (
               <Button 
                 onClick={() => setShowSections(!showSections)} 

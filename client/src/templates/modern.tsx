@@ -77,7 +77,7 @@ const Section = <T extends { visible?: boolean; id?: string }>({
             key={item.id || Math.random()} 
             className="relative space-y-2 border-blue-200 border-l-2 pl-4"
           >
-            <div>{children?.(item as T)}</div>
+            <div>{typeof children === 'function' ? children(item as T) : children}</div>
           </div>
         ))}
       </div>
@@ -144,12 +144,12 @@ const mapSectionToComponent = (section: string) => {
               <div className="text-xs text-blue-400">{item.date}</div>
               {item.url && (
                 <a 
-                  href={typeof item.url === 'string' ? item.url : item.url.href} 
+                  href={typeof item.url === 'string' ? item.url : (item.url.href || '#')} 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="text-xs text-blue-600 underline hover:text-blue-800 break-all"
                 >
-                  {typeof item.url === 'string' ? item.url : (item.url.label || item.url.href)}
+                  {typeof item.url === 'string' ? item.url : (item.url.label || item.url.href || 'View Project')}
                 </a>
               )}
             </TimelineItem>
