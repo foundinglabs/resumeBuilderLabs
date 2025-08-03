@@ -386,3 +386,14 @@ html {
     line-height: 1.6;
   }
 }
+
+/* Magic UI Animations - Only used components */
+@keyframes shimmer-slide {
+  to {
+    transform: translate(calc(100cqw - 100%), calc(100cqh - 100%));
+  }
+}
+
+.animate-shimmer-slide {
+  animation: shimmer-slide calc(var(--speed) * 2) ease-in-out infinite alternate;
+}

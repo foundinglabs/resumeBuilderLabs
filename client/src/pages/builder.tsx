@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Download, Save, Sparkles, Upload, Briefcase, Palette } from "lucide-react";
+import { ArrowLeft, Download, Save, Upload, Briefcase } from "lucide-react";
 import { ResumeForm } from "@/components/resume-form";
 import { ResumePreview } from "@/components/resume-preview";
 import { ResumeUpload } from "@/components/resume-upload";
@@ -207,11 +207,8 @@ const initialResumeData: ResumeData = {
       title: "Multi-vendor Marketplace Backend",
       description: "Built RESTful APIs and payment processing infrastructure for scalable e-commerce platform serving 1000+ vendors.",
       technologies: ["Node.js", "Express", "MongoDB", "Stripe API", "Redis", "JWT"],
-      role: "Backend Developer",
       link: "https://ecommerce-demo.dev",
       duration: "8 months",
-      startDate: "2022-03",
-      endDate: "2022-10",
     },
     {
       title: "E-commerce Platform",
@@ -661,7 +658,7 @@ export default function Builder() {
   return (
     <div className="min-h-screen bg-slate-50 pt-16 overflow-x-hidden">
       {/* Navigation */}
-      <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b border-slate-200">
+      <nav className="fixed top-0 w-full bg-white z-50 border-b border-slate-200 shadow-sm">
         <div className="w-[95vw] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link href="/" className="flex items-center text-blue-600 hover:text-blue-700 text-sm sm:text-base">

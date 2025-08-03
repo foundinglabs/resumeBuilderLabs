@@ -92,7 +92,7 @@ export const LoginSignupButton: React.FC = () => {
         
         {/* User Account Dropdown */}
         {showDropdown && (
-          <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-50">
+          <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg border border-gray-200 z-50">
             <div className="py-1">
               <div className="px-4 py-2 border-b border-gray-100">
                 <div className="flex items-center space-x-3">
@@ -108,11 +108,11 @@ export const LoginSignupButton: React.FC = () => {
                       <User className="h-4 w-4 text-gray-600" />
                     </div>
                   )}
-                  <div>
-                    <div className="text-sm font-medium text-gray-900">
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-medium text-gray-900 truncate">
                       {userProfile?.display_name || user.displayName || 'User'}
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-gray-500 truncate">
                       {user.email}
                     </div>
                   </div>

@@ -2,56 +2,60 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Download, FileText, File, Code, Loader2, CheckCircle } from 'lucide-react';
+import { Download, Loader2, CheckCircle2, FileText, File, Code } from 'lucide-react';
 import { ResumeData } from '@/pages/builder';
-import { generatePDF } from '@/lib/pdf-utils';
+import { generatePDFWithPuppeteer } from '@/lib/pdf-utils-puppeteer';
 import { generateDOCX } from '@/lib/docx-utils';
 import { generateJSON } from '@/lib/json-utils';
+import { MagicCard } from './ui/magic-card';
+import { ShimmerButton } from './ui/shimmer-button';
+import { cn } from '@/lib/utils';
 
 interface DownloadModalProps {
   resumeData: ResumeData;
+  className?: string;
   children?: React.ReactNode;
 }
 
 interface DownloadFormat {
   id: string;
-  label: string;
-  icon: React.ReactNode;
+  name: string;
   description: string;
-  estimatedSize: string;
-  recommended?: boolean;
+  icon: React.ReactNode;
+  extension: string;
 }
 
-const downloadFormats: DownloadFormat[] = [
-  {
-    id: 'pdf',
-    label: 'PDF',
-    icon: <FileText className="h-5 w-5" />,
-    description: 'Professional, print-ready format',
-    estimatedSize: '~200KB',
-    recommended: true,
-  },
-  {
-    id: 'docx',
-    label: 'DOCX',
-    icon: <File className="h-5 w-5" />,
-    description: 'Editable Word document',
-    estimatedSize: '~150KB',
-  },
-  {
-    id: 'json',
-    label: 'JSON',
-    icon: <Code className="h-5 w-5" />,
-    description: 'Raw data for developers',
-    estimatedSize: '~5KB',
-  },
-];
-
-export function DownloadModal({ resumeData, children }: DownloadModalProps) {
+export function DownloadModal({ resumeData, className, children }: DownloadModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [downloadingFormat, setDownloadingFormat] = useState<string | null>(null);
-  const [lastDownloaded, setLastDownloaded] = useState<string | null>(null);
   const [downloadSuccess, setDownloadSuccess] = useState<string | null>(null);
+  const [selectedFormat, setSelectedFormat] = useState<string>('pdf-puppeteer');
+
+  const formats: DownloadFormat[] = [
+    {
+      id: 'pdf-puppeteer',
+      name: 'PDF',
+      description: 'Professional PDF format',
+      icon: <FileText className="w-5 h-5" />,
+      extension: '.pdf'
+    },
+    {
+      id: 'docx',
+      name: 'Word',
+      description: 'Microsoft Word document',
+      icon: <File className="w-5 h-5" />,
+      extension: '.docx'
+    },
+    {
+      id: 'json',
+      name: 'JSON',
+      description: 'Raw data export',
+      icon: <Code className="w-5 h-5" />,
+      extension: '.json'
+    }
+  ];
+
+  const isDownloading = downloadingFormat !== null;
 
   const handleDownload = async (format: string) => {
     setDownloadingFormat(format);
@@ -61,8 +65,8 @@ export function DownloadModal({ resumeData, children }: DownloadModalProps) {
       const fileName = `${resumeData.personalInfo.firstName}_${resumeData.personalInfo.lastName}_Resume`.replace(/\s+/g, '_');
       
       switch (format) {
-        case 'pdf':
-          await generatePDF(resumeData, fileName);
+        case 'pdf-puppeteer':
+          await generatePDFWithPuppeteer(resumeData, fileName);
           break;
         case 'docx':
           await generateDOCX(resumeData, fileName);
@@ -74,136 +78,134 @@ export function DownloadModal({ resumeData, children }: DownloadModalProps) {
           throw new Error('Unsupported format');
       }
       
-      setLastDownloaded(format);
       setDownloadSuccess(format);
-      
-      // Store preference in localStorage
-      localStorage.setItem('preferredDownloadFormat', format);
-      
-      // Clear success message after 3 seconds
-      setTimeout(() => {
-        setDownloadSuccess(null);
-      }, 3000);
-      
+      setTimeout(() => setDownloadSuccess(null), 3000);
     } catch (error) {
-      console.error(`Failed to download ${format}:`, error);
+      console.error('Download failed:', error);
       alert(`Failed to download ${format.toUpperCase()}. Please try again.`);
     } finally {
       setDownloadingFormat(null);
     }
   };
 
-  const getPreferredFormat = () => {
-    return localStorage.getItem('preferredDownloadFormat') || 'pdf';
-  };
-
-  const preferredFormat = getPreferredFormat();
-
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         {children || (
-          <Button className="gap-2">
-            <Download className="h-4 w-4" />
+          <ShimmerButton 
+            className={cn("h-10 px-6", className)}
+            shimmerColor="#60a5fa"
+            background="hsl(var(--primary))"
+          >
+            <Download className="w-4 h-4 mr-2" />
             Download Resume
-          </Button>
+          </ShimmerButton>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="text-center">Choose Download Format</DialogTitle>
-        </DialogHeader>
-        
-        <div className="space-y-3 py-4">
-          {downloadFormats.map((format) => {
-            const isDownloading = downloadingFormat === format.id;
-            const wasDownloaded = downloadSuccess === format.id;
-            const isPreferred = preferredFormat === format.id;
-            
-            return (
-              <div
-                key={format.id}
-                className={`relative p-4 border rounded-lg transition-all duration-200 ${
-                  isPreferred 
-                    ? 'border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950' 
-                    : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
-                } ${wasDownloaded ? 'ring-2 ring-green-500' : ''}`}
-              >
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-6">
-                  <div className="flex items-center gap-3 flex-1 w-full">
-                    <div className="flex-shrink-0 text-gray-600 dark:text-gray-400">
-                      {format.icon}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-medium text-gray-900 dark:text-gray-100">
-                          {format.label}
-                        </h3>
-                        {format.recommended && (
-                          <Badge variant="secondary" className="text-xs">
-                            Recommended
-                          </Badge>
-                        )}
-                        {isPreferred && (
-                          <Badge variant="outline" className="text-xs">
-                            Last used
-                          </Badge>
-                        )}
+      
+      <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden">
+        <div className="bg-gradient-to-br from-slate-50 to-blue-50/30 p-6">
+          <DialogHeader className="space-y-3">
+            <DialogTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+              <Download className="w-5 h-5 text-blue-600" />
+              Download Resume
+            </DialogTitle>
+            <p className="text-sm text-gray-600">
+              Choose your preferred format to download your resume
+            </p>
+          </DialogHeader>
+
+          <div className="mt-6 space-y-3">
+            {formats.map((format, index) => {
+              const isSelected = selectedFormat === format.id;
+              const isCurrentlyDownloading = downloadingFormat === format.id;
+              const isSuccessful = downloadSuccess === format.id;
+
+              return (
+                <MagicCard
+                  key={format.id}
+                  className={cn(
+                    "p-4 cursor-pointer transition-all duration-200 border-2",
+                    isSelected 
+                      ? "border-blue-500 bg-blue-50/50" 
+                      : "border-gray-200 hover:border-gray-300 bg-white"
+                  )}
+                  gradientSize={150}
+                  gradientColor={isSelected ? "#3b82f6" : "#e5e7eb"}
+                  gradientOpacity={isSelected ? 0.1 : 0.05}
+                  onClick={() => setSelectedFormat(format.id)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={cn(
+                        "p-2 rounded-lg transition-colors",
+                        isSelected ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-600"
+                      )}>
+                        {format.icon}
                       </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                        {format.description}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                        {format.estimatedSize}
-                      </p>
+                      <div>
+                        <h3 className={cn(
+                          "font-medium transition-colors",
+                          isSelected ? "text-blue-900" : "text-gray-900"
+                        )}>
+                          {format.name}
+                        </h3>
+                        <p className={cn(
+                          "text-sm transition-colors",
+                          isSelected ? "text-blue-600" : "text-gray-500"
+                        )}>
+                          {format.description}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary" className="text-xs">
+                        {format.extension}
+                      </Badge>
+                      {isSelected && (
+                        <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse" />
+                      )}
                     </div>
                   </div>
-                  
-                  <div className="flex flex-row sm:flex-col items-center gap-2 w-full sm:w-auto mt-3 sm:mt-0">
-                    {wasDownloaded && (
-                      <CheckCircle className="h-4 w-4 text-green-500" />
-                    )}
-                    <Button
-                      onClick={() => handleDownload(format.id)}
-                      disabled={isDownloading}
-                      size="sm"
-                      variant={isPreferred ? "default" : "outline"}
-                      className="w-full sm:w-auto flex-shrink-0"
-                    >
-                      {isDownloading ? (
-                        <>
-                          <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                          Downloading...
-                        </>
-                      ) : (
-                        <>
-                          <Download className="h-3 w-3 mr-1" />
-                          Download
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        
-        {downloadSuccess && (
-          <div className="mt-4 p-3 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg">
-            <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
-              <CheckCircle className="h-4 w-4" />
-              <span className="text-sm font-medium">
-                Resume downloaded successfully as {downloadSuccess.toUpperCase()}!
-              </span>
-            </div>
+                </MagicCard>
+              );
+            })}
           </div>
-        )}
-        
-        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-            Your preferred format will be remembered for next time
-          </p>
+
+          <div className="mt-6 flex gap-3">
+            <Button
+              onClick={() => setIsOpen(false)}
+              variant="outline"
+              className="flex-1"
+              disabled={isDownloading}
+            >
+              Cancel
+            </Button>
+            
+            <Button
+              onClick={() => handleDownload(selectedFormat)}
+              disabled={isDownloading}
+              className="flex-1 bg-blue-600 hover:bg-blue-700"
+            >
+              {isDownloading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Downloading...
+                </>
+              ) : downloadSuccess === selectedFormat ? (
+                <>
+                  <CheckCircle2 className="w-4 h-4 mr-2 text-green-500" />
+                  Downloaded!
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4 mr-2" />
+                  Download {formats.find(f => f.id === selectedFormat)?.name}
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

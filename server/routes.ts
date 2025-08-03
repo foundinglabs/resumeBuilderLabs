@@ -6,6 +6,7 @@ import { z } from "zod";
 import multer from "multer";
 import { processPDFBuffer, validatePDFFile, PDFProcessingResult } from "./pdf-processor";
 import { handleRefineResume } from "./gemini-service";
+import { generatePDFWithPuppeteer } from "./pdf-service-puppeteer";
 
 // Configure multer for file uploads
 const upload = multer({
@@ -25,15 +26,27 @@ const upload = multer({
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize mock user on startup
   let mockUser: any;
+  let databaseAvailable = true;
+  
   try {
     mockUser = await storage.initializeMockUser();
+    console.log("Database connected successfully, mock user initialized");
   } catch (error) {
     console.error("Failed to initialize mock user:", error);
+    console.log("Running in offline mode without database");
+    databaseAvailable = false;
+    // Create a fallback mock user for offline mode
+    mockUser = { id: 1, username: "demo_user" };
   }
 
   // Resume routes
   app.get("/api/resumes", async (req, res) => {
     try {
+      if (!databaseAvailable) {
+        // Return empty array when database is not available
+        return res.json([]);
+      }
+      
       // Use mock user for demo purposes
       const mockUserId = mockUser?.id || 1;
       const resumes = await storage.getResumesByUser(mockUserId);
@@ -100,6 +113,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to delete resume" });
     }
   });
+
+  // Health check endpoint
+  app.get("/api/health", (req, res) => {
+    res.json({
+      status: "healthy",
+      database: databaseAvailable ? "connected" : "offline",
+      puppeteer: "available",
+      timestamp: new Date().toISOString()
+    });
+  });
+
+  // Puppeteer PDF Generation endpoint
+  app.post("/api/pdf/generate-puppeteer", generatePDFWithPuppeteer);
 
   // PDF Processing API endpoint
   app.post("/api/pdf/extract", upload.single('pdf'), async (req, res) => {

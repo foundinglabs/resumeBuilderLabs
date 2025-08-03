@@ -1,5 +1,14 @@
-import pdf from 'pdf-parse';
 import { Request, Response } from 'express';
+
+// Lazy load pdf-parse to avoid module initialization issues
+let pdfModule: any = null;
+async function getPdfParser() {
+  if (!pdfModule) {
+    const pdfParse = await import('pdf-parse');
+    pdfModule = pdfParse.default;
+  }
+  return pdfModule;
+}
 
 export interface PDFProcessingResult {
   success: boolean;
@@ -22,7 +31,8 @@ export async function processPDFBuffer(buffer: Buffer): Promise<PDFProcessingRes
   try {
     console.log('Processing PDF buffer of size:', buffer.length);
     
-    // Parse PDF using pdf-parse library
+    // Get the PDF parser and parse the buffer
+    const pdf = await getPdfParser();
     const data = await pdf(buffer);
     
     if (!data || !data.text) {

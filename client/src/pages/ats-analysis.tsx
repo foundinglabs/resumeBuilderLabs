@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Upload, FileText, AlertCircle, CheckCircle2, Target, TrendingUp, AlertTriangle, Award, Download, ArrowLeft, Hash, BarChart3, RefreshCcw, Edit, Briefcase, Users, Clock, Zap, Eye } from 'lucide-react';
+import { Upload, FileText, AlertCircle, CheckCircle2, Target, TrendingUp, AlertTriangle, Award, Download, ArrowLeft, BarChart3, RefreshCcw, Edit, Briefcase, Users, Clock, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -701,7 +701,7 @@ export default function ATSAnalysis() {
     URL.revokeObjectURL(url);
   };
 
-  const downloadPDFReport = () => {
+  const downloadPDFReport = async () => {
     if (!analysis || !uploadedFile) return;
     
     const reportData = generateReportData(analysis, uploadedFile.name);
@@ -799,20 +799,39 @@ export default function ATSAnalysis() {
     
     document.body.appendChild(reportDiv);
     
-    // Use html2pdf to generate PDF
-    import('html2pdf.js').then((html2pdf) => {
-      const opt = {
-        margin: 1,
-        filename: `ats-analysis-report-${new Date().toISOString().split('T')[0]}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-      };
-      
-      html2pdf.default().from(reportDiv).set(opt).save().then(() => {
-        document.body.removeChild(reportDiv);
+    // Use Puppeteer PDF generation via server API
+    try {
+      const response = await fetch('/api/pdf/generate-puppeteer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          resumeData: { content: reportDiv.innerHTML },
+          templateId: 'ats-report',
+          filename: `ats-analysis-report-${new Date().toISOString().split('T')[0]}`
+        }),
       });
-    });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate PDF');
+      }
+
+      const pdfBlob = await response.blob();
+      const url = window.URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `ats-analysis-report-${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Failed to generate PDF report. Please try again.');
+    } finally {
+      document.body.removeChild(reportDiv);
+    }
   };
 
   const getScoreColor = (score: number) => {
