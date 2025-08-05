@@ -864,7 +864,7 @@ export default function ATSAnalysis() {
               <div className="hidden md:flex items-center space-x-8">
                 <Link href="/builder" className="text-slate-600 hover:text-blue-600 transition-colors">Resume Builder</Link>
                 <Link href="/ats-analysis" className="text-slate-600 hover:text-blue-600 transition-colors">ATS Analysis</Link>
-                <Link href="/text-extractor" className="text-slate-600 hover:text-blue-600 transition-colors">Text Extractor</Link>
+
                 <LoginSignupButton />
                 <span className="text-slate-600 hover:text-blue-600 transition-colors cursor-pointer">Help</span>
               </div>

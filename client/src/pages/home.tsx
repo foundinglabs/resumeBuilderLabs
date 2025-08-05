@@ -208,27 +208,11 @@ export default function Home() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  ATS Analysis
+                ATS Analysis
                 </motion.a>
               </Link>
               
-              {/* Text Extractor Link */}
-              <Link href="/text-extractor">
-                <motion.a 
-                  className={`transition-colors ${isDarkMode ? 'text-slate-300 hover:text-blue-400' : 'text-slate-600 hover:text-blue-600'}`}
-                  initial={{ y: -20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ 
-                    duration: 0.5, 
-                    delay: 0.9,
-                    ease: "easeOut"
-                  }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Text Extractor
-                </motion.a>
-              </Link>
+
               
               {/* Dark Mode Toggle */}
               <motion.button
@@ -273,7 +257,7 @@ export default function Home() {
                   ease: "easeOut"
                 }}
               >
-                <LoginSignupButton />
+              <LoginSignupButton />
               </motion.div>
               
               {/* Start Building Button */}
@@ -293,17 +277,17 @@ export default function Home() {
                   }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <Button 
+                <Button 
                     className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-md hover:shadow-lg transition-all duration-300 border-0"
-                    onClick={() => {
-                      // Clear any URL hash before navigation
-                      if (window.location.hash) {
-                        window.history.replaceState(null, '', window.location.pathname);
-                      }
-                    }}
-                  >
-                    Start Building
-                  </Button>
+                  onClick={() => {
+                    // Clear any URL hash before navigation
+                    if (window.location.hash) {
+                      window.history.replaceState(null, '', window.location.pathname);
+                    }
+                  }}
+                >
+                  Start Building
+                </Button>
                 </motion.div>
               </Link>
             </div>
@@ -320,18 +304,18 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Left Column - Text Content */}
             <div className="animate-fadeInUp text-center lg:text-left">
-              <motion.h1 
-                className={`text-4xl md:text-6xl font-bold mb-6 ${
-                  isDarkMode ? 'text-white' : 'text-slate-800'
-                }`}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-              >
-                <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                  {typedText}
-                </span>
-              </motion.h1>
+                              <motion.h1 
+                  className={`text-4xl md:text-6xl font-bold mb-6 ${
+                    isDarkMode ? 'text-white' : 'text-slate-800'
+                  }`}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.2 }}
+                >
+                  <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 dark:from-blue-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
+                    {typedText}
+                  </span>
+                </motion.h1>
               <motion.p 
                 className={`text-xl md:text-2xl mb-8 max-w-2xl ${
                   isDarkMode ? 'text-slate-300' : 'text-slate-600'
@@ -340,7 +324,7 @@ export default function Home() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.4 }}
               >
-                Build professional resumes in minutes with our AI-powered tools, live preview, and stunning templates.
+              Build professional resumes in minutes with our AI-powered tools, live preview, and stunning templates.
               </motion.p>
               
               {/* Quick Value Props */}
@@ -400,7 +384,7 @@ export default function Home() {
                 </motion.div>
               </motion.div>
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center">
-                <Link href="/builder">
+              <Link href="/builder">
                   <motion.div
                     whileHover={{ 
                       scale: 1.05,
@@ -414,21 +398,21 @@ export default function Home() {
                       damping: 25 
                     }}
                   >
-                    <Button 
+                <Button 
                       className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 hover:from-blue-700 hover:via-purple-700 hover:to-blue-800 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-0"
-                      onClick={() => {
-                        // Clear any URL hash before navigation
-                        if (window.location.hash) {
-                          window.history.replaceState(null, '', window.location.pathname);
-                        }
-                      }}
-                    >
-                      <Sparkles className="mr-2 h-5 w-5" />
-                      Start Building Resume
-                    </Button>
+                  onClick={() => {
+                    // Clear any URL hash before navigation
+                    if (window.location.hash) {
+                      window.history.replaceState(null, '', window.location.pathname);
+                    }
+                  }}
+                >
+                  <Sparkles className="mr-2 h-5 w-5" />
+                  Start Building Resume
+                </Button>
                   </motion.div>
-                </Link>
-                <Link href="/ats-analysis">
+              </Link>
+              <Link href="/ats-analysis">
                   <motion.div
                     whileHover={{ 
                       scale: 1.05,
@@ -446,11 +430,11 @@ export default function Home() {
                       variant="outline" 
                       className="border-2 border-slate-300 hover:border-slate-400 text-slate-700 hover:text-slate-800 bg-white hover:bg-slate-50 px-8 py-4 text-lg font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
                     >
-                      <Target className="mr-2 h-5 w-5" />
-                      ATS Checker
-                    </Button>
+                  <Target className="mr-2 h-5 w-5" />
+                  ATS Checker
+                </Button>
                   </motion.div>
-                </Link>
+              </Link>
               </div>
             </div>
             
@@ -725,50 +709,7 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            {/* Text Extractor */}
-            <Card className="bg-gradient-to-br from-green-50 to-green-100 border-0 hover:shadow-xl transition-all group overflow-hidden">
-              <CardContent className="p-8">
-                <div className="flex items-center mb-6">
-                  <div className="bg-green-600 w-16 h-16 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
-                    <FileText className="text-white h-8 w-8" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-slate-800 mb-1">Text Extractor</h3>
-                    <p className="text-green-600 font-medium">Document Parser</p>
-                  </div>
-                </div>
-                
-                <p className="text-slate-600 mb-6 text-lg">
-                  Extract clean, structured text from PDF and DOCX resumes. Perfect for analyzing existing resumes or converting documents to plain text.
-                </p>
-                
-                <div className="space-y-3 mb-8">
-                  <div className="flex items-center text-slate-700">
-                    <Check className="w-5 h-5 text-green-600 mr-3" />
-                    <span>PDF & DOCX Support</span>
-                  </div>
-                  <div className="flex items-center text-slate-700">
-                    <Check className="w-5 h-5 text-green-600 mr-3" />
-                    <span>Multi-page Document Processing</span>
-                  </div>
-                  <div className="flex items-center text-slate-700">
-                    <Check className="w-5 h-5 text-green-600 mr-3" />
-                    <span>Smart Section Detection</span>
-                  </div>
-                  <div className="flex items-center text-slate-700">
-                    <Check className="w-5 h-5 text-green-600 mr-3" />
-                    <span>Copy & Download Options</span>
-                  </div>
-                </div>
 
-                <Link href="/text-extractor">
-                  <Button className="w-full bg-green-600 hover:bg-green-700 text-lg py-6">
-                    <FileText className="mr-2 h-5 w-5" />
-                    Extract Resume Text
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
 
             {/* ATS Analysis */}
             <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-0 hover:shadow-xl transition-all group overflow-hidden">
