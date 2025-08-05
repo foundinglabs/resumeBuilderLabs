@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, FileText, Palette, Sparkles, Edit, Check, Target, Star } from "lucide-react";
 import { allTemplates, getCustomTemplates, getReactiveResumeTemplates, getTemplatePreviewUrl } from "@/utils/template-integration";
 import { LoginSignupButton } from "@/components/LoginSignupButton";
+import AnimatedResume from "@/components/AnimatedResume";
+import { motion } from "framer-motion";
 
 export default function Home() {
   return (
@@ -53,38 +55,66 @@ export default function Home() {
           <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="animate-fadeInUp">
-            <h1 className="text-4xl md:text-6xl font-bold text-slate-800 mb-6">
-              Create Your Perfect{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-                Resume
-              </span>
-            </h1>
-            <p className="text-xl md:text-2xl text-slate-600 mb-8 max-w-3xl mx-auto">
-              Build professional resumes in minutes with our AI-powered tools, live preview, and stunning templates.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link href="/builder">
-                <Button 
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 text-lg font-semibold rounded-xl transform hover:scale-105 transition-all duration-300"
-                  onClick={() => {
-                    // Clear any URL hash before navigation
-                    if (window.location.hash) {
-                      window.history.replaceState(null, '', window.location.pathname);
-                    }
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Left Column - Text Content */}
+            <div className="animate-fadeInUp text-center lg:text-left">
+              <motion.h1 
+                className="text-4xl md:text-6xl font-bold text-slate-800 mb-6"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+              >
+                Create Your Perfect{" "}
+                <motion.span 
+                  className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600"
+                  animate={{
+                    backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"]
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "easeInOut"
                   }}
                 >
-                  <Sparkles className="mr-2 h-5 w-5" />
-                  Start Building Resume
-                </Button>
-              </Link>
-              <Link href="/ats-analysis">
-                <Button variant="outline" className="border-2 border-slate-300 text-slate-700 px-8 py-4 text-lg font-semibold rounded-xl hover:bg-slate-50">
-                  <Target className="mr-2 h-5 w-5" />
-                  ATS Checker
-                </Button>
-              </Link>
+                  Resume
+                </motion.span>
+              </motion.h1>
+              <motion.p 
+                className="text-xl md:text-2xl text-slate-600 mb-8 max-w-2xl"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+              >
+                Build professional resumes in minutes with our AI-powered tools, live preview, and stunning templates.
+              </motion.p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center">
+                <Link href="/builder">
+                  <Button 
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 text-lg font-semibold rounded-xl transform hover:scale-105 transition-all duration-300"
+                    onClick={() => {
+                      // Clear any URL hash before navigation
+                      if (window.location.hash) {
+                        window.history.replaceState(null, '', window.location.pathname);
+                      }
+                    }}
+                  >
+                    <Sparkles className="mr-2 h-5 w-5" />
+                    Start Building Resume
+                  </Button>
+                </Link>
+                <Link href="/ats-analysis">
+                  <Button variant="outline" className="border-2 border-slate-300 text-slate-700 px-8 py-4 text-lg font-semibold rounded-xl hover:bg-slate-50">
+                    <Target className="mr-2 h-5 w-5" />
+                    ATS Checker
+                  </Button>
+                </Link>
+              </div>
+            </div>
+            
+            {/* Right Column - Animated Resume */}
+            <div className="flex justify-center lg:justify-end">
+              <AnimatedResume />
             </div>
           </div>
         </div>

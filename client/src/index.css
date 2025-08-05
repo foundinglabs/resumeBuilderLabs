@@ -86,6 +86,18 @@
     animation: fadeInUp 0.6s ease-out;
   }
 
+  .animate-typewriter {
+    animation: typewriter 2s steps(40) 1s 1 normal both;
+  }
+
+  .animate-bounce-gentle {
+    animation: bounceGentle 2s ease-in-out infinite;
+  }
+
+  .animate-pulse-slow {
+    animation: pulseSlow 3s ease-in-out infinite;
+  }
+
   .animation-delay-2000 {
     animation-delay: 2s;
   }
@@ -138,6 +150,33 @@
   100% {
     transform: translateY(0px);
     opacity: 1;
+  }
+}
+
+@keyframes typewriter {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes bounceGentle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulseSlow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
   }
 }
 
