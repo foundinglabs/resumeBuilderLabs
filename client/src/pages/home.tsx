@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, FileText, Palette, Sparkles, Edit, Check, Target, Star } from "lucide-react";
+import { Eye, FileText, Palette, Sparkles, Edit, Check, Target, Star, Moon, Sun } from "lucide-react";
 import { allTemplates, getCustomTemplates, getReactiveResumeTemplates, getTemplatePreviewUrl } from "@/utils/template-integration";
 import { LoginSignupButton } from "@/components/LoginSignupButton";
 import AnimatedResume from "@/components/AnimatedResume";
@@ -13,6 +13,9 @@ export default function Home() {
   const [typedText, setTypedText] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTyping, setIsTyping] = useState(true);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState('home');
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   const fullText = "Your story deserves a standout resume — powered by AI.";
 
@@ -29,46 +32,287 @@ export default function Home() {
     }
   }, [currentIndex, fullText]);
 
+  // Handle scroll for sticky header shadow and active section
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      setIsScrolled(scrollTop > 10);
+
+      // Determine active section based on scroll position
+      const sections = ['home', 'features', 'templates'];
+      const sectionElements = sections.map(id => document.getElementById(id));
+      
+      let currentSection = 'home';
+      sectionElements.forEach((element, index) => {
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          if (rect.top <= 100 && rect.bottom >= 100) {
+            currentSection = sections[index];
+          }
+        }
+      });
+      
+      setActiveSection(currentSection);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Handle dark mode toggle
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+    if (!isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  };
+
+  const isActiveLink = (section: string) => activeSection === section;
+
   return (
-    <div className="min-h-screen bg-slate-50 overflow-x-hidden relative">
+    <div className={`min-h-screen overflow-x-hidden relative transition-colors duration-300 ${
+      isDarkMode 
+        ? 'bg-slate-900 text-white' 
+        : 'bg-slate-50'
+    }`}>
       {/* Navigation */}
-      <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b border-slate-200">
+      <motion.nav 
+        className={`fixed top-0 w-full z-50 border-b transition-all duration-300 ${
+          isDarkMode 
+            ? 'bg-slate-800/80 backdrop-blur-md border-slate-700' 
+            : 'bg-white/80 backdrop-blur-md border-slate-200'
+        } ${isScrolled ? 'shadow-md' : ''}`}
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ 
+          duration: 0.8, 
+          ease: "easeOut",
+          type: "spring",
+          stiffness: 100,
+          damping: 20
+        }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <FileText className="h-8 w-8 text-blue-600 mr-3" />
-              <span className="text-xl font-bold text-slate-800">ResumeBuilder Pro</span>
-            </div>
+            {/* Logo Section */}
+            <motion.div 
+              className="flex items-center"
+              initial={{ x: -50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ 
+                duration: 0.6, 
+                delay: 0.2,
+                ease: "easeOut"
+              }}
+            >
+              <motion.div
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ 
+                  duration: 0.5, 
+                  delay: 0.3,
+                  type: "spring",
+                  stiffness: 200
+                }}
+              >
+                <FileText className={`h-8 w-8 mr-3 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
+              </motion.div>
+              <motion.span 
+                className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-slate-800'}`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ 
+                  duration: 0.5, 
+                  delay: 0.5
+                }}
+              >
+                ResumeBuilder Pro
+              </motion.span>
+            </motion.div>
+            
+            {/* Navigation Links */}
             <div className="hidden md:flex items-center space-x-8">
-              <a href="#features" className="text-slate-600 hover:text-blue-600 transition-colors">Features</a>
-              <a href="#templates" className="text-slate-600 hover:text-blue-600 transition-colors">Templates</a>
-              <Link href="/ats-analysis" className="text-slate-600 hover:text-blue-600 transition-colors">
-                ATS Analysis
-              </Link>
-              <Link href="/text-extractor" className="text-slate-600 hover:text-blue-600 transition-colors">
-                Text Extractor
-              </Link>
-              <LoginSignupButton />
-              <Link href="/builder">
-                <Button 
-                  className="bg-blue-600 hover:bg-blue-700"
-                  onClick={() => {
-                    // Clear any URL hash before navigation
-                    if (window.location.hash) {
-                      window.history.replaceState(null, '', window.location.pathname);
-                    }
+              {/* Features Link */}
+              <motion.a 
+                href="#features" 
+                className={`relative transition-colors duration-200 ${
+                  isActiveLink('features') 
+                    ? (isDarkMode ? 'text-blue-400 font-semibold' : 'text-blue-600 font-semibold')
+                    : (isDarkMode ? 'text-slate-300 hover:text-blue-400' : 'text-slate-600 hover:text-blue-600')
+                }`}
+                initial={{ y: -20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ 
+                  duration: 0.5, 
+                  delay: 0.6,
+                  ease: "easeOut"
+                }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                Features
+                {isActiveLink('features') && (
+                  <motion.div
+                    className={`absolute -bottom-1 left-0 right-0 h-0.5 ${isDarkMode ? 'bg-blue-400' : 'bg-blue-600'}`}
+                    layoutId="activeTab"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.2 }}
+                  />
+                )}
+              </motion.a>
+              
+              {/* Templates Link */}
+              <motion.a 
+                href="#templates" 
+                className={`relative transition-colors duration-200 ${
+                  isActiveLink('templates') 
+                    ? (isDarkMode ? 'text-blue-400 font-semibold' : 'text-blue-600 font-semibold')
+                    : (isDarkMode ? 'text-slate-300 hover:text-blue-400' : 'text-slate-600 hover:text-blue-600')
+                }`}
+                initial={{ y: -20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ 
+                  duration: 0.5, 
+                  delay: 0.7,
+                  ease: "easeOut"
+                }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                Templates
+                {isActiveLink('templates') && (
+                  <motion.div
+                    className={`absolute -bottom-1 left-0 right-0 h-0.5 ${isDarkMode ? 'bg-blue-400' : 'bg-blue-600'}`}
+                    layoutId="activeTab"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.2 }}
+                  />
+                )}
+              </motion.a>
+              
+              {/* ATS Analysis Link */}
+              <Link href="/ats-analysis">
+                <motion.a 
+                  className={`transition-colors ${isDarkMode ? 'text-slate-300 hover:text-blue-400' : 'text-slate-600 hover:text-blue-600'}`}
+                  initial={{ y: -20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ 
+                    duration: 0.5, 
+                    delay: 0.8,
+                    ease: "easeOut"
                   }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  Start Building
-                </Button>
+                  ATS Analysis
+                </motion.a>
+              </Link>
+              
+              {/* Text Extractor Link */}
+              <Link href="/text-extractor">
+                <motion.a 
+                  className={`transition-colors ${isDarkMode ? 'text-slate-300 hover:text-blue-400' : 'text-slate-600 hover:text-blue-600'}`}
+                  initial={{ y: -20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ 
+                    duration: 0.5, 
+                    delay: 0.9,
+                    ease: "easeOut"
+                  }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Text Extractor
+                </motion.a>
+              </Link>
+              
+              {/* Dark Mode Toggle */}
+              <motion.button
+                onClick={toggleDarkMode}
+                className={`p-2 rounded-lg transition-all duration-200 ${
+                  isDarkMode 
+                    ? 'bg-slate-700 hover:bg-slate-600 text-yellow-400' 
+                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                }`}
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ 
+                  duration: 0.6, 
+                  delay: 1.0,
+                  type: "spring",
+                  stiffness: 200
+                }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                <motion.div
+                  initial={false}
+                  animate={{ rotate: isDarkMode ? 180 : 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {isDarkMode ? (
+                    <Sun className="h-5 w-5" />
+                  ) : (
+                    <Moon className="h-5 w-5" />
+                  )}
+                </motion.div>
+              </motion.button>
+              
+              {/* Login/Signup Button */}
+              <motion.div
+                initial={{ y: -20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ 
+                  duration: 0.5, 
+                  delay: 1.1,
+                  ease: "easeOut"
+                }}
+              >
+                <LoginSignupButton />
+              </motion.div>
+              
+              {/* Start Building Button */}
+              <Link href="/builder">
+                <motion.div
+                  initial={{ y: -20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ 
+                    duration: 0.5, 
+                    delay: 1.2,
+                    ease: "easeOut"
+                  }}
+                  whileHover={{ 
+                    scale: 1.05,
+                    y: -1,
+                    boxShadow: "0 10px 15px -3px rgba(59, 130, 246, 0.3), 0 4px 6px -2px rgba(59, 130, 246, 0.2)"
+                  }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Button 
+                    className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-md hover:shadow-lg transition-all duration-300 border-0"
+                    onClick={() => {
+                      // Clear any URL hash before navigation
+                      if (window.location.hash) {
+                        window.history.replaceState(null, '', window.location.pathname);
+                      }
+                    }}
+                  >
+                    Start Building
+                  </Button>
+                </motion.div>
               </Link>
             </div>
           </div>
         </div>
-      </nav>
+      </motion.nav>
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
+      <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
         {/* Animated Tile Background - Only in Hero Section */}
         <AnimatedTileBackground />
         
@@ -77,7 +321,9 @@ export default function Home() {
             {/* Left Column - Text Content */}
             <div className="animate-fadeInUp text-center lg:text-left">
               <motion.h1 
-                className="text-4xl md:text-6xl font-bold text-slate-800 mb-6"
+                className={`text-4xl md:text-6xl font-bold mb-6 ${
+                  isDarkMode ? 'text-white' : 'text-slate-800'
+                }`}
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
@@ -87,33 +333,123 @@ export default function Home() {
                 </span>
               </motion.h1>
               <motion.p 
-                className="text-xl md:text-2xl text-slate-600 mb-8 max-w-2xl"
+                className={`text-xl md:text-2xl mb-8 max-w-2xl ${
+                  isDarkMode ? 'text-slate-300' : 'text-slate-600'
+                }`}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.4 }}
               >
                 Build professional resumes in minutes with our AI-powered tools, live preview, and stunning templates.
               </motion.p>
+              
+              {/* Quick Value Props */}
+              <motion.div 
+                className="flex flex-wrap gap-3 mb-8 justify-center lg:justify-start"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.6 }}
+              >
+                <motion.div
+                  className={`flex items-center px-3 py-1.5 rounded-full text-sm font-medium border ${
+                    isDarkMode 
+                      ? 'bg-blue-900/50 text-blue-300 border-blue-700' 
+                      : 'bg-blue-50 text-blue-700 border-blue-200'
+                  }`}
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: "spring", stiffness: 400 }}
+                >
+                  <Check className="w-4 h-4 mr-1.5" />
+                  ATS-Friendly
+                </motion.div>
+                <motion.div
+                  className={`flex items-center px-3 py-1.5 rounded-full text-sm font-medium border ${
+                    isDarkMode 
+                      ? 'bg-green-900/50 text-green-300 border-green-700' 
+                      : 'bg-green-50 text-green-700 border-green-200'
+                  }`}
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: "spring", stiffness: 400 }}
+                >
+                  <Eye className="w-4 h-4 mr-1.5" />
+                  Live Preview
+                </motion.div>
+                <motion.div
+                  className={`flex items-center px-3 py-1.5 rounded-full text-sm font-medium border ${
+                    isDarkMode 
+                      ? 'bg-purple-900/50 text-purple-300 border-purple-700' 
+                      : 'bg-purple-50 text-purple-700 border-purple-200'
+                  }`}
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: "spring", stiffness: 400 }}
+                >
+                  <Sparkles className="w-4 h-4 mr-1.5" />
+                  AI-Powered
+                </motion.div>
+                <motion.div
+                  className={`flex items-center px-3 py-1.5 rounded-full text-sm font-medium border ${
+                    isDarkMode 
+                      ? 'bg-orange-900/50 text-orange-300 border-orange-700' 
+                      : 'bg-orange-50 text-orange-700 border-orange-200'
+                  }`}
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: "spring", stiffness: 400 }}
+                >
+                  <FileText className="w-4 h-4 mr-1.5" />
+                  PDF Export
+                </motion.div>
+              </motion.div>
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center">
                 <Link href="/builder">
-                  <Button 
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 text-lg font-semibold rounded-xl transform hover:scale-105 transition-all duration-300"
-                    onClick={() => {
-                      // Clear any URL hash before navigation
-                      if (window.location.hash) {
-                        window.history.replaceState(null, '', window.location.pathname);
-                      }
+                  <motion.div
+                    whileHover={{ 
+                      scale: 1.05,
+                      y: -2,
+                      boxShadow: "0 20px 25px -5px rgba(59, 130, 246, 0.3), 0 10px 10px -5px rgba(59, 130, 246, 0.2)"
+                    }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ 
+                      type: "spring", 
+                      stiffness: 400, 
+                      damping: 25 
                     }}
                   >
-                    <Sparkles className="mr-2 h-5 w-5" />
-                    Start Building Resume
-                  </Button>
+                    <Button 
+                      className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 hover:from-blue-700 hover:via-purple-700 hover:to-blue-800 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-0"
+                      onClick={() => {
+                        // Clear any URL hash before navigation
+                        if (window.location.hash) {
+                          window.history.replaceState(null, '', window.location.pathname);
+                        }
+                      }}
+                    >
+                      <Sparkles className="mr-2 h-5 w-5" />
+                      Start Building Resume
+                    </Button>
+                  </motion.div>
                 </Link>
                 <Link href="/ats-analysis">
-                  <Button variant="outline" className="border-2 border-slate-300 text-slate-700 px-8 py-4 text-lg font-semibold rounded-xl hover:bg-slate-50">
-                    <Target className="mr-2 h-5 w-5" />
-                    ATS Checker
-                  </Button>
+                  <motion.div
+                    whileHover={{ 
+                      scale: 1.05,
+                      y: -2,
+                      boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.05)"
+                    }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ 
+                      type: "spring", 
+                      stiffness: 400, 
+                      damping: 25 
+                    }}
+                  >
+                    <Button 
+                      variant="outline" 
+                      className="border-2 border-slate-300 hover:border-slate-400 text-slate-700 hover:text-slate-800 bg-white hover:bg-slate-50 px-8 py-4 text-lg font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
+                    >
+                      <Target className="mr-2 h-5 w-5" />
+                      ATS Checker
+                    </Button>
+                  </motion.div>
                 </Link>
               </div>
             </div>
@@ -127,59 +463,97 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 bg-white">
+      <section id="features" className={`py-20 transition-colors duration-300 ${
+        isDarkMode ? 'bg-slate-800' : 'bg-white'
+      }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-800 mb-4">
+            <h2 className={`text-3xl md:text-4xl font-bold mb-4 ${
+              isDarkMode ? 'text-white' : 'text-slate-800'
+            }`}>
               Why Choose ResumeBuilder Pro?
             </h2>
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+            <p className={`text-xl max-w-2xl mx-auto ${
+              isDarkMode ? 'text-slate-300' : 'text-slate-600'
+            }`}>
               Everything you need to create, customize, and download your perfect resume.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {/* Feature 1: Live Preview */}
-            <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-0 hover:shadow-lg transition-shadow group">
+            <Card className={`border-0 hover:shadow-lg transition-shadow group ${
+              isDarkMode 
+                ? 'bg-gradient-to-br from-blue-900/50 to-blue-800/50 hover:shadow-blue-500/10' 
+                : 'bg-gradient-to-br from-blue-50 to-blue-100'
+            }`}>
               <CardContent className="p-8">
                 <div className="bg-blue-600 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                   <Eye className="text-white h-8 w-8" />
                 </div>
-                <h3 className="text-xl font-semibold text-slate-800 mb-3">Live Preview</h3>
-                <p className="text-slate-600">See your resume update in real-time as you make changes. No more guessing how it looks!</p>
+                <h3 className={`text-xl font-semibold mb-3 ${
+                  isDarkMode ? 'text-white' : 'text-slate-800'
+                }`}>Live Preview</h3>
+                <p className={isDarkMode ? 'text-slate-300' : 'text-slate-600'}>
+                  See your resume update in real-time as you make changes. No more guessing how it looks!
+                </p>
               </CardContent>
             </Card>
 
             {/* Feature 2: PDF Export */}
-            <Card className="bg-gradient-to-br from-green-50 to-green-100 border-0 hover:shadow-lg transition-shadow group">
+            <Card className={`border-0 hover:shadow-lg transition-shadow group ${
+              isDarkMode 
+                ? 'bg-gradient-to-br from-green-900/50 to-green-800/50 hover:shadow-green-500/10' 
+                : 'bg-gradient-to-br from-green-50 to-green-100'
+            }`}>
               <CardContent className="p-8">
                 <div className="bg-green-600 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                   <FileText className="text-white h-8 w-8" />
                 </div>
-                <h3 className="text-xl font-semibold text-slate-800 mb-3">PDF Export</h3>
-                <p className="text-slate-600">Download your resume as a high-quality PDF ready for printing or sharing.</p>
+                <h3 className={`text-xl font-semibold mb-3 ${
+                  isDarkMode ? 'text-white' : 'text-slate-800'
+                }`}>PDF Export</h3>
+                <p className={isDarkMode ? 'text-slate-300' : 'text-slate-600'}>
+                  Download your resume as a high-quality PDF ready for printing or sharing.
+                </p>
               </CardContent>
             </Card>
 
             {/* Feature 3: 18 Professional Templates */}
-            <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-0 hover:shadow-lg transition-shadow group">
+            <Card className={`border-0 hover:shadow-lg transition-shadow group ${
+              isDarkMode 
+                ? 'bg-gradient-to-br from-purple-900/50 to-purple-800/50 hover:shadow-purple-500/10' 
+                : 'bg-gradient-to-br from-purple-50 to-purple-100'
+            }`}>
               <CardContent className="p-8">
                 <div className="bg-purple-600 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                   <Palette className="text-white h-8 w-8" />
                 </div>
-                <h3 className="text-xl font-semibold text-slate-800 mb-3">18 Professional Templates</h3>
-                <p className="text-slate-600">Choose from 6 custom templates plus 12 premium templates for every profession and style.</p>
+                <h3 className={`text-xl font-semibold mb-3 ${
+                  isDarkMode ? 'text-white' : 'text-slate-800'
+                }`}>18 Professional Templates</h3>
+                <p className={isDarkMode ? 'text-slate-300' : 'text-slate-600'}>
+                  Choose from 6 custom templates plus 12 premium templates for every profession and style.
+                </p>
               </CardContent>
             </Card>
 
             {/* Feature 4: ATS Checker */}
-            <Card className="bg-gradient-to-br from-amber-50 to-amber-100 border-0 hover:shadow-lg transition-shadow group">
+            <Card className={`border-0 hover:shadow-lg transition-shadow group ${
+              isDarkMode 
+                ? 'bg-gradient-to-br from-amber-900/50 to-amber-800/50 hover:shadow-amber-500/10' 
+                : 'bg-gradient-to-br from-amber-50 to-amber-100'
+            }`}>
               <CardContent className="p-8">
                 <div className="bg-amber-600 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                   <Target className="text-white h-8 w-8" />
                 </div>
-                <h3 className="text-xl font-semibold text-slate-800 mb-3">ATS Checker</h3>
-                <p className="text-slate-600">Get comprehensive ATS analysis with detailed scoring, keyword optimization, and professional recommendations to improve your resume's compatibility.</p>
+                <h3 className={`text-xl font-semibold mb-3 ${
+                  isDarkMode ? 'text-white' : 'text-slate-800'
+                }`}>ATS Checker</h3>
+                <p className={isDarkMode ? 'text-slate-300' : 'text-slate-600'}>
+                  Get comprehensive ATS analysis with detailed scoring, keyword optimization, and professional recommendations to improve your resume's compatibility.
+                </p>
               </CardContent>
             </Card>
           </div>
