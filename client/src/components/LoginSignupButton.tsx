@@ -69,7 +69,7 @@ export const LoginSignupButton: React.FC = () => {
           disabled 
           variant="outline" 
           size="sm"
-          className="bg-white border-slate-300 text-slate-700 font-medium shadow-sm hover:shadow-md transition-all duration-200"
+          className="bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-medium shadow-sm hover:shadow-md transition-all duration-200"
         >
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           Loading...
@@ -93,18 +93,18 @@ export const LoginSignupButton: React.FC = () => {
             variant="outline"
             size="sm"
             onClick={() => setShowDropdown(!showDropdown)}
-            className="bg-white hover:bg-slate-50 border-slate-300 hover:border-slate-400 text-slate-700 hover:text-slate-800 flex items-center gap-2 shadow-sm hover:shadow-md transition-all duration-200"
+            className="bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500 text-slate-700 dark:text-slate-200 hover:text-slate-800 dark:hover:text-white flex items-center gap-2 shadow-sm hover:shadow-md transition-all duration-200"
           >
             {shouldShowImage ? (
               <img
                 src={userProfile.avatar}
                 alt={userProfile.display_name || user.displayName || 'User'}
-                className="h-6 w-6 rounded-full object-cover ring-2 ring-slate-200"
+                className="h-6 w-6 rounded-full object-cover ring-2 ring-slate-200 dark:ring-slate-600"
                 onError={() => setImageError(true)}
                 onLoad={() => setImageError(false)}
               />
             ) : (
-              <div className="h-6 w-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center ring-2 ring-slate-200">
+              <div className="h-6 w-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center ring-2 ring-slate-200 dark:ring-slate-600">
                 <User className="h-3 w-3 text-white" />
               </div>
             )}
@@ -128,28 +128,28 @@ export const LoginSignupButton: React.FC = () => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-slate-200 z-50 overflow-hidden"
+              className="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden"
             >
               <div className="py-1">
-                <div className="px-4 py-3 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
+                <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700 bg-gradient-to-r from-slate-50 to-white dark:from-slate-700 dark:to-slate-800">
                   <div className="flex items-center space-x-3">
                     {shouldShowImage ? (
                       <img
                         src={userProfile.avatar}
                         alt={userProfile.display_name || user.displayName || 'User'}
-                        className="h-10 w-10 rounded-full object-cover ring-2 ring-slate-200"
+                        className="h-10 w-10 rounded-full object-cover ring-2 ring-slate-200 dark:ring-slate-600"
                         onError={() => setImageError(true)}
                       />
                     ) : (
-                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center ring-2 ring-slate-200">
+                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center ring-2 ring-slate-200 dark:ring-slate-600">
                         <User className="h-5 w-5 text-white" />
                       </div>
                     )}
                     <div className="min-w-0 flex-1">
-                      <div className="text-sm font-semibold text-slate-900 truncate">
+                      <div className="text-sm font-semibold text-slate-900 dark:text-white truncate">
                         {userProfile?.display_name || user.displayName || 'User'}
                       </div>
-                      <div className="text-xs text-slate-500 truncate">
+                      <div className="text-xs text-slate-500 dark:text-slate-400 truncate">
                         {user.email}
                       </div>
                     </div>
@@ -162,7 +162,7 @@ export const LoginSignupButton: React.FC = () => {
                     setShowDropdown(false);
                     signOut();
                   }}
-                  className="block w-full text-left px-4 py-3 text-sm text-slate-700 hover:text-slate-900 transition-colors duration-200"
+                  className="block w-full text-left px-4 py-3 text-sm text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors duration-200"
                 >
                   <LogOut className="inline mr-2 h-4 w-4" />
                   Sign Out
@@ -187,7 +187,7 @@ export const LoginSignupButton: React.FC = () => {
           variant="outline"
           size="sm"
           onClick={() => setShowDropdown(!showDropdown)}
-          className="bg-white hover:bg-slate-50 border-slate-300 hover:border-slate-400 text-slate-700 hover:text-slate-800 flex items-center gap-2 shadow-sm hover:shadow-md transition-all duration-200"
+          className="bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500 text-slate-700 dark:text-slate-200 hover:text-slate-800 dark:hover:text-white flex items-center gap-2 shadow-sm hover:shadow-md transition-all duration-200"
           disabled={isSigningIn}
         >
           {isSigningIn ? (
@@ -213,7 +213,7 @@ export const LoginSignupButton: React.FC = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-slate-200 z-50 overflow-hidden"
+            className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden"
           >
             <div className="py-1">
               {/* Quick Google Sign In */}
@@ -222,7 +222,7 @@ export const LoginSignupButton: React.FC = () => {
                 whileTap={{ scale: 0.98 }}
                 onClick={handleGoogleSignIn}
                 disabled={isSigningIn}
-                className="block w-full text-left px-4 py-3 text-sm text-slate-700 hover:text-slate-900 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed border-b border-slate-100"
+                className="block w-full text-left px-4 py-3 text-sm text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed border-b border-slate-100 dark:border-slate-700"
               >
                 {isSigningIn ? (
                   <>
@@ -258,10 +258,10 @@ export const LoginSignupButton: React.FC = () => {
               <div className="px-4 py-2">
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-slate-200" />
+                    <span className="w-full border-t border-slate-200 dark:border-slate-700" />
                   </div>
                   <div className="relative flex justify-center text-xs">
-                    <span className="bg-white px-2 text-slate-500">or</span>
+                    <span className="bg-white dark:bg-slate-800 px-2 text-slate-500 dark:text-slate-400">or</span>
                   </div>
                 </div>
               </div>
@@ -271,7 +271,7 @@ export const LoginSignupButton: React.FC = () => {
                 whileHover={{ backgroundColor: "#f1f5f9" }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleNavigateToLogin}
-                className="block w-full text-left px-4 py-3 text-sm text-slate-700 hover:text-slate-900 transition-colors duration-200"
+                className="block w-full text-left px-4 py-3 text-sm text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors duration-200"
               >
                 <LogIn className="inline mr-2 h-4 w-4" />
                 Sign In
@@ -282,7 +282,7 @@ export const LoginSignupButton: React.FC = () => {
                 whileHover={{ backgroundColor: "#f1f5f9" }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleNavigateToSignup}
-                className="block w-full text-left px-4 py-3 text-sm text-slate-700 hover:text-slate-900 transition-colors duration-200"
+                className="block w-full text-left px-4 py-3 text-sm text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors duration-200"
               >
                 <UserPlus className="inline mr-2 h-4 w-4" />
                 Create Account

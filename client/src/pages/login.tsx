@@ -123,7 +123,7 @@ const LoginPage: React.FC = () => {
           <Button
             variant="ghost"
             onClick={() => setLocation('/')}
-            className="text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground dark:text-slate-300 dark:hover:text-white"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Home
@@ -131,21 +131,21 @@ const LoginPage: React.FC = () => {
         </div>
         
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-foreground">Welcome back</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <h2 className="text-3xl font-bold text-foreground dark:text-white">Welcome back</h2>
+          <p className="mt-2 text-sm text-muted-foreground dark:text-slate-300">
             Sign in to your account to continue building your resume
           </p>
         </div>
 
-        <Card className="shadow-xl border-0 bg-background/80 backdrop-blur-sm dark:bg-background/90">
+        <Card className="shadow-xl border-0 bg-background/80 backdrop-blur-sm dark:bg-slate-800/90 dark:border-slate-700">
           <CardHeader>
-            <CardTitle className="text-center text-xl text-foreground">Sign In</CardTitle>
+            <CardTitle className="text-center text-xl text-foreground dark:text-white">Sign In</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Google Sign In Button */}
             <Button 
               onClick={handleGoogleSignIn} 
-              className="w-full bg-white hover:bg-gray-50 dark:bg-slate-800 dark:hover:bg-slate-700 border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-200 font-medium shadow-sm hover:shadow-md transition-all duration-200" 
+              className="w-full bg-white hover:bg-gray-50 dark:bg-slate-700 dark:hover:bg-slate-600 border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-200 font-medium shadow-sm hover:shadow-md transition-all duration-200" 
               variant="outline"
               disabled={isLoading}
             >
@@ -176,10 +176,10 @@ const LoginPage: React.FC = () => {
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border" />
+                <span className="w-full border-t border-border dark:border-slate-600" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
+                <span className="bg-background dark:bg-slate-800 px-2 text-muted-foreground dark:text-slate-400">
                   Or continue with email
                 </span>
               </div>
@@ -187,7 +187,7 @@ const LoginPage: React.FC = () => {
 
             {/* Error Message */}
             {error && (
-              <Alert variant="destructive">
+              <Alert variant="destructive" className="dark:bg-red-900/20 dark:border-red-800 dark:text-red-400">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
@@ -203,32 +203,32 @@ const LoginPage: React.FC = () => {
             {/* Email Login Form */}
             <form onSubmit={handleEmailLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-foreground">Email</Label>
+                <Label htmlFor="email" className="text-foreground dark:text-white">Email</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground dark:text-slate-400" />
                   <Input
                     id="email"
                     type="email"
                     placeholder="Enter your email"
                     value={formData.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
-                    className="pl-10 bg-background border-border text-foreground placeholder:text-muted-foreground"
+                    className="pl-10 bg-background dark:bg-slate-700 border-border dark:border-slate-600 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-slate-400 focus:border-blue-500 dark:focus:border-blue-400"
                     required
                     disabled={isLoading}
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-foreground">Password</Label>
+                <Label htmlFor="password" className="text-foreground dark:text-white">Password</Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground dark:text-slate-400" />
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                     value={formData.password}
                     onChange={(e) => handleInputChange('password', e.target.value)}
-                    className="pl-10 pr-10 bg-background border-border text-foreground placeholder:text-muted-foreground"
+                    className="pl-10 pr-10 bg-background dark:bg-slate-700 border-border dark:border-slate-600 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-slate-400 focus:border-blue-500 dark:focus:border-blue-400"
                     required
                     disabled={isLoading}
                   />
@@ -236,7 +236,7 @@ const LoginPage: React.FC = () => {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent dark:text-slate-400 dark:hover:text-white"
                     onClick={() => setShowPassword(!showPassword)}
                     disabled={isLoading}
                   >
@@ -256,7 +256,7 @@ const LoginPage: React.FC = () => {
                   variant="link"
                   onClick={() => setShowResetPassword(!showResetPassword)}
                   disabled={isLoading}
-                  className="text-sm text-primary hover:text-primary/80 p-0 h-auto"
+                  className="text-sm text-primary hover:text-primary/80 dark:text-blue-400 dark:hover:text-blue-300 p-0 h-auto"
                 >
                   Forgot your password?
                 </Button>
@@ -264,10 +264,10 @@ const LoginPage: React.FC = () => {
 
               {/* Password Reset Form */}
               {showResetPassword && (
-                <div className="space-y-4 p-4 border border-border rounded-lg bg-muted/50 dark:bg-muted/20">
+                <div className="space-y-4 p-4 border border-border dark:border-slate-600 rounded-lg bg-muted/50 dark:bg-slate-700/50">
                   <div className="text-center">
-                    <h3 className="font-semibold text-sm text-foreground">Reset Password</h3>
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <h3 className="font-semibold text-sm text-foreground dark:text-white">Reset Password</h3>
+                    <p className="text-xs text-muted-foreground dark:text-slate-400 mt-1">
                       Enter your email to receive a password reset link
                     </p>
                   </div>
@@ -295,6 +295,7 @@ const LoginPage: React.FC = () => {
                       onClick={() => setShowResetPassword(false)}
                       disabled={isLoading}
                       size="sm"
+                      className="dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600"
                     >
                       Cancel
                     </Button>
@@ -304,7 +305,7 @@ const LoginPage: React.FC = () => {
 
               <Button 
                 type="submit" 
-                className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700" 
+                className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white" 
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -317,9 +318,9 @@ const LoginPage: React.FC = () => {
             </form>
 
             <div className="text-center">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground dark:text-slate-400">
                 Don't have an account?{' '}
-                <Link href="/signup" className="text-primary hover:text-primary/80 font-medium">
+                <Link href="/signup" className="text-primary hover:text-primary/80 dark:text-blue-400 dark:hover:text-blue-300 font-medium">
                   Sign up
                 </Link>
               </p>

@@ -7,6 +7,7 @@ interface TileProps {
   y: number;
   size: number;
   color: string;
+  darkColor: string;
   delay: number;
   shape: 'square' | 'L' | 'rectangle';
 }
@@ -16,10 +17,17 @@ const AnimatedTileBackground: React.FC = () => {
   const tiles = useMemo(() => {
     const tileArray: TileProps[] = [];
     const colors = [
-      'from-blue-200/40 to-blue-300/30',
-      'from-blue-100/50 to-blue-200/40',
-      'from-cyan-200/40 to-blue-200/30',
-      'from-sky-200/40 to-blue-100/50'
+      'from-blue-50/80 to-blue-100/70',
+      'from-slate-50/90 to-blue-50/80',
+      'from-cyan-50/80 to-blue-50/70',
+      'from-sky-50/90 to-slate-50/80'
+    ];
+    
+    const darkColors = [
+      'from-blue-300/60 to-blue-400/50',
+      'from-blue-200/70 to-blue-300/60',
+      'from-cyan-300/60 to-blue-300/50',
+      'from-sky-300/60 to-blue-200/70'
     ];
 
     // Create irregular grid pattern
@@ -78,6 +86,7 @@ const AnimatedTileBackground: React.FC = () => {
         y: pos.y,
         size: pos.size,
         color: colors[colorIndex],
+        darkColor: darkColors[colorIndex],
         shape: pos.shape,
         delay: index * 0.1
       });
@@ -136,17 +145,17 @@ const AnimatedTileBackground: React.FC = () => {
   }), []);
 
   const getShapeClasses = (shape: 'square' | 'L' | 'rectangle', size: number) => {
-    const baseClasses = "absolute bg-gradient-to-br backdrop-blur-sm border border-blue-200/30 cursor-pointer";
+    const baseClasses = "absolute bg-gradient-to-br backdrop-blur-sm border cursor-pointer";
     
     switch (shape) {
       case 'square':
-        return `${baseClasses} rounded-lg`;
+        return `${baseClasses} rounded-lg border-blue-100/50 dark:border-blue-300/50`;
       case 'L':
-        return `${baseClasses} rounded-lg`;
+        return `${baseClasses} rounded-lg border-blue-100/50 dark:border-blue-300/50`;
       case 'rectangle':
-        return `${baseClasses} rounded-lg`;
+        return `${baseClasses} rounded-lg border-blue-100/50 dark:border-blue-300/50`;
       default:
-        return `${baseClasses} rounded-lg`;
+        return `${baseClasses} rounded-lg border-blue-100/50 dark:border-blue-300/50`;
     }
   };
 
@@ -160,7 +169,7 @@ const AnimatedTileBackground: React.FC = () => {
       {tiles.map((tile) => (
         <motion.div
           key={tile.id}
-          className={`${getShapeClasses(tile.shape, tile.size)} ${tile.color}`}
+          className={`${getShapeClasses(tile.shape, tile.size)} ${tile.color} dark:${tile.darkColor}`}
           style={{
             left: tile.x,
             top: tile.y,

@@ -8,6 +8,8 @@ import AnimatedResume from "@/components/AnimatedResume";
 import AnimatedTileBackground from "@/components/AnimatedTileBackground";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
+import { useTheme } from "@/hooks/useTheme";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function Home() {
   const [typedText, setTypedText] = useState('');
@@ -15,7 +17,7 @@ export default function Home() {
   const [isTyping, setIsTyping] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { resolvedTheme } = useTheme();
 
   const fullText = "Your story deserves a standout resume — powered by AI.";
 
@@ -59,31 +61,14 @@ export default function Home() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Handle dark mode toggle
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-    if (!isDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  };
-
   const isActiveLink = (section: string) => activeSection === section;
+  const isDarkMode = resolvedTheme === 'dark';
 
   return (
-    <div className={`min-h-screen overflow-x-hidden relative transition-colors duration-300 ${
-      isDarkMode 
-        ? 'bg-slate-900 text-white' 
-        : 'bg-slate-50'
-    }`}>
+    <div className="min-h-screen overflow-x-hidden relative transition-colors duration-300 bg-background text-foreground">
       {/* Navigation */}
       <motion.nav 
-        className={`fixed top-0 w-full z-50 border-b transition-all duration-300 ${
-          isDarkMode 
-            ? 'bg-slate-800/80 backdrop-blur-md border-slate-700' 
-            : 'bg-white/80 backdrop-blur-md border-slate-200'
-        } ${isScrolled ? 'shadow-md' : ''}`}
+        className={`fixed top-0 w-full z-50 border-b transition-all duration-300 bg-background/80 backdrop-blur-md border-border ${isScrolled ? 'shadow-md' : ''}`}
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ 
@@ -117,10 +102,10 @@ export default function Home() {
                   stiffness: 200
                 }}
               >
-                <FileText className={`h-8 w-8 mr-3 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
+                <FileText className="h-8 w-8 mr-3 text-primary" />
               </motion.div>
               <motion.span 
-                className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-slate-800'}`}
+                className="text-xl font-bold text-foreground"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ 
@@ -139,8 +124,8 @@ export default function Home() {
                 href="#features" 
                 className={`relative transition-colors duration-200 ${
                   isActiveLink('features') 
-                    ? (isDarkMode ? 'text-blue-400 font-semibold' : 'text-blue-600 font-semibold')
-                    : (isDarkMode ? 'text-slate-300 hover:text-blue-400' : 'text-slate-600 hover:text-blue-600')
+                    ? 'text-primary font-semibold'
+                    : 'text-muted-foreground hover:text-primary'
                 }`}
                 initial={{ y: -20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
@@ -155,7 +140,7 @@ export default function Home() {
                 Features
                 {isActiveLink('features') && (
                   <motion.div
-                    className={`absolute -bottom-1 left-0 right-0 h-0.5 ${isDarkMode ? 'bg-blue-400' : 'bg-blue-600'}`}
+                    className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary"
                     layoutId="activeTab"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -169,8 +154,8 @@ export default function Home() {
                 href="#templates" 
                 className={`relative transition-colors duration-200 ${
                   isActiveLink('templates') 
-                    ? (isDarkMode ? 'text-blue-400 font-semibold' : 'text-blue-600 font-semibold')
-                    : (isDarkMode ? 'text-slate-300 hover:text-blue-400' : 'text-slate-600 hover:text-blue-600')
+                    ? 'text-primary font-semibold'
+                    : 'text-muted-foreground hover:text-primary'
                 }`}
                 initial={{ y: -20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
@@ -185,7 +170,7 @@ export default function Home() {
                 Templates
                 {isActiveLink('templates') && (
                   <motion.div
-                    className={`absolute -bottom-1 left-0 right-0 h-0.5 ${isDarkMode ? 'bg-blue-400' : 'bg-blue-600'}`}
+                    className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary"
                     layoutId="activeTab"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -197,7 +182,7 @@ export default function Home() {
               {/* ATS Analysis Link */}
               <Link href="/ats-analysis">
                 <motion.a 
-                  className={`transition-colors ${isDarkMode ? 'text-slate-300 hover:text-blue-400' : 'text-slate-600 hover:text-blue-600'}`}
+                  className="transition-colors text-muted-foreground hover:text-primary"
                   initial={{ y: -20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ 
@@ -212,16 +197,8 @@ export default function Home() {
                 </motion.a>
               </Link>
               
-
-              
-              {/* Dark Mode Toggle */}
-              <motion.button
-                onClick={toggleDarkMode}
-                className={`p-2 rounded-lg transition-all duration-200 ${
-                  isDarkMode 
-                    ? 'bg-slate-700 hover:bg-slate-600 text-yellow-400' 
-                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                }`}
+              {/* Theme Toggle */}
+              <motion.div
                 initial={{ scale: 0, rotate: -180 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ 
@@ -230,22 +207,9 @@ export default function Home() {
                   type: "spring",
                   stiffness: 200
                 }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
               >
-                <motion.div
-                  initial={false}
-                  animate={{ rotate: isDarkMode ? 180 : 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  {isDarkMode ? (
-                    <Sun className="h-5 w-5" />
-                  ) : (
-                    <Moon className="h-5 w-5" />
-                  )}
-                </motion.div>
-              </motion.button>
+                <ThemeToggle />
+              </motion.div>
               
               {/* Login/Signup Button */}
               <motion.div
@@ -305,9 +269,7 @@ export default function Home() {
             {/* Left Column - Text Content */}
             <div className="animate-fadeInUp text-center lg:text-left">
                               <motion.h1 
-                  className={`text-4xl md:text-6xl font-bold mb-6 ${
-                    isDarkMode ? 'text-white' : 'text-slate-800'
-                  }`}
+                                  className="text-4xl md:text-6xl font-bold mb-6 text-foreground"
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: 0.2 }}
@@ -317,9 +279,7 @@ export default function Home() {
               </span>
                 </motion.h1>
               <motion.p 
-                className={`text-xl md:text-2xl mb-8 max-w-2xl ${
-                  isDarkMode ? 'text-slate-300' : 'text-slate-600'
-                }`}
+                className="text-xl md:text-2xl mb-8 max-w-2xl text-muted-foreground"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.4 }}
@@ -335,11 +295,7 @@ export default function Home() {
                 transition={{ duration: 0.8, delay: 0.6 }}
               >
                 <motion.div
-                  className={`flex items-center px-3 py-1.5 rounded-full text-sm font-medium border ${
-                    isDarkMode 
-                      ? 'bg-blue-900/50 text-blue-300 border-blue-700' 
-                      : 'bg-blue-50 text-blue-700 border-blue-200'
-                  }`}
+                  className="flex items-center px-3 py-1.5 rounded-full text-sm font-medium border bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/50 dark:text-blue-300 dark:border-blue-700"
                   whileHover={{ scale: 1.05 }}
                   transition={{ type: "spring", stiffness: 400 }}
                 >
@@ -347,11 +303,7 @@ export default function Home() {
                   ATS-Friendly
                 </motion.div>
                 <motion.div
-                  className={`flex items-center px-3 py-1.5 rounded-full text-sm font-medium border ${
-                    isDarkMode 
-                      ? 'bg-green-900/50 text-green-300 border-green-700' 
-                      : 'bg-green-50 text-green-700 border-green-200'
-                  }`}
+                  className="flex items-center px-3 py-1.5 rounded-full text-sm font-medium border bg-green-50 text-green-700 border-green-200 dark:bg-green-900/50 dark:text-green-300 dark:border-green-700"
                   whileHover={{ scale: 1.05 }}
                   transition={{ type: "spring", stiffness: 400 }}
                 >
@@ -359,11 +311,7 @@ export default function Home() {
                   Live Preview
                 </motion.div>
                 <motion.div
-                  className={`flex items-center px-3 py-1.5 rounded-full text-sm font-medium border ${
-                    isDarkMode 
-                      ? 'bg-purple-900/50 text-purple-300 border-purple-700' 
-                      : 'bg-purple-50 text-purple-700 border-purple-200'
-                  }`}
+                  className="flex items-center px-3 py-1.5 rounded-full text-sm font-medium border bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/50 dark:text-purple-300 dark:border-purple-700"
                   whileHover={{ scale: 1.05 }}
                   transition={{ type: "spring", stiffness: 400 }}
                 >
@@ -371,11 +319,7 @@ export default function Home() {
                   AI-Powered
                 </motion.div>
                 <motion.div
-                  className={`flex items-center px-3 py-1.5 rounded-full text-sm font-medium border ${
-                    isDarkMode 
-                      ? 'bg-orange-900/50 text-orange-300 border-orange-700' 
-                      : 'bg-orange-50 text-orange-700 border-orange-200'
-                  }`}
+                  className="flex items-center px-3 py-1.5 rounded-full text-sm font-medium border bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/50 dark:text-orange-300 dark:border-orange-700"
                   whileHover={{ scale: 1.05 }}
                   transition={{ type: "spring", stiffness: 400 }}
                 >
@@ -466,76 +410,52 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {/* Feature 1: Live Preview */}
-            <Card className={`border-0 hover:shadow-lg transition-shadow group ${
-              isDarkMode 
-                ? 'bg-gradient-to-br from-blue-900/50 to-blue-800/50 hover:shadow-blue-500/10' 
-                : 'bg-gradient-to-br from-blue-50 to-blue-100'
-            }`}>
+            <Card className="border-0 hover:shadow-lg transition-shadow group bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/50 dark:to-blue-800/50 dark:hover:shadow-blue-500/10">
               <CardContent className="p-8">
                 <div className="bg-blue-600 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                   <Eye className="text-white h-8 w-8" />
                 </div>
-                <h3 className={`text-xl font-semibold mb-3 ${
-                  isDarkMode ? 'text-white' : 'text-slate-800'
-                }`}>Live Preview</h3>
-                <p className={isDarkMode ? 'text-slate-300' : 'text-slate-600'}>
+                <h3 className="text-xl font-semibold mb-3 text-foreground">Live Preview</h3>
+                <p className="text-muted-foreground">
                   See your resume update in real-time as you make changes. No more guessing how it looks!
                 </p>
               </CardContent>
             </Card>
 
             {/* Feature 2: PDF Export */}
-            <Card className={`border-0 hover:shadow-lg transition-shadow group ${
-              isDarkMode 
-                ? 'bg-gradient-to-br from-green-900/50 to-green-800/50 hover:shadow-green-500/10' 
-                : 'bg-gradient-to-br from-green-50 to-green-100'
-            }`}>
+            <Card className="border-0 hover:shadow-lg transition-shadow group bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/50 dark:to-green-800/50 dark:hover:shadow-green-500/10">
               <CardContent className="p-8">
                 <div className="bg-green-600 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                   <FileText className="text-white h-8 w-8" />
                 </div>
-                <h3 className={`text-xl font-semibold mb-3 ${
-                  isDarkMode ? 'text-white' : 'text-slate-800'
-                }`}>PDF Export</h3>
-                <p className={isDarkMode ? 'text-slate-300' : 'text-slate-600'}>
+                <h3 className="text-xl font-semibold mb-3 text-foreground">PDF Export</h3>
+                <p className="text-muted-foreground">
                   Download your resume as a high-quality PDF ready for printing or sharing.
                 </p>
               </CardContent>
             </Card>
 
             {/* Feature 3: 18 Professional Templates */}
-            <Card className={`border-0 hover:shadow-lg transition-shadow group ${
-              isDarkMode 
-                ? 'bg-gradient-to-br from-purple-900/50 to-purple-800/50 hover:shadow-purple-500/10' 
-                : 'bg-gradient-to-br from-purple-50 to-purple-100'
-            }`}>
+            <Card className="border-0 hover:shadow-lg transition-shadow group bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/50 dark:to-purple-800/50 dark:hover:shadow-purple-500/10">
               <CardContent className="p-8">
                 <div className="bg-purple-600 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                   <Palette className="text-white h-8 w-8" />
                 </div>
-                <h3 className={`text-xl font-semibold mb-3 ${
-                  isDarkMode ? 'text-white' : 'text-slate-800'
-                }`}>18 Professional Templates</h3>
-                <p className={isDarkMode ? 'text-slate-300' : 'text-slate-600'}>
+                <h3 className="text-xl font-semibold mb-3 text-foreground">18 Professional Templates</h3>
+                <p className="text-muted-foreground">
                   Choose from 6 custom templates plus 12 premium templates for every profession and style.
                 </p>
               </CardContent>
             </Card>
 
             {/* Feature 4: ATS Checker */}
-            <Card className={`border-0 hover:shadow-lg transition-shadow group ${
-              isDarkMode 
-                ? 'bg-gradient-to-br from-amber-900/50 to-amber-800/50 hover:shadow-amber-500/10' 
-                : 'bg-gradient-to-br from-amber-50 to-amber-100'
-            }`}>
+            <Card className="border-0 hover:shadow-lg transition-shadow group bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/50 dark:to-amber-800/50 dark:hover:shadow-amber-500/10">
               <CardContent className="p-8">
                 <div className="bg-amber-600 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                   <Target className="text-white h-8 w-8" />
                 </div>
-                <h3 className={`text-xl font-semibold mb-3 ${
-                  isDarkMode ? 'text-white' : 'text-slate-800'
-                }`}>ATS Checker</h3>
-                <p className={isDarkMode ? 'text-slate-300' : 'text-slate-600'}>
+                <h3 className="text-xl font-semibold mb-3 text-foreground">ATS Checker</h3>
+                <p className="text-muted-foreground">
                   Get comprehensive ATS analysis with detailed scoring, keyword optimization, and professional recommendations to improve your resume's compatibility.
                 </p>
               </CardContent>
@@ -545,20 +465,20 @@ export default function Home() {
       </section>
 
       {/* Templates Preview Section */}
-      <section id="templates" className="py-20 bg-slate-50">
+      <section id="templates" className="py-20 bg-muted/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-800 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               Professional Templates
             </h2>
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Choose from our collection of ATS-friendly, professionally designed templates.
             </p>
           </div>
 
           {/* Custom Templates Section */}
           <div className="mb-16">
-            <h3 className="text-2xl font-bold text-slate-800 mb-8 text-center">
+            <h3 className="text-2xl font-bold text-foreground mb-8 text-center">
               ResumeGenius Templates
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
