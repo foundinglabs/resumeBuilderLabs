@@ -8,7 +8,8 @@ const ANIMATION_CONFIG = {
   TYPEWRITER_DELAY: 200,
   NAME_TYPE_SPEED: 80,
   SUMMARY_TYPE_SPEED: 40,
-  FADE_TRANSITION: { duration: 0.5, delay: 0.2 }
+  FADE_TRANSITION: { duration: 0.5, delay: 0.2 },
+  HOVER_TRANSITION: { duration: 0.3, ease: "easeOut" }
 } as const;
 
 const nameData = [
@@ -31,6 +32,7 @@ const AnimatedResume: React.FC = () => {
   const [typedName, setTypedName] = useState('');
   const [typedSummary, setTypedSummary] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const nameIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const summaryIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -93,6 +95,42 @@ const AnimatedResume: React.FC = () => {
     typeWriter(summaryData[currentSummary], setTypedSummary, ANIMATION_CONFIG.SUMMARY_TYPE_SPEED);
   }, [currentSummary, typeWriter]);
 
+  // Hover handlers
+  const handleHoverStart = useCallback(() => setIsHovered(true), []);
+  const handleHoverEnd = useCallback(() => setIsHovered(false), []);
+
+  // Beautiful hover variants
+  const resumeHoverVariants = useMemo(() => ({
+    initial: { scale: 1, y: 0 },
+    hover: { 
+      scale: 1.02, 
+      y: -5,
+      transition: ANIMATION_CONFIG.HOVER_TRANSITION
+    }
+  }), []);
+
+  const glowVariants = useMemo(() => ({
+    initial: { opacity: 0, scale: 0.8 },
+    hover: { 
+      opacity: 1, 
+      scale: 1,
+      transition: { duration: 0.4, ease: "easeOut" }
+    }
+  }), []);
+
+  const floatingHoverVariants = useMemo(() => ({
+    initial: { y: 0, scale: 1 },
+    hover: { 
+      y: [-2, 2, -2], 
+      scale: [1, 1.1, 1],
+      transition: { 
+        duration: 2, 
+        repeat: Infinity, 
+        ease: "easeInOut" 
+      }
+    }
+  }), []);
+
   const cursorVariants = useMemo(() => ({
     blink: {
       opacity: [1, 0, 1],
@@ -152,14 +190,27 @@ const AnimatedResume: React.FC = () => {
   return (
     <div className="relative w-full max-w-6xl mx-auto mt-8 px-4 sm:px-6 lg:px-8">
       {/* Resume Paper */}
-      <div
-        className="bg-white rounded-2xl shadow-2xl relative overflow-hidden w-full"
+      <motion.div
+        className="bg-white rounded-2xl shadow-2xl relative overflow-hidden w-full cursor-pointer"
         style={{
           background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
           border: '1px solid #e2e8f0'
         }}
+        variants={resumeHoverVariants}
+        initial="initial"
+        whileHover="hover"
+        onHoverStart={handleHoverStart}
+        onHoverEnd={handleHoverEnd}
       >
-        {/* Background Elements */}
+        {/* Beautiful Hover Glow */}
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-r from-blue-400/10 via-purple-400/10 to-pink-400/10 rounded-2xl"
+          variants={glowVariants}
+          initial="initial"
+          animate={isHovered ? "hover" : "initial"}
+        />
+
+        {/* Enhanced Background Elements */}
         <motion.div
           className="absolute top-4 right-4 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-blue-200 to-purple-200 rounded-full opacity-30"
           variants={backgroundAnimationVariants}
@@ -318,7 +369,7 @@ const AnimatedResume: React.FC = () => {
           </motion.div>
         </div>
 
-        {/* Floating Elements */}
+        {/* Enhanced Floating Elements */}
         <motion.div
           className="absolute top-4 sm:top-6 right-4 sm:right-6 w-2 h-2 sm:w-3 sm:h-3 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full"
           variants={floatingAnimationVariants}
@@ -329,7 +380,19 @@ const AnimatedResume: React.FC = () => {
           variants={floatingAnimationVariants}
           animate="slide"
         />
-      </div>
+
+        {/* New Hover-Enhanced Floating Elements */}
+        <motion.div
+          className="absolute top-8 sm:top-10 left-8 sm:left-10 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gradient-to-r from-pink-400 to-rose-400 rounded-full"
+          variants={floatingHoverVariants}
+          animate={isHovered ? "hover" : "initial"}
+        />
+        <motion.div
+          className="absolute bottom-8 sm:bottom-10 right-8 sm:right-10 w-1 h-1 sm:w-1.5 sm:h-1.5 bg-gradient-to-r from-cyan-400 to-blue-400 rounded-full"
+          variants={floatingHoverVariants}
+          animate={isHovered ? "hover" : "initial"}
+        />
+      </motion.div>
 
       {/* Decorative Elements */}
       <motion.div
