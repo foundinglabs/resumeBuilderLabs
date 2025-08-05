@@ -314,7 +314,7 @@ export default function Home() {
                 >
                   <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 dark:from-blue-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
                     {typedText}
-                  </span>
+              </span>
                 </motion.h1>
               <motion.p 
                 className={`text-xl md:text-2xl mb-8 max-w-2xl ${
