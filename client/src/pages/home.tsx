@@ -5,11 +5,32 @@ import { Eye, FileText, Palette, Sparkles, Edit, Check, Target, Star } from "luc
 import { allTemplates, getCustomTemplates, getReactiveResumeTemplates, getTemplatePreviewUrl } from "@/utils/template-integration";
 import { LoginSignupButton } from "@/components/LoginSignupButton";
 import AnimatedResume from "@/components/AnimatedResume";
+import AnimatedTileBackground from "@/components/AnimatedTileBackground";
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 
 export default function Home() {
+  const [typedText, setTypedText] = useState('');
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isTyping, setIsTyping] = useState(true);
+
+  const fullText = "Your story deserves a standout resume — powered by AI.";
+
+  useEffect(() => {
+    if (currentIndex < fullText.length) {
+      const timeout = setTimeout(() => {
+        setTypedText(fullText.slice(0, currentIndex + 1));
+        setCurrentIndex(currentIndex + 1);
+      }, 50); // Speed of typing
+
+      return () => clearTimeout(timeout);
+    } else {
+      setIsTyping(false);
+    }
+  }, [currentIndex, fullText]);
+
   return (
-    <div className="min-h-screen bg-slate-50 overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 overflow-x-hidden relative">
       {/* Navigation */}
       <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -48,13 +69,9 @@ export default function Home() {
 
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
-        {/* Animated Background */}
-        <div className="absolute inset-0">
-          <div className="absolute top-0 -left-4 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-          <div className="absolute top-0 -right-4 w-72 h-72 bg-yellow-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-          <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
-        </div>
-
+        {/* Animated Tile Background - Only in Hero Section */}
+        <AnimatedTileBackground />
+        
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Left Column - Text Content */}
@@ -65,20 +82,9 @@ export default function Home() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
               >
-                Create Your Perfect{" "}
-                <motion.span 
-                  className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600"
-                  animate={{
-                    backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"]
-                  }}
-                  transition={{
-                    duration: 3,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                >
-                  Resume
-                </motion.span>
+                <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  {typedText}
+                </span>
               </motion.h1>
               <motion.p 
                 className="text-xl md:text-2xl text-slate-600 mb-8 max-w-2xl"
@@ -113,7 +119,7 @@ export default function Home() {
             </div>
             
             {/* Right Column - Animated Resume */}
-            <div className="flex justify-center lg:justify-end">
+            <div className="flex justify-end">
               <AnimatedResume />
             </div>
           </div>
