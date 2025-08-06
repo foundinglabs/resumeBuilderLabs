@@ -21,10 +21,10 @@ const AnimatedTileBackground: React.FC<AnimatedTileBackgroundProps> = ({ showInD
   const tiles = useMemo(() => {
     const tileArray: TileProps[] = [];
     const colors = [
-      'from-blue-50/80 to-blue-100/70',
-      'from-slate-50/90 to-blue-50/80',
-      'from-cyan-50/80 to-blue-50/70',
-      'from-sky-50/90 to-slate-50/80'
+      'from-blue-50/30 to-blue-100/25',
+      'from-slate-50/35 to-blue-50/30',
+      'from-cyan-50/30 to-blue-50/25',
+      'from-sky-50/35 to-slate-50/30'
     ];
     
     const darkColors = [
