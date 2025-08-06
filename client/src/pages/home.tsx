@@ -68,7 +68,7 @@ export default function Home() {
     <div className="min-h-screen overflow-x-hidden relative transition-colors duration-300 bg-background text-foreground">
       {/* Navigation */}
       <motion.nav 
-        className={`fixed top-0 w-full z-50 border-b transition-all duration-300 bg-background/80 backdrop-blur-md border-border ${isScrolled ? 'shadow-md' : ''}`}
+        className={`fixed top-0 w-full z-50 border-b transition-all duration-300 bg-background border-border ${isScrolled ? 'shadow-md' : ''}`}
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ 
