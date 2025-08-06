@@ -22,14 +22,14 @@ export const TEMPLATE_CONFIG: TemplateConfig[] = [
   {
     id: "bronzor",
     name: "Bronzor",
-    enabled: true,
+    enabled: false,
     category: 'reactive-resume',
     description: "Minimalist design with strong visual hierarchy"
   },
   {
     id: "chikorita",
     name: "Chikorita",
-    enabled: true,
+    enabled: false,
     category: 'reactive-resume',
     description: "Fresh, vibrant design perfect for creative professionals"
   },
@@ -64,7 +64,7 @@ export const TEMPLATE_CONFIG: TemplateConfig[] = [
   {
     id: "leafish",
     name: "Leafish",
-    enabled: true,
+    enabled: false,
     category: 'reactive-resume',
     description: "Modern and clean with excellent readability"
   },
@@ -92,7 +92,7 @@ export const TEMPLATE_CONFIG: TemplateConfig[] = [
   {
     id: "rhyhorn",
     name: "Rhyhorn",
-    enabled: true,
+    enabled: false,
     category: 'reactive-resume',
     description: "Bold and structured professional layout"
   },
@@ -135,7 +135,7 @@ export const TEMPLATE_CONFIG: TemplateConfig[] = [
   {
     id: "elegant",
     name: "Elegant",
-    enabled: true,
+    enabled: false,
     category: 'custom',
     description: "Minimalist, refined, and highly readable"
   }

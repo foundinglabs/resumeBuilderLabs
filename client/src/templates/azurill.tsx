@@ -440,12 +440,14 @@ const Languages = () => {
 const isGitHubUrl = (url: string | URL | undefined): boolean => {
   if (!url) return false;
   const urlString = typeof url === 'string' ? url : url.href;
+  if (typeof urlString !== 'string') return false;
   return urlString.toLowerCase().includes('github.com');
 };
 
 const isLiveUrl = (url: string | URL | undefined): boolean => {
   if (!url) return false;
   const urlString = typeof url === 'string' ? url : url.href;
+  if (typeof urlString !== 'string') return false;
   return !isGitHubUrl(urlString) && (urlString.toLowerCase().includes('http://') || urlString.toLowerCase().includes('https://'));
 };
 

@@ -107,7 +107,7 @@ const AnimatedTileBackground: React.FC<AnimatedTileBackgroundProps> = ({ showInD
       y: 20
     },
     animate: { 
-      opacity: 0.6, 
+      opacity: 0.25, 
       scale: 1,
       rotate: 0,
       y: 0,
@@ -118,7 +118,7 @@ const AnimatedTileBackground: React.FC<AnimatedTileBackgroundProps> = ({ showInD
       }
     },
     hover: { 
-      opacity: 0.8, 
+      opacity: 0.4, 
       scale: 1.1,
       rotate: 3,
       y: -5,

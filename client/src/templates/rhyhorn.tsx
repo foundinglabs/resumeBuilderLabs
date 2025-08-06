@@ -488,12 +488,18 @@ const Languages = () => {
   );
 };
 
-const isGitHubUrl = (url: string): boolean => {
-  return url.toLowerCase().includes('github.com');
+const isGitHubUrl = (url: string | URL | undefined): boolean => {
+  if (!url) return false;
+  const urlString = typeof url === 'string' ? url : url.href;
+  if (typeof urlString !== 'string') return false;
+  return urlString.toLowerCase().includes('github.com');
 };
 
-const isLiveUrl = (url: string): boolean => {
-  return !isGitHubUrl(url) && (url.toLowerCase().includes('http://') || url.toLowerCase().includes('https://'));
+const isLiveUrl = (url: string | URL | undefined): boolean => {
+  if (!url) return false;
+  const urlString = typeof url === 'string' ? url : url.href;
+  if (typeof urlString !== 'string') return false;
+  return !isGitHubUrl(urlString) && (urlString.toLowerCase().includes('http://') || urlString.toLowerCase().includes('https://'));
 };
 
 const Projects = () => {
@@ -509,17 +515,17 @@ const Projects = () => {
                 <div className="font-bold">{item.name}</div>
                 <div>{item.description}</div>
                 <div className="flex items-center gap-2 mt-2">
-                  {isGitHubUrl(item.url.href) ? (
-                    <a
-                      href={item.url.href}
-                      target="_blank"
-                      rel="noreferrer noopener nofollow"
-                      className="flex items-center gap-2 text-blue-600 hover:underline"
-                    >
-                      <BrandIcon slug="github" />
-                      <span>GitHub</span>
-                    </a>
-                  ) : isLiveUrl(item.url.href) ? (
+                                  {isGitHubUrl(item.url) ? (
+                  <a
+                    href={item.url.href}
+                    target="_blank"
+                    rel="noreferrer noopener nofollow"
+                    className="flex items-center gap-2 text-blue-600 hover:underline"
+                  >
+                    <BrandIcon slug="github" />
+                    <span>GitHub</span>
+                  </a>
+                ) : isLiveUrl(item.url) ? (
                     <a
                       href={item.url.href}
                       target="_blank"
