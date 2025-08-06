@@ -572,9 +572,10 @@ export default function Home() {
                   PDF Export
                 </motion.div>
               </motion.div>
-              <div className="flex flex-row gap-4 justify-center lg:justify-start items-center">
-              <Link href="/builder">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start items-center">
+              <Link href="/builder" className="w-full sm:w-auto">
                   <motion.div
+                    className="w-full sm:w-auto"
                     whileHover={{ 
                       scale: 1.05,
                       y: -2,
@@ -588,7 +589,7 @@ export default function Home() {
                     }}
                   >
                 <Button 
-                      className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 hover:from-blue-700 hover:via-purple-700 hover:to-blue-800 text-white px-8 py-6 text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 border-0"
+                      className="w-full sm:w-auto bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 hover:from-blue-700 hover:via-purple-700 hover:to-blue-800 text-white px-4 sm:px-6 md:px-8 py-3 sm:py-4 md:py-6 text-base sm:text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 border-0"
                   onClick={() => {
                     // Clear any URL hash before navigation
                     if (window.location.hash) {
@@ -596,13 +597,15 @@ export default function Home() {
                     }
                   }}
                 >
-                  <Sparkles className="mr-2 h-5 w-5" />
-                  Start Building Resume
+                  <Sparkles className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                  <span className="hidden sm:inline">Start Building Resume</span>
+                  <span className="sm:hidden">Start Building</span>
                 </Button>
                   </motion.div>
               </Link>
-              <Link href="/ats-analysis">
+              <Link href="/ats-analysis" className="w-full sm:w-auto">
                   <motion.div
+                    className="w-full sm:w-auto"
                     whileHover={{ 
                       scale: 1.05,
                       y: -2,
@@ -617,10 +620,11 @@ export default function Home() {
                   >
                     <Button 
                       variant="outline" 
-                      className="border-2 border-slate-300 hover:border-slate-400 text-slate-700 hover:text-slate-800 bg-white hover:bg-slate-50 px-8 py-6 text-lg font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300"
+                      className="w-full sm:w-auto border-2 border-slate-300 hover:border-slate-400 text-slate-700 hover:text-slate-800 bg-white hover:bg-slate-50 px-4 sm:px-6 md:px-8 py-3 sm:py-4 md:py-6 text-base sm:text-lg font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300"
                     >
-                  <Target className="mr-2 h-5 w-5" />
-                  ATS Checker
+                  <Target className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                  <span className="hidden sm:inline">ATS Checker</span>
+                  <span className="sm:hidden">ATS Check</span>
                 </Button>
                   </motion.div>
               </Link>
