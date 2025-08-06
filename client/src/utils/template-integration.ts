@@ -21,7 +21,8 @@ export const customTemplates: TemplateInfo[] = [
     description: "Traditional, clean, and ATS-friendly layout.",
     color: "bg-slate-600",
     hoverColor: "hover:bg-slate-700",
-    isReactiveResume: false
+    isReactiveResume: false,
+    previewImage: "/templates/jpg/classic.jpg"
   },
   {
     id: "modern",
@@ -38,6 +39,7 @@ export const customTemplates: TemplateInfo[] = [
     color: "bg-pink-600",
     hoverColor: "hover:bg-pink-700",
     isReactiveResume: false
+    ,previewImage: "/templates/jpg/stylish.jpg"
   },
   {
     id: "compact",
@@ -45,7 +47,7 @@ export const customTemplates: TemplateInfo[] = [
     description: "Space-efficient, single-column layout for concise resumes.",
     color: "bg-emerald-600",
     hoverColor: "hover:bg-emerald-700",
-    isReactiveResume: false
+     previewImage: "/templates/jpg/compact.jpg"
   },
   {
     id: "overleaf",
@@ -54,6 +56,7 @@ export const customTemplates: TemplateInfo[] = [
     color: "bg-yellow-500",
     hoverColor: "hover:bg-yellow-600",
     isReactiveResume: false
+    ,previewImage: "/templates/jpg/overleaf.jpg"
   },
   {
     id: "elegant",

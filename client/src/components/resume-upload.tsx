@@ -304,10 +304,10 @@ export function ResumeUpload({ onParseComplete, onError }: ResumeUploadProps) {
   }
 
   return (
-    <Card className="border-2 border-dashed border-slate-300 hover:border-blue-400 transition-colors">
+    <Card className="border-2 border-dashed border-slate-300 hover:border-purple-400 transition-colors bg-background dark:bg-slate-700">
       <CardContent className="p-8">
         <div
-          className={`text-center ${isDragging ? 'bg-blue-50 border-blue-300' : ''} 
+          className={`text-center ${isDragging ? 'bg-purple-50 dark:bg-purple-900/20 border-purple-300 dark:border-purple-400' : 'bg-background dark:bg-slate-700'} 
             border-2 border-dashed border-transparent rounded-lg p-8 transition-all`}
           onDragOver={(e) => {
             e.preventDefault();
@@ -318,12 +318,12 @@ export function ResumeUpload({ onParseComplete, onError }: ResumeUploadProps) {
         >
           {isProcessing ? (
             <div className="space-y-4">
-              <div className="animate-spin mx-auto w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full"></div>
+              <div className="animate-spin mx-auto w-12 h-12 border-4 border-purple-600 border-t-transparent rounded-full"></div>
               <div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-2">
+                <h3 className="text-lg font-semibold text-slate-800 dark:text-white mb-2">
                   Processing Resume...
                 </h3>
-                <p className="text-slate-600">
+                <p className="text-slate-600 dark:text-slate-300">
                   Extracting text and analyzing content from {uploadedFile?.name}
                 </p>
               </div>
@@ -331,16 +331,16 @@ export function ResumeUpload({ onParseComplete, onError }: ResumeUploadProps) {
           ) : (
             <div className="space-y-4">
               <div className="flex justify-center">
-                <div className="bg-blue-100 p-4 rounded-full">
-                  <Upload className="text-blue-600" size={32} />
+                <div className="bg-purple-100 dark:bg-purple-900/20 p-4 rounded-full">
+                  <Upload className="text-purple-600 dark:text-purple-400" size={32} />
                 </div>
               </div>
               
               <div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-2">
+                <h3 className="text-lg font-semibold text-slate-800 dark:text-white mb-2">
                   Upload Your Resume
                 </h3>
-                <p className="text-slate-600 mb-4">
+                <p className="text-slate-600 dark:text-slate-300 mb-4">
                   Drag and drop your resume file here, or click to browse
                 </p>
               </div>
@@ -362,7 +362,7 @@ export function ResumeUpload({ onParseComplete, onError }: ResumeUploadProps) {
                   className="hidden"
                 />
                 
-                <div className="text-sm text-slate-500 space-y-1">
+                <div className="text-sm text-slate-500 dark:text-slate-400 space-y-1">
                   <p><strong>Recommended:</strong> DOCX files (max 10MB) - Work perfectly!</p>
                   <p><strong>PDF files:</strong> Require conversion to DOCX for best results</p>
                 </div>

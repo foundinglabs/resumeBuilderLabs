@@ -7,7 +7,7 @@ const Footer: React.FC = () => {
     <footer className="bg-slate-900 text-white py-12 mt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
           
           {/* Company Info */}
           <div className="space-y-4">
@@ -50,68 +50,15 @@ const Footer: React.FC = () => {
                   ATS Checker
                 </Link>
               </li>
-              <li>
-                <Link href="/text-extractor" className="text-slate-400 hover:text-white transition-colors">
-                  Text Extractor
-                </Link>
-              </li>
-              <li>
-                <Link href="/demo" className="text-slate-400 hover:text-white transition-colors">
-                  Demo
-                </Link>
-              </li>
             </ul>
           </div>
 
-          {/* Resources */}
+          {/* Love Section */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-white">Resources</h3>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <a href="#" className="text-slate-400 hover:text-white transition-colors">
-                  Resume Templates
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-slate-400 hover:text-white transition-colors">
-                  Writing Tips
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-slate-400 hover:text-white transition-colors">
-                  ATS Guide
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-slate-400 hover:text-white transition-colors">
-                  Career Advice
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-slate-400 hover:text-white transition-colors">
-                  Help Center
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* Contact Info */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-white">Contact Us</h3>
-            <div className="space-y-3 text-sm">
-              <div className="flex items-center space-x-3">
-                <Mail className="h-4 w-4 text-slate-400" />
-                <span className="text-slate-400">contact@foundinglabs.com</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <Phone className="h-4 w-4 text-slate-400" />
-                <span className="text-slate-400">+1 (555) 123-4567</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <MapPin className="h-4 w-4 text-slate-400" />
-                <span className="text-slate-400">San Francisco, CA</span>
-              </div>
-            </div>
+            <h3 className="text-lg font-semibold text-white">💗 with foundinglabs</h3>
+            <p className="text-sm text-slate-400 leading-relaxed">
+              Built with passion and dedication to help you succeed in your career journey.
+            </p>
           </div>
         </div>
 
