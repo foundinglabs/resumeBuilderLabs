@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LoginSignupButton } from '@/components/LoginSignupButton';
 import { processFile, validateFile, type FileProcessingResult } from '@/lib/file-processing';
 import { refineResumeWithGemini, type RefinedResumeData } from '@/lib/gemini-api';
+import Footer from "@/components/Footer";
 
 interface ATSScore {
   overall: number;
@@ -1665,6 +1666,9 @@ export default function ATSAnalysis() {
           </div>
         )}
       </div>
+      
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

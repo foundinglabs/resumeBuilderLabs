@@ -6,99 +6,146 @@ import { allTemplates, getCustomTemplates, getReactiveResumeTemplates, getTempla
 import { LoginSignupButton } from "@/components/LoginSignupButton";
 import AnimatedResume from "@/components/AnimatedResume";
 import AnimatedTileBackground from "@/components/AnimatedTileBackground";
-import { motion, AnimatePresence, useScroll, useTransform, useSpring } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform, useSpring, MotionValue, useMotionValue, useMotionValueEvent, animate } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 import { useTheme } from "@/hooks/useTheme";
 import ThemeToggle from "@/components/ThemeToggle";
+import Footer from "@/components/Footer";
 
-// Template Slider Component
+// Template Slider Component with Horizontal Scroll
 const TemplateSlider = () => {
-  // Show all templates at once in a grid
   const templates = allTemplates;
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollXProgress } = useScroll({ container: ref });
+  const maskImage = useScrollOverflowMask(scrollXProgress);
+  
+  // Auto-scroll functionality
+  useEffect(() => {
+    const container = ref.current;
+    if (!container) return;
 
-  return (
-    <div className="w-full h-full">
-      {/* Main Templates Container */}
-      <motion.div 
-        className="bg-white rounded-2xl shadow-2xl overflow-hidden hover:shadow-3xl transition-all duration-500 transform hover:-translate-y-2 w-full h-full"
-        initial={{ opacity: 0, y: 50, scale: 0.95 }}
-        animate={{ 
-          opacity: 1, 
-          y: 0, 
-          scale: 1,
-          transition: {
-            type: "spring",
-            stiffness: 100,
-            damping: 20,
-            duration: 0.8
-          }
-        }}
-        whileHover={{ 
-          y: -5,
-          transition: {
-            type: "spring",
-            stiffness: 200,
-            damping: 25
-          }
-        }}
-      >
-        <div className="w-full h-full p-8 relative overflow-hidden">
-          <motion.div
-            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 h-full"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ 
-              opacity: 1, 
-              scale: 1,
-              transition: {
-                type: "spring",
-                stiffness: 100,
-                damping: 20,
-                duration: 0.8
-              }
-            }}
-          >
-            {templates.map((template, index) => (
-              <motion.div
-                key={template.id}
-                className="bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group h-full flex flex-col"
-                initial={{ opacity: 0, y: 50, scale: 0.9 }}
-                animate={{ 
-                  opacity: 1, 
-                  y: 0, 
-                  scale: 1,
-                  transition: {
-                    delay: index * 0.1,
-                    type: "spring",
-                    stiffness: 120,
-                    damping: 15,
-                    duration: 0.6
-                  }
-                }}
-                whileHover={{ 
-                  scale: 1.05,
-                  y: -8,
-                  transition: { 
-                    type: "spring",
-                    stiffness: 300,
-                    damping: 20,
-                    duration: 0.3 
-                  }
-                }}
-                whileTap={{ 
-                  scale: 0.98,
-                  transition: { duration: 0.1 }
-                }}
-                onClick={() => {
-                  window.location.href = `/builder?template=${template.id}&source=${template.isReactiveResume ? 'reactive-resume' : 'custom'}`;
-                }}
-              >
-                {/* Template Preview - Using JSX instead of image */}
-                <div className="flex-1 relative overflow-hidden rounded-t-lg bg-gradient-to-br p-4 flex items-center justify-center" 
+    let animationId: number;
+    let scrollDirection = 1; // 1 for right, -1 for left
+    let scrollSpeed = 1; // pixels per frame
+
+    const autoScroll = () => {
+      if (!container) return;
+
+      const scrollLeft = container.scrollLeft;
+      const scrollWidth = container.scrollWidth;
+      const clientWidth = container.clientWidth;
+      const maxScroll = scrollWidth - clientWidth;
+
+      // Change direction when reaching the end
+      if (scrollLeft >= maxScroll) {
+        scrollDirection = -1;
+      } else if (scrollLeft <= 0) {
+        scrollDirection = 1;
+      }
+
+      container.scrollLeft += scrollSpeed * scrollDirection;
+      animationId = requestAnimationFrame(autoScroll);
+    };
+
+    // Start auto-scroll after a delay
+    const startDelay = setTimeout(() => {
+      animationId = requestAnimationFrame(autoScroll);
+    }, 2000);
+
+    // Pause auto-scroll on hover
+    const handleMouseEnter = () => {
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
+    };
+
+    const handleMouseLeave = () => {
+      animationId = requestAnimationFrame(autoScroll);
+    };
+
+    container.addEventListener('mouseenter', handleMouseEnter);
+    container.addEventListener('mouseleave', handleMouseLeave);
+
+    return () => {
+      clearTimeout(startDelay);
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
+      container.removeEventListener('mouseenter', handleMouseEnter);
+      container.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, []);
+
+    return (
+    <div className="w-full h-full flex flex-col">
+      {/* Templates Container */}
+      <div className="relative w-full flex-1 flex items-center justify-center">
+        <motion.div 
+          ref={ref}
+          style={{ 
+            maskImage,
+            scrollbarWidth: 'thin',
+            scrollbarColor: 'var(--primary) transparent'
+          }}
+          className="flex gap-4 md:gap-6 lg:gap-8 overflow-x-auto pb-4 px-4 w-full max-w-full"
+        >
+          {templates.map((template, index) => (
+            <motion.div
+              key={template.id}
+                             className="flex-shrink-0 w-72 md:w-80 lg:w-96 bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group"
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ 
+                opacity: 1, 
+                x: 0,
+                transition: {
+                  delay: index * 0.1,
+                  type: "spring",
+                  stiffness: 120,
+                  damping: 15,
+                  duration: 0.6
+                }
+              }}
+              whileHover={{ 
+                scale: 1.05,
+                y: -8,
+                transition: { 
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 20,
+                  duration: 0.3 
+                }
+              }}
+              whileTap={{ 
+                scale: 0.98,
+                transition: { duration: 0.1 }
+              }}
+              onClick={() => {
+                window.location.href = `/builder?template=${template.id}&source=${template.isReactiveResume ? 'reactive-resume' : 'custom'}`;
+              }}
+            >
+                             {/* Template Preview */}
+               <div className="relative h-64 md:h-72 lg:h-80 overflow-hidden rounded-t-lg">
+                {template.previewImage ? (
+                  <img 
+                    src={template.previewImage} 
+                    alt={`${template.name} template preview`}
+                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      const nextSibling = e.currentTarget.nextElementSibling as HTMLElement;
+                      if (nextSibling) {
+                        nextSibling.style.display = 'flex';
+                      }
+                    }}
+                  />
+                ) : null}
+                <div 
+                  className="w-full h-full bg-gradient-to-br p-4 items-center justify-center absolute inset-0" 
                   style={{
+                    display: template.previewImage ? 'none' : 'flex',
                     background: `linear-gradient(to bottom right, ${template.color.includes('blue') ? '#dbeafe' : template.color.includes('gray') ? '#f3f4f6' : template.color.includes('green') ? '#d1fae5' : template.color.includes('purple') ? '#e9d5ff' : template.color.includes('indigo') ? '#e0e7ff' : template.color.includes('cyan') ? '#cffafe' : template.color.includes('yellow') ? '#fef3c7' : template.color.includes('emerald') ? '#d1fae5' : template.color.includes('stone') ? '#f5f5f4' : template.color.includes('slate') ? '#f1f5f9' : template.color.includes('amber') ? '#fef3c7' : '#fed7aa'}, ${template.color.includes('blue') ? '#60a5fa' : template.color.includes('gray') ? '#9ca3af' : template.color.includes('green') ? '#34d399' : template.color.includes('purple') ? '#a78bfa' : template.color.includes('indigo') ? '#818cf8' : template.color.includes('cyan') ? '#22d3ee' : template.color.includes('yellow') ? '#fbbf24' : template.color.includes('emerald') ? '#34d399' : template.color.includes('stone') ? '#a8a29e' : template.color.includes('slate') ? '#64748b' : template.color.includes('amber') ? '#f59e0b' : '#fb923c'})`
                   }}
                 >
-                  {/* Template Icon/Preview */}
                   <div className="text-center">
                     <div className="w-16 h-16 mx-auto mb-3 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
                       <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -107,30 +154,68 @@ const TemplateSlider = () => {
                     </div>
                     <span className="text-sm font-semibold text-white text-center block">{template.name}</span>
                   </div>
-                  
-                  {template.isReactiveResume && (
-                    <div className="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-                      Premium
-                    </div>
-                  )}
                 </div>
                 
-                {/* Template Info */}
-                <div className="p-3 flex-shrink-0">
-                  <h4 className="text-sm font-semibold text-slate-800 mb-1 line-clamp-1">{template.name}</h4>
-                  <p className="text-xs text-slate-600 mb-3 line-clamp-2">{template.description}</p>
-                  <Button className={`w-full ${template.color} ${template.hoverColor} text-xs group-hover:scale-105 transition-transform py-2`}>
-                    Use Template
-                  </Button>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </motion.div>
+                {template.isReactiveResume && (
+                  <div className="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                    Premium
+                  </div>
+                )}
+              </div>
+              
+              {/* Template Info */}
+              <div className="p-4">
+                <h4 className="text-sm font-semibold text-slate-800 mb-1 line-clamp-1">{template.name}</h4>
+                <p className="text-xs text-slate-600 mb-3 line-clamp-2">{template.description}</p>
+                <Button className={`w-full ${template.color} ${template.hoverColor} text-xs group-hover:scale-105 transition-transform py-2`}>
+                  Use Template
+                </Button>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
     </div>
   );
 };
+
+// Scroll Overflow Mask Hook
+const left = `0%`;
+const right = `100%`;
+const leftInset = `20%`;
+const rightInset = `80%`;
+const transparent = `#0000`;
+const opaque = `#000`;
+
+function useScrollOverflowMask(scrollXProgress: MotionValue<number>) {
+  const maskImage = useMotionValue(
+    `linear-gradient(90deg, ${opaque}, ${opaque} ${left}, ${opaque} ${rightInset}, ${transparent})`
+  );
+
+  useMotionValueEvent(scrollXProgress, "change", (value) => {
+    if (value === 0) {
+      animate(
+        maskImage,
+        `linear-gradient(90deg, ${opaque}, ${opaque} ${left}, ${opaque} ${rightInset}, ${transparent})`
+      );
+    } else if (value === 1) {
+      animate(
+        maskImage,
+        `linear-gradient(90deg, ${transparent}, ${opaque} ${leftInset}, ${opaque} ${right}, ${opaque})`
+      );
+    } else if (
+      scrollXProgress.getPrevious() === 0 ||
+      scrollXProgress.getPrevious() === 1
+    ) {
+      animate(
+        maskImage,
+        `linear-gradient(90deg, ${transparent}, ${opaque} ${leftInset}, ${opaque} ${rightInset}, ${transparent})`
+      );
+    }
+  });
+
+  return maskImage;
+}
 
 // Animated Templates Section Component
 const AnimatedTemplatesSection = () => {
@@ -369,7 +454,7 @@ export default function Home() {
                 }}
               >
                 <ThemeToggle />
-              </motion.div>
+                </motion.div>
               
               {/* Login/Signup Button */}
               <motion.div
@@ -548,18 +633,20 @@ export default function Home() {
             </div>
           </div>
         </div>
-              </section>
+      </section>
 
         {/* Animated Templates Section */}
         <AnimatedTemplatesSection />
 
-        {/* Templates Preview Section */}
+      {/* Templates Preview Section */}
         <section id="templates" className="w-full h-screen bg-muted/30">
-          <div className="w-full h-full px-4 sm:px-6 lg:px-8">
+          <div className="w-full h-full flex flex-col">
             {/* Animated Template Slider */}
-            <TemplateSlider />
+            <div className="flex-1 w-full">
+              <TemplateSlider />
           </div>
-        </section>
+        </div>
+      </section>
 
 
 
@@ -575,21 +662,21 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
             {/* Resume Builder */}
-            <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-0 hover:shadow-xl transition-all group overflow-hidden">
-              <CardContent className="p-8">
+            <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-0 hover:shadow-xl transition-all group overflow-hidden h-full">
+              <CardContent className="p-6 md:p-8 flex flex-col h-full">
                 <div className="flex items-center mb-6">
-                  <div className="bg-blue-600 w-16 h-16 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
-                    <Edit className="text-white h-8 w-8" />
+                  <div className="bg-blue-600 w-12 h-12 md:w-16 md:h-16 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
+                    <Edit className="text-white h-6 w-6 md:h-8 md:w-8" />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold text-foreground mb-1">Resume Builder</h3>
-                    <p className="text-blue-600 font-medium">Interactive Editor</p>
+                    <h3 className="text-xl md:text-2xl font-bold text-foreground mb-1">Resume Builder</h3>
+                    <p className="text-blue-600 font-medium text-sm md:text-base">Interactive Editor</p>
                   </div>
                 </div>
                 
-                <p className="text-muted-foreground mb-6 text-lg">
+                <p className="text-muted-foreground mb-6 text-base md:text-lg flex-grow">
                   Create professional resumes with live preview, 18+ templates, and instant PDF export. Perfect for crafting your perfect resume from scratch.
                 </p>
                 
@@ -624,19 +711,19 @@ export default function Home() {
 
 
             {/* ATS Analysis */}
-            <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-0 hover:shadow-xl transition-all group overflow-hidden">
-              <CardContent className="p-8">
+            <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-0 hover:shadow-xl transition-all group overflow-hidden h-full">
+              <CardContent className="p-6 md:p-8 flex flex-col h-full">
                 <div className="flex items-center mb-6">
-                  <div className="bg-purple-600 w-16 h-16 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
-                    <Target className="text-white h-8 w-8" />
+                  <div className="bg-purple-600 w-12 h-12 md:w-16 md:h-16 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
+                    <Target className="text-white h-6 w-6 md:h-8 md:w-8" />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold text-foreground mb-1">ATS Analysis</h3>
-                    <p className="text-purple-600 font-medium">Compatibility Scoring</p>
+                    <h3 className="text-xl md:text-2xl font-bold text-foreground mb-1">ATS Analysis</h3>
+                    <p className="text-purple-600 font-medium text-sm md:text-base">Compatibility Scoring</p>
                   </div>
                 </div>
                 
-                <p className="text-muted-foreground mb-6 text-lg">
+                <p className="text-muted-foreground mb-6 text-base md:text-lg flex-grow">
                   Get detailed ATS compatibility scoring and recommendations. Analyze your resume's performance with applicant tracking systems.
                 </p>
                 
@@ -696,6 +783,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

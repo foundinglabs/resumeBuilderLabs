@@ -1,5 +1,6 @@
 import React from 'react';
 import { ReactiveResumeRenderer } from '../components/ReactiveResumeRenderer';
+import Footer from "@/components/Footer";
 
 // Sample resume data for testing
 const sampleResumeData = {
@@ -78,6 +79,9 @@ const TemplateTestPage: React.FC = () => {
           ))}
         </div>
       </div>
+      
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };

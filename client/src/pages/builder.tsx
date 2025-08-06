@@ -20,6 +20,7 @@ import type { Resume } from "@shared/schema";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { defaultResume } from '@/lib/default-resume';
 import { mapResumeGeniusToReactiveResume } from '@/utils/reactive-resume-mapper';
+import Footer from "@/components/Footer";
 
 export interface ResumeData {
   personalInfo: {
@@ -788,10 +789,10 @@ export default function Builder() {
             </Card>
           </div>
 
-          {/* Live Preview Panel - Full Width */}
-          <div className="w-full lg:w-3/5 overflow-x-hidden">
-            <Card className="bg-white shadow-lg h-fit flex flex-col items-center">
-              <CardContent className="p-8 md:p-12 w-full">
+                     {/* Live Preview Panel - Full Width */}
+           <div className="w-full lg:w-3/5 overflow-x-hidden">
+             <Card className="bg-white shadow-lg h-fit flex flex-col items-center">
+               <CardContent className="p-4 md:p-6 w-full">
                 <div className="mb-4 flex items-center justify-between w-full max-w-3xl mx-auto">
                   <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold text-slate-800">Live Preview</h2>
                   <div className="flex items-center space-x-2">
@@ -874,6 +875,9 @@ export default function Builder() {
           </div>
         </div>
       </div>
+      
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { ResumeTextExtractor } from "@/components/resume-text-extractor";
 import { LoginSignupButton } from "@/components/LoginSignupButton";
+import Footer from "@/components/Footer";
 
 export default function TextExtractor() {
   return (
@@ -107,6 +108,9 @@ export default function TextExtractor() {
 
         </div>
       </div>
+      
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }
