@@ -12,7 +12,11 @@ interface TileProps {
   shape: 'square' | 'L' | 'rectangle';
 }
 
-const AnimatedTileBackground: React.FC = () => {
+interface AnimatedTileBackgroundProps {
+  showInDarkMode?: boolean;
+}
+
+const AnimatedTileBackground: React.FC<AnimatedTileBackgroundProps> = ({ showInDarkMode = false }) => {
   // Generate tiles in an irregular grid pattern like the image
   const tiles = useMemo(() => {
     const tileArray: TileProps[] = [];
@@ -158,6 +162,11 @@ const AnimatedTileBackground: React.FC = () => {
         return `${baseClasses} rounded-lg border-blue-100/50 dark:border-blue-300/50`;
     }
   };
+
+  // Don't render if showInDarkMode is false and we're in dark mode
+  if (!showInDarkMode) {
+    return null;
+  }
 
   return (
     <motion.div
