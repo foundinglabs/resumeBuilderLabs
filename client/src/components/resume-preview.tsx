@@ -125,7 +125,7 @@ export function ResumePreview({ resumeData }: ResumePreviewProps) {
       case 'elegant':
         return <Elegant columns={[['summary','experience','projects','education'], ['skills','languages','interests']]} isFirstPage={true} resumeData={resumeData} />;
       default:
-        return <EnhancedReactiveResumeRenderer resumeData={resumeData} templateId="classic" />; // Default fallback
+        return <EnhancedReactiveResumeRenderer resumeData={resumeData} templateId="azurill" />; // Default fallback
     }
   };
 

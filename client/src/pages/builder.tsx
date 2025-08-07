@@ -195,7 +195,7 @@ const initialResumeData: ResumeData = {
   }],
   skills: ["JavaScript", "React", "Node.js", "Python", "SQL", "AWS", "Docker", "Git"],
   projectSkills: ["React", "Redux", "MongoDB", "GraphQL", "Express.js"],
-  template: "classic",
+  template: "azurill",
   field: "",
   socialLinks: {
     linkedin: "https://linkedin.com/in/johndoe",
@@ -466,17 +466,17 @@ export default function Builder() {
     if (saved) {
       try {
         const parsedData = JSON.parse(saved);
-        // If URL has template parameter, use that template
-        if (templateParam) {
-          return { ...parsedData, template: templateParam };
-        }
-        // If no template, default to classic
-        return { ...parsedData, template: parsedData.template || 'classic' };
-      } catch {
-        return { ...initialResumeData, template: templateParam || 'classic' };
-      }
-    }
-    return { ...initialResumeData, template: templateParam || 'classic' };
+                 // If URL has template parameter, use that template
+         if (templateParam) {
+           return { ...parsedData, template: templateParam };
+         }
+         // If no template, default to azurill
+         return { ...parsedData, template: parsedData.template || 'azurill' };
+       } catch {
+         return { ...initialResumeData, template: templateParam || 'azurill' };
+       }
+     }
+     return { ...initialResumeData, template: templateParam || 'azurill' };
   });
   
   const [title, setTitle] = useState(() => {
@@ -835,9 +835,7 @@ export default function Builder() {
                              </span>
                            </SelectItem>
                          ))}
-                         <div className="px-2 sm:px-3 py-1 sm:py-2 text-xs font-medium text-muted-foreground uppercase tracking-wide border-t border-border/30 mt-1 pt-2">
-                           Premium Templates
-                         </div>
+
                          {allTemplates.filter(t => t.isReactiveResume).map((template) => (
                            <SelectItem key={template.id} value={template.id} className="w-full truncate px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm">
                              <span className="flex items-center truncate">

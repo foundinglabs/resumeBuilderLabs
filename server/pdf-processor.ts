@@ -33,12 +33,24 @@ export async function processPDFBuffer(buffer: Buffer): Promise<PDFProcessingRes
     
     // Get the PDF parser and parse the buffer
     const pdf = await getPdfParser();
-    const data = await pdf(buffer);
+    
+    // Try with different options for better compatibility
+    const options = {
+      // Try to handle more PDF versions
+      version: 'v2.0.550',
+      // Increase timeout for complex PDFs
+      max: 0,
+      // Try to extract text even from problematic PDFs
+      normalizeWhitespace: true,
+      disableCombineTextItems: false
+    };
+    
+    const data = await pdf(buffer, options);
     
     if (!data || !data.text) {
       return {
         success: false,
-        error: 'No text could be extracted from the PDF file'
+        error: 'No text could be extracted from the PDF file. The PDF may be image-based or encrypted.'
       };
     }
 
@@ -51,7 +63,7 @@ export async function processPDFBuffer(buffer: Buffer): Promise<PDFProcessingRes
     if (cleanText.length < 50) {
       return {
         success: false,
-        error: 'PDF appears to contain very little text content. It may be image-based or encrypted.'
+        error: 'PDF appears to contain very little text content. It may be image-based, encrypted, or in an unsupported format. Try converting to DOCX format for better compatibility.'
       };
     }
 
@@ -91,12 +103,17 @@ export async function processPDFBuffer(buffer: Buffer): Promise<PDFProcessingRes
     } else if (errorMessage.includes('not supported') || errorMessage.includes('version')) {
       return {
         success: false,
-        error: 'This PDF version is not supported. Please try saving it in a different format or use a DOCX file.'
+        error: 'This PDF version is not supported by our current parser. Please try one of these solutions:\n\n1. Convert the PDF to DOCX format using an online converter\n2. Open the PDF in a word processor and save as DOCX\n3. Try a different PDF file\n\nDOCX files work much better with our system!'
+      };
+    } else if (errorMessage.includes('timeout') || errorMessage.includes('max')) {
+      return {
+        success: false,
+        error: 'PDF processing timed out. The file may be too complex or large. Try converting to DOCX format for better results.'
       };
     } else {
       return {
         success: false,
-        error: `PDF processing failed: ${errorMessage}. Please try converting to DOCX format for better compatibility.`
+        error: `PDF processing failed: ${errorMessage}. This usually means the PDF format is not compatible. Please try converting to DOCX format using an online converter like:\n\n• SmallPDF.com\n• ILovePDF.com\n• PDFtoWord.com\n\nDOCX files work perfectly with our system!`
       };
     }
   }

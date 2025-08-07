@@ -156,11 +156,7 @@ const TemplateSlider = () => {
                   </div>
                 </div>
                 
-                {template.isReactiveResume && (
-                  <div className="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-                    Premium
-                  </div>
-                )}
+
               </div>
               
               {/* Template Info */}
@@ -655,104 +651,140 @@ export default function Home() {
 
 
       {/* Tools Section */}
-      <section className="py-20 bg-background">
+      <section className="py-20 bg-gradient-to-br from-background via-background to-muted/20 dark:from-background dark:via-background dark:to-muted/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            <div className="inline-flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-primary to-primary/80 rounded-2xl mb-6 shadow-lg">
+              <svg className="w-8 h-8 md:w-10 md:h-10 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-foreground via-foreground to-foreground/80 bg-clip-text text-transparent mb-4">
               Complete Resume Toolkit
             </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Everything you need to create, extract, and optimize your resume content.
+            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              Everything you need to create, extract, and optimize your resume content with professional-grade tools.
             </p>
+            <div className="flex justify-center mt-6 space-x-2">
+              <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-primary/60 rounded-full animate-pulse animation-delay-2000"></div>
+              <div className="w-2 h-2 bg-primary/40 rounded-full animate-pulse animation-delay-4000"></div>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
             {/* Resume Builder */}
-            <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-0 hover:shadow-xl transition-all group overflow-hidden h-full">
-              <CardContent className="p-6 md:p-8 flex flex-col h-full">
+            <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-blue-50/50 via-blue-50/30 to-blue-100/50 dark:from-blue-900/20 dark:via-blue-800/10 dark:to-blue-900/30 hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] h-full backdrop-blur-sm">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardContent className="relative p-6 md:p-8 flex flex-col h-full">
                 <div className="flex items-center mb-6">
-                  <div className="bg-blue-600 w-12 h-12 md:w-16 md:h-16 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
-                    <Edit className="text-white h-6 w-6 md:h-8 md:w-8" />
+                  <div className="relative">
+                    <div className="bg-gradient-to-br from-blue-600 to-blue-700 w-12 h-12 md:w-16 md:h-16 rounded-2xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                      <Edit className="text-white h-6 w-6 md:h-8 md:w-8" />
+                    </div>
+                    <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 to-purple-400 rounded-2xl blur opacity-0 group-hover:opacity-75 transition-opacity duration-300 -z-10"></div>
                   </div>
                   <div>
-                    <h3 className="text-xl md:text-2xl font-bold text-foreground mb-1">Resume Builder</h3>
-                    <p className="text-blue-600 font-medium text-sm md:text-base">Interactive Editor</p>
+                    <h3 className="text-xl md:text-2xl font-bold text-foreground mb-1 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">
+                      Resume Builder
+                    </h3>
+                    <p className="text-blue-600 dark:text-blue-400 font-medium text-sm md:text-base">Interactive Editor</p>
                   </div>
                 </div>
                 
-                <p className="text-muted-foreground mb-6 text-base md:text-lg flex-grow">
-                  Create professional resumes with live preview, 18+ templates, and instant PDF export. Perfect for crafting your perfect resume from scratch.
+                <p className="text-muted-foreground mb-6 text-base md:text-lg flex-grow leading-relaxed">
+                  Create professional resumes with live preview, 18+ templates, and instant PDF export. Perfect for crafting your perfect resume from scratch with real-time collaboration.
                 </p>
                 
                 <div className="space-y-3 mb-8">
-                  <div className="flex items-center text-foreground">
-                    <Check className="w-5 h-5 text-green-600 mr-3" />
-                    <span>18+ Professional Templates</span>
+                  <div className="flex items-center text-foreground group/item">
+                    <div className="bg-green-100 dark:bg-green-900/30 p-1 rounded-full mr-3 group-hover/item:scale-110 transition-transform">
+                      <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
+                    </div>
+                    <span className="group-hover/item:text-foreground/80 transition-colors">18+ Professional Templates</span>
                   </div>
-                  <div className="flex items-center text-foreground">
-                    <Check className="w-5 h-5 text-green-600 mr-3" />
-                    <span>Live Preview & Real-time Editing</span>
+                  <div className="flex items-center text-foreground group/item">
+                    <div className="bg-green-100 dark:bg-green-900/30 p-1 rounded-full mr-3 group-hover/item:scale-110 transition-transform">
+                      <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
+                    </div>
+                    <span className="group-hover/item:text-foreground/80 transition-colors">Live Preview & Real-time Editing</span>
                   </div>
-                  <div className="flex items-center text-foreground">
-                    <Check className="w-5 h-5 text-green-600 mr-3" />
-                    <span>High-Quality PDF Export</span>
+                  <div className="flex items-center text-foreground group/item">
+                    <div className="bg-green-100 dark:bg-green-900/30 p-1 rounded-full mr-3 group-hover/item:scale-110 transition-transform">
+                      <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
+                    </div>
+                    <span className="group-hover/item:text-foreground/80 transition-colors">High-Quality PDF Export</span>
                   </div>
-                  <div className="flex items-center text-foreground">
-                    <Check className="w-5 h-5 text-green-600 mr-3" />
-                    <span>Resume Upload & Auto-fill</span>
+                  <div className="flex items-center text-foreground group/item">
+                    <div className="bg-green-100 dark:bg-green-900/30 p-1 rounded-full mr-3 group-hover/item:scale-110 transition-transform">
+                      <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
+                    </div>
+                    <span className="group-hover/item:text-foreground/80 transition-colors">Resume Upload & Auto-fill</span>
                   </div>
                 </div>
 
                 <Link href="/builder">
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-lg py-6">
-                    <Edit className="mr-2 h-5 w-5" />
+                  <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-lg py-6 shadow-lg hover:shadow-xl transition-all duration-300 group/btn">
+                    <Edit className="mr-2 h-5 w-5 group-hover/btn:scale-110 transition-transform" />
                     Start Building Resume
                   </Button>
                 </Link>
               </CardContent>
             </Card>
 
-
-
             {/* ATS Analysis */}
-            <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-0 hover:shadow-xl transition-all group overflow-hidden h-full">
-              <CardContent className="p-6 md:p-8 flex flex-col h-full">
+            <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-purple-50/50 via-purple-50/30 to-purple-100/50 dark:from-purple-900/20 dark:via-purple-800/10 dark:to-purple-900/30 hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] h-full backdrop-blur-sm">
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-600/5 to-pink-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardContent className="relative p-6 md:p-8 flex flex-col h-full">
                 <div className="flex items-center mb-6">
-                  <div className="bg-purple-600 w-12 h-12 md:w-16 md:h-16 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
-                    <Target className="text-white h-6 w-6 md:h-8 md:w-8" />
+                  <div className="relative">
+                    <div className="bg-gradient-to-br from-purple-600 to-purple-700 w-12 h-12 md:w-16 md:h-16 rounded-2xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                      <Target className="text-white h-6 w-6 md:h-8 md:w-8" />
+                    </div>
+                    <div className="absolute -inset-1 bg-gradient-to-r from-purple-400 to-pink-400 rounded-2xl blur opacity-0 group-hover:opacity-75 transition-opacity duration-300 -z-10"></div>
                   </div>
                   <div>
-                    <h3 className="text-xl md:text-2xl font-bold text-foreground mb-1">ATS Analysis</h3>
-                    <p className="text-purple-600 font-medium text-sm md:text-base">Compatibility Scoring</p>
+                    <h3 className="text-xl md:text-2xl font-bold text-foreground mb-1 group-hover:text-purple-700 dark:group-hover:text-purple-400 transition-colors">
+                      ATS Analysis
+                    </h3>
+                    <p className="text-purple-600 dark:text-purple-400 font-medium text-sm md:text-base">Compatibility Scoring</p>
                   </div>
                 </div>
                 
-                <p className="text-muted-foreground mb-6 text-base md:text-lg flex-grow">
-                  Get detailed ATS compatibility scoring and recommendations. Analyze your resume's performance with applicant tracking systems.
+                <p className="text-muted-foreground mb-6 text-base md:text-lg flex-grow leading-relaxed">
+                  Get detailed ATS compatibility scoring and recommendations. Analyze your resume's performance with applicant tracking systems and optimize for maximum visibility.
                 </p>
                 
                 <div className="space-y-3 mb-8">
-                  <div className="flex items-center text-foreground">
-                    <Check className="w-5 h-5 text-green-600 mr-3" />
-                    <span>ATS Compatibility Score</span>
+                  <div className="flex items-center text-foreground group/item">
+                    <div className="bg-green-100 dark:bg-green-900/30 p-1 rounded-full mr-3 group-hover/item:scale-110 transition-transform">
+                      <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
+                    </div>
+                    <span className="group-hover/item:text-foreground/80 transition-colors">ATS Compatibility Score</span>
                   </div>
-                  <div className="flex items-center text-foreground">
-                    <Check className="w-5 h-5 text-green-600 mr-3" />
-                    <span>Keyword Analysis</span>
+                  <div className="flex items-center text-foreground group/item">
+                    <div className="bg-green-100 dark:bg-green-900/30 p-1 rounded-full mr-3 group-hover/item:scale-110 transition-transform">
+                      <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
+                    </div>
+                    <span className="group-hover/item:text-foreground/80 transition-colors">Keyword Analysis</span>
                   </div>
-                  <div className="flex items-center text-foreground">
-                    <Check className="w-5 h-5 text-green-600 mr-3" />
-                    <span>Improvement Recommendations</span>
+                  <div className="flex items-center text-foreground group/item">
+                    <div className="bg-green-100 dark:bg-green-900/30 p-1 rounded-full mr-3 group-hover/item:scale-110 transition-transform">
+                      <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
+                    </div>
+                    <span className="group-hover/item:text-foreground/80 transition-colors">Improvement Recommendations</span>
                   </div>
-                  <div className="flex items-center text-foreground">
-                    <Check className="w-5 h-5 text-green-600 mr-3" />
-                    <span>Format & Structure Analysis</span>
+                  <div className="flex items-center text-foreground group/item">
+                    <div className="bg-green-100 dark:bg-green-900/30 p-1 rounded-full mr-3 group-hover/item:scale-110 transition-transform">
+                      <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
+                    </div>
+                    <span className="group-hover/item:text-foreground/80 transition-colors">Format & Structure Analysis</span>
                   </div>
                 </div>
 
                 <Link href="/ats-analysis">
-                  <Button className="w-full bg-purple-600 hover:bg-purple-700 text-lg py-6">
-                    <Target className="mr-2 h-5 w-5" />
+                  <Button className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-lg py-6 shadow-lg hover:shadow-xl transition-all duration-300 group/btn">
+                    <Target className="mr-2 h-5 w-5 group-hover/btn:scale-110 transition-transform" />
                     Analyze Resume
                   </Button>
                 </Link>
@@ -762,31 +794,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-            Ready to Build Your Dream Resume?
-          </h2>
-          <p className="text-xl text-blue-100 mb-8">
-            Join thousands of professionals who've landed their dream jobs with our resume builder.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/builder">
-              <Button className="bg-white text-blue-600 hover:bg-blue-50 px-8 py-4 text-lg font-semibold rounded-xl">
-                <Sparkles className="mr-2 h-5 w-5" />
-                Start Building Now
-              </Button>
-            </Link>
-            <Link href="/text-extractor">
-              <Button className="bg-blue-700 text-white hover:bg-blue-800 px-8 py-4 text-lg font-semibold rounded-xl border border-blue-400">
-                <FileText className="mr-2 h-5 w-5" />
-                Extract Text First
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
+
 
       {/* Footer */}
       <Footer />

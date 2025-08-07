@@ -15,22 +15,40 @@ export interface FileProcessingResult {
 // Server-side PDF processing for production
 export async function processPDFFile(file: File): Promise<FileProcessingResult> {
   try {
+    console.log('Starting PDF processing for:', file.name, 'Size:', file.size);
+    
     const formData = new FormData();
     formData.append('pdf', file);
 
+    console.log('Sending PDF to server endpoint...');
     const response = await fetch('/api/pdf/extract', {
       method: 'POST',
       body: formData,
     });
 
-    const result = await response.json();
-
+    console.log('Server response status:', response.status);
+    
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Server error response:', errorText);
+      
+      let errorMessage = 'Failed to process PDF file';
+      try {
+        const errorData = JSON.parse(errorText);
+        errorMessage = errorData.error || errorMessage;
+      } catch (e) {
+        // If we can't parse the error, use the raw text
+        errorMessage = errorText || errorMessage;
+      }
+      
       return {
         success: false,
-        error: result.error || 'Failed to process PDF file'
+        error: errorMessage
       };
     }
+
+    const result = await response.json();
+    console.log('PDF processing successful, extracted text length:', result.text?.length);
 
     return {
       success: true,
@@ -43,9 +61,18 @@ export async function processPDFFile(file: File): Promise<FileProcessingResult> 
     };
   } catch (error) {
     console.error('PDF processing error:', error);
+    
+    // Provide more specific error messages
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      return {
+        success: false,
+        error: 'Network error: Server may not be running. Please ensure the development server is started with "npm run dev".'
+      };
+    }
+    
     return {
       success: false,
-      error: 'Network error during PDF processing. Please check your connection and try again.'
+      error: 'Network error during PDF processing. Please check your connection and ensure the server is running.'
     };
   }
 }
@@ -53,6 +80,7 @@ export async function processPDFFile(file: File): Promise<FileProcessingResult> 
 // Client-side DOCX processing (continues to work well in browser)
 export async function processDOCXFile(file: File): Promise<FileProcessingResult> {
   try {
+    console.log('Processing DOCX file:', file.name);
     const arrayBuffer = await file.arrayBuffer();
     const result = await mammoth.extractRawText({ arrayBuffer });
 
@@ -77,6 +105,8 @@ export async function processDOCXFile(file: File): Promise<FileProcessingResult>
       };
     }
 
+    console.log('DOCX processing successful, extracted text length:', cleanText.length);
+
     return {
       success: true,
       text: cleanText,
@@ -98,6 +128,8 @@ export async function processDOCXFile(file: File): Promise<FileProcessingResult>
 export async function processFile(file: File): Promise<FileProcessingResult> {
   const fileType = file.type.toLowerCase();
   const fileName = file.name.toLowerCase();
+
+  console.log('Processing file:', fileName, 'Type:', fileType);
 
   if (fileType === 'application/pdf' || fileName.endsWith('.pdf')) {
     return processPDFFile(file);
@@ -123,6 +155,8 @@ export function validateFile(file: File): { valid: boolean; error?: string } {
   ];
   const allowedExtensions = ['.pdf', '.docx'];
 
+  console.log('Validating file:', file.name, 'Size:', file.size, 'Type:', file.type);
+
   if (file.size > maxSize) {
     return {
       valid: false,
@@ -141,5 +175,6 @@ export function validateFile(file: File): { valid: boolean; error?: string } {
     };
   }
 
+  console.log('File validation passed');
   return { valid: true };
 }
