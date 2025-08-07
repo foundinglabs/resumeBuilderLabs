@@ -128,81 +128,86 @@ async function getPdfParser() {
 async function processPDFBuffer(buffer) {
   try {
     console.log("Processing PDF buffer of size:", buffer.length);
-    const pdf = await getPdfParser();
-    const options = {
-      // Try to handle more PDF versions
-      version: "v2.0.550",
-      // Increase timeout for complex PDFs
-      max: 0,
-      // Try to extract text even from problematic PDFs
-      normalizeWhitespace: true,
-      disableCombineTextItems: false
-    };
-    const data = await pdf(buffer, options);
-    if (!data || !data.text) {
-      return {
-        success: false,
-        error: "No text could be extracted from the PDF file. The PDF may be image-based or encrypted."
-      };
-    }
-    const cleanText = data.text.replace(/\n\s*\n/g, "\n").replace(/\s+/g, " ").trim();
-    if (cleanText.length < 50) {
-      return {
-        success: false,
-        error: "PDF appears to contain very little text content. It may be image-based, encrypted, or in an unsupported format. Try converting to DOCX format for better compatibility."
-      };
-    }
-    console.log(`Successfully extracted ${cleanText.length} characters from PDF`);
-    return {
-      success: true,
-      text: cleanText,
-      metadata: {
-        pages: data.numpages,
-        title: data.info?.Title,
-        author: data.info?.Author,
-        subject: data.info?.Subject,
-        keywords: data.info?.Keywords,
-        creator: data.info?.Creator,
-        producer: data.info?.Producer,
-        creationDate: data.info?.CreationDate,
-        modificationDate: data.info?.ModDate
+    let data;
+    try {
+      const pdf = await getPdfParser();
+      data = await pdf(buffer, {
+        normalizeWhitespace: true,
+        disableCombineTextItems: false
+      });
+      if (data?.text?.trim().length > 50) {
+        const cleanText = data.text.replace(/\n\s*\n/g, "\n").replace(/\s+/g, " ").trim();
+        return {
+          success: true,
+          text: cleanText,
+          metadata: {
+            pages: data.numpages,
+            title: data.info?.Title,
+            author: data.info?.Author,
+            subject: data.info?.Subject,
+            keywords: data.info?.Keywords,
+            creator: data.info?.Creator,
+            producer: data.info?.Producer,
+            creationDate: data.info?.CreationDate ? new Date(data.info.CreationDate) : void 0,
+            modificationDate: data.info?.ModDate ? new Date(data.info.ModDate) : void 0
+          }
+        };
       }
-    };
-  } catch (error) {
-    console.error("Error processing PDF:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-    if (errorMessage.includes("password") || errorMessage.includes("encrypted")) {
+    } catch (parseError) {
+      console.warn("pdf-parse failed, trying pdfjs-dist...", parseError);
+    }
+    try {
+      const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.js");
+      const uint8Array = new Uint8Array(buffer);
+      const loadingTask = pdfjsLib.getDocument({ data: uint8Array });
+      const pdfDocument = await loadingTask.promise;
+      let fullText = "";
+      for (let i = 1; i <= pdfDocument.numPages; i++) {
+        const page = await pdfDocument.getPage(i);
+        const content = await page.getTextContent();
+        const pageText = content.items.map((item) => item.str || "").join(" ");
+        fullText += pageText + "\n";
+      }
+      const cleanText = fullText.replace(/\n\s*\n/g, "\n").replace(/\s+/g, " ").trim();
+      if (cleanText.length < 50) {
+        return {
+          success: false,
+          error: "PDF appears to be image-based or scanned. Little text could be extracted. Please convert to DOCX using SmallPDF.com or ILovePDF.com."
+        };
+      }
       return {
-        success: false,
-        error: "This PDF is password-protected or encrypted. Please remove the password and try again."
+        success: true,
+        text: cleanText,
+        metadata: {
+          pages: pdfDocument.numPages
+        }
       };
-    } else if (errorMessage.includes("Invalid") || errorMessage.includes("corrupt")) {
+    } catch (fallbackError) {
+      console.error("pdfjs-dist fallback also failed:", fallbackError);
       return {
         success: false,
-        error: "The PDF file appears to be corrupted or invalid. Please try a different file."
-      };
-    } else if (errorMessage.includes("not supported") || errorMessage.includes("version")) {
-      return {
-        success: false,
-        error: "This PDF version is not supported by our current parser. Please try one of these solutions:\n\n1. Convert the PDF to DOCX format using an online converter\n2. Open the PDF in a word processor and save as DOCX\n3. Try a different PDF file\n\nDOCX files work much better with our system!"
-      };
-    } else if (errorMessage.includes("timeout") || errorMessage.includes("max")) {
-      return {
-        success: false,
-        error: "PDF processing timed out. The file may be too complex or large. Try converting to DOCX format for better results."
-      };
-    } else {
-      return {
-        success: false,
-        error: `PDF processing failed: ${errorMessage}. This usually means the PDF format is not compatible. Please try converting to DOCX format using an online converter like:
-
-\u2022 SmallPDF.com
-\u2022 ILovePDF.com
-\u2022 PDFtoWord.com
-
-DOCX files work perfectly with our system!`
+        error: "Failed to parse PDF: unsupported format or corrupted file. Please convert to DOCX using an online converter."
       };
     }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (message.includes("password") || message.includes("encrypted")) {
+      return {
+        success: false,
+        error: "This PDF is password-protected. Please remove the password and try again."
+      };
+    }
+    if (message.includes("corrupt") || message.includes("invalid")) {
+      return {
+        success: false,
+        error: "The PDF file is corrupted or invalid. Please try a different file."
+      };
+    }
+    console.error("Unexpected PDF processing error:", error);
+    return {
+      success: false,
+      error: "We could not extract text from this PDF. It may be scanned, complex, or in an unsupported format.\n\n\u2705 Try this:\n1. Go to https://smallpdf.com/pdf-to-word\n2. Convert your PDF to DOCX\n3. Upload the DOCX file instead\n\nDOCX files work perfectly with our system!"
+    };
   }
 }
 function validatePDFFile(file) {
@@ -928,30 +933,57 @@ async function registerRoutes(app2) {
     });
   });
   app2.post("/api/pdf/generate-puppeteer", generatePDFWithPuppeteer);
-  app2.post("/api/pdf/extract", upload.single("pdf"), async (req, res) => {
+  app2.post("/api/pdf/extract", async (req, res) => {
     try {
-      if (!req.file) {
-        return res.status(400).json({
-          success: false,
-          error: "No PDF file provided"
-        });
-      }
-      console.log("Processing PDF upload:", req.file.originalname, "Size:", req.file.size);
-      const validation = validatePDFFile(req.file);
-      if (!validation.valid) {
-        return res.status(400).json({
-          success: false,
-          error: validation.error
-        });
-      }
-      const result = await processPDFBuffer(req.file.buffer);
-      if (result.success) {
-        console.log("PDF processing successful for:", req.file.originalname);
-        res.json(result);
-      } else {
-        console.log("PDF processing failed for:", req.file.originalname, "Error:", result.error);
-        res.status(422).json(result);
-      }
+      upload.single("pdf")(req, res, async (err) => {
+        if (err) {
+          console.error("Multer upload error:", err);
+          if (err.code === "LIMIT_FILE_SIZE") {
+            return res.status(400).json({
+              success: false,
+              error: "File size too large. Maximum size is 10MB."
+            });
+          }
+          if (err.code === "LIMIT_UNEXPECTED_FILE") {
+            return res.status(400).json({
+              success: false,
+              error: 'Unexpected file field. Please upload a PDF file using the field name "pdf".'
+            });
+          }
+          if (err.message && err.message.includes("Unexpected field")) {
+            return res.status(400).json({
+              success: false,
+              error: 'Invalid file field. Please upload a PDF file using the field name "pdf".'
+            });
+          }
+          return res.status(400).json({
+            success: false,
+            error: "File upload error. Please ensure you are uploading a valid PDF file."
+          });
+        }
+        if (!req.file) {
+          return res.status(400).json({
+            success: false,
+            error: "No PDF file provided. Please select a PDF file to upload."
+          });
+        }
+        console.log("Processing PDF upload:", req.file.originalname, "Size:", req.file.size);
+        const validation = validatePDFFile(req.file);
+        if (!validation.valid) {
+          return res.status(400).json({
+            success: false,
+            error: validation.error
+          });
+        }
+        const result = await processPDFBuffer(req.file.buffer);
+        if (result.success) {
+          console.log("PDF processing successful for:", req.file.originalname);
+          res.json(result);
+        } else {
+          console.log("PDF processing failed for:", req.file.originalname, "Error:", result.error);
+          res.status(422).json(result);
+        }
+      });
     } catch (error) {
       console.error("PDF processing endpoint error:", error);
       res.status(500).json({

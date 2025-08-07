@@ -90,14 +90,6 @@ export interface ResumeData {
     description?: string;
   }>;
   
-  // Publications
-  publications?: Array<{
-    title: string;
-    publisher: string;
-    date: string;
-    link?: string;
-  }>;
-  
   // Languages spoken
   languages?: Array<{
     language: string;
@@ -165,167 +157,90 @@ export interface ResumeData {
   atsScore?: number;
 }
 
-const initialResumeData: ResumeData = {
-  personalInfo: {
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@email.com",
-    phone: "(555) 123-4567",
-    address: "San Francisco, CA",
-  },
-  summary: "Experienced software engineer with 5+ years of expertise in full-stack development. Passionate about creating scalable solutions and leading technical teams to deliver high-quality products.",
-  careerObjective: "To leverage my technical and leadership skills to build impactful software solutions that enhance user experience and business performance in a growth-focused organization.",
-  experience: [{
-    title: "Senior Software Engineer",
-    company: "Tech Solutions Inc.",
-    startDate: "2022",
-    endDate: "Present",
-    description: "Led development of microservices architecture\nManaged team of 4 junior developers\nImproved application performance by 40%",
-    location: "San Francisco, CA",
-    employment_type: "Full-time",
-  }],
-  education: [{
-    degree: "Bachelor of Science in Computer Science",
-    school: "University of California, Berkeley",
-    graduationYear: "2019",
-    gpa: "3.8",
-    field_of_study: "Computer Science",
-    location: "Berkeley, CA",
-    honors: "Magna Cum Laude",
-  }],
-  skills: ["JavaScript", "React", "Node.js", "Python", "SQL", "AWS", "Docker", "Git"],
-  projectSkills: ["React", "Redux", "MongoDB", "GraphQL", "Express.js"],
-  template: "azurill",
-  field: "",
-  socialLinks: {
-    linkedin: "https://linkedin.com/in/johndoe",
-    github: "https://github.com/johndoe",
-    portfolio: "https://johndoe.dev",
-    website: "https://johndoe.dev",
-  },
-  projects: [
-    {
-      title: "Multi-vendor Marketplace Backend",
-      description: "Built RESTful APIs and payment processing infrastructure for scalable e-commerce platform serving 1000+ vendors.",
-      technologies: ["Node.js", "Express", "MongoDB", "Stripe API", "Redis", "JWT"],
-      link: "https://ecommerce-demo.dev",
-      duration: "8 months",
+function mapDefaultResumeToResumeData(defaultResume: any): ResumeData {
+  // Map the defaultResume structure to ResumeData structure for the builder
+  return {
+    personalInfo: {
+      firstName: defaultResume.basics?.name?.split(' ')[0] || '',
+      lastName: defaultResume.basics?.name?.split(' ').slice(1).join(' ') || '',
+      email: defaultResume.basics?.email || '',
+      phone: defaultResume.basics?.phone || '',
+      address: defaultResume.basics?.location || '',
     },
-    {
-      title: "E-commerce Platform",
-      description: "Developed scalable backend services and integrated Stripe payments for a multi-vendor marketplace.",
-      technologies: ["Node.js", "MongoDB", "Express", "Stripe API"],
-      link: "https://ecommerce-demo.dev",
-      duration: "2022"
+    summary: defaultResume.sections?.summary?.content || '',
+    experience: (defaultResume.sections?.experience?.items || []).map((item: any) => ({
+      title: item.position,
+      company: item.company,
+      startDate: item.date?.split(' - ')[0] || '',
+      endDate: item.date?.split(' - ')[1] || '',
+      description: item.summary || '',
+      location: item.location || '',
+      employment_type: '',
+    })),
+    education: (defaultResume.sections?.education?.items || []).map((item: any) => ({
+      degree: item.studyType,
+      school: item.institution,
+      graduationYear: item.date,
+      gpa: item.score,
+      field_of_study: item.area,
+      location: item.location,
+      honors: '',
+    })),
+    skills: (defaultResume.sections?.skills?.items || []).map((item: any) => item.name),
+    projectSkills: [],
+    template: 'azurill',
+    field: '',
+    socialLinks: {
+      linkedin: defaultResume.basics?.customFields?.find((f: any) => f.name === 'LinkedIn')?.value || '',
+      github: defaultResume.basics?.customFields?.find((f: any) => f.name === 'GitHub')?.value || '',
+      portfolio: defaultResume.basics?.url?.href || '',
+      website: defaultResume.basics?.url?.href || '',
     },
-  ],
-  awards: [
-    {
-      title: "Top Innovator Award",
-      issuer: "TechConf 2023",
-      date: "2023",
-      description: "Awarded for developing a real-time code collaboration tool.",
+    projects: (defaultResume.sections?.projects?.items || []).map((item: any) => ({
+      title: item.name,
+      description: item.description,
+      technologies: item.keywords,
+      link: item.url?.href,
+      duration: item.date,
+    })),
+    awards: (defaultResume.sections?.awards?.items || []).map((item: any) => ({
+      title: item.title,
+      issuer: item.awarder,
+      date: item.date,
+      description: item.description,
+    })),
+    languages: (defaultResume.sections?.languages?.items || []).map((item: any) => ({
+      language: item.name,
+      proficiency: item.description,
+    })),
+    certifications: (defaultResume.sections?.certifications?.items || []).map((item: any) => ({
+      name: item.name,
+      issuer: item.issuer,
+      date: item.date,
+      credential_id: item.credential_id,
+    })),
+    courses: [],
+    internships: [],
+    freelanceWork: [],
+    volunteerWork: (defaultResume.sections?.volunteer?.items || []).map((item: any) => ({
+      role: item.position,
+      organization: item.organization,
+      startDate: item.date,
+      endDate: '',
+      description: item.summary,
+    })),
+    softSkills: [],
+    technicalSkills: {
+      programming_languages: [],
+      frameworks: [],
+      tools: [],
+      databases: [],
+      cloud_platforms: [],
     },
-    {
-      title: "Employee of the Year",
-      issuer: "Tech Solutions Inc.",
-      date: "2022",
-      description: "Recognized for outstanding performance and leadership.",
-    },
-  ],
-  publications: [
-    {
-      title: "Optimizing React Apps for Performance",
-      publisher: "DevTech Journal",
-      date: "2022-10",
-      link: "https://devtechjournal.com/react-optimization",
-    },
-    {
-      title: "Microservices in Node.js",
-      publisher: "Code Magazine",
-      date: "2021-06",
-      link: "https://codemag.com/microservices-nodejs",
-    },
-  ],
-  languages: [
-    {
-      language: "English",
-      proficiency: "Native",
-    },
-    {
-      language: "Spanish",
-      proficiency: "Professional",
-    },
-  ],
-  certifications: [
-    {
-      name: "AWS Certified Developer – Associate",
-      issuer: "Amazon Web Services",
-      date: "2023",
-      credential_id: "AWS-123456"
-    },
-    {
-      name: "Certified Kubernetes Application Developer",
-      issuer: "Cloud Native Computing Foundation",
-      date: "2022",
-      credential_id: "CKAD-654321"
-    },
-  ],
-  courses: [
-    {
-      title: "Advanced JavaScript Concepts",
-      provider: "Udemy",
-      date: "2022",
-    },
-    {
-      title: "Docker & Kubernetes for Developers",
-      provider: "Coursera",
-      date: "2023",
-    },
-  ],
-  internships: [
-    {
-      company: "DevLaunchpad",
-      title: "Software Engineering Intern",
-      startDate: "2018-06",
-      endDate: "2018-08",
-      location: "Remote",
-      description: "Built internal tools using React and Firebase\nContributed to open-source bug fixes\nLearned agile practices and SCRUM",
-    },
-  ],
-  freelanceWork: [
-    {
-      client: "StartUply",
-      title: "Freelance Web Developer",
-      startDate: "2021-01",
-      endDate: "2021-05",
-      description: "Developed a landing page and blog for a SaaS startup\nHandled mobile responsiveness and SEO optimization",
-    },
-  ],
-  volunteerWork: [
-    {
-      organization: "CodeForGood",
-      role: "Volunteer Mentor",
-      startDate: "2020",
-      endDate: "Present",
-      description: "Mentor young developers on Git, open-source, and JavaScript\nContributed to community education workshops",
-    },
-  ],
-  softSkills: [
-    "Team Leadership",
-    "Communication",
-    "Problem Solving",
-    "Adaptability",
-    "Time Management",
-  ],
-  technicalSkills: {
-    programming_languages: ["JavaScript", "Python", "TypeScript", "SQL"],
-    frameworks: ["React", "Node.js", "Express", "Next.js"],
-    tools: ["Git", "Docker", "Postman", "VS Code"],
-    databases: ["MongoDB", "PostgreSQL", "Firebase"],
-    cloud_platforms: ["AWS", "Vercel", "Heroku"],
-  },
-};
+  };
+}
+
+const initialResumeData: ResumeData = mapDefaultResumeToResumeData(defaultResume);
 
 // Industry/Field options for targeted resume generation
 const INDUSTRY_OPTIONS = [
@@ -427,11 +342,6 @@ function mapTopLevelToSections(resumeData: any) {
         ...(sections.certifications || {}),
         items: sections.certifications?.items || resumeData.certifications || [],
         visible: sections.certifications?.visible !== false,
-      },
-      publications: {
-        ...(sections.publications || {}),
-        items: sections.publications?.items || resumeData.publications || [],
-        visible: sections.publications?.visible !== false,
       },
       volunteer: {
         ...(sections.volunteer || {}),
