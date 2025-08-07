@@ -158,19 +158,20 @@ export function ResumeForm({ resumeData, onChange }: ResumeFormProps) {
   return (
     <div className="w-full">
       {/* Custom Tab Navigation */}
-      <div className="grid grid-cols-2 sm:flex sm:flex-nowrap gap-1 sm:space-x-1 bg-gray-100 dark:bg-slate-700 p-1 rounded-lg mb-4 sm:mb-6">
+      <div className="grid grid-cols-2 sm:flex sm:flex-nowrap gap-1 sm:space-x-1 bg-gray-100 dark:bg-slate-700 p-1 rounded-lg mb-4 sm:mb-6 overflow-x-auto whitespace-nowrap">
         {[
           { id: "personal", label: "Personal", icon: Users },
           { id: "experience", label: "Experience", icon: Briefcase },
           { id: "skills", label: "Skills", icon: Code },
           { id: "additional", label: "Additional", icon: Award },
+          { id: "others", label: "Others", icon: BookOpen },
         ].map((tab) => {
           const Icon = tab.icon;
           return (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center justify-center px-2 sm:px-3 lg:px-4 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors ${
+              className={`min-w-max flex items-center justify-center px-2 sm:px-3 lg:px-4 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors ${
                 activeTab === tab.id
                   ? "bg-white dark:bg-slate-600 text-blue-600 dark:text-blue-400 shadow-sm"
                   : "text-gray-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400"
@@ -827,6 +828,244 @@ export function ResumeForm({ resumeData, onChange }: ResumeFormProps) {
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Add Certification
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === "others" && (
+        <div className="space-y-8">
+          {/* Awards */}
+          <div>
+            <h2 className="text-2xl font-semibold text-slate-800 dark:text-white mb-4 flex items-center">
+              <Award className="mr-2 h-6 w-6" />
+              Awards
+            </h2>
+            <div className="space-y-4 overflow-x-auto">
+              {(resumeData.awards || []).map((award, index) => (
+                <Card key={index} className="bg-slate-50 dark:bg-slate-700 w-full">
+                  <CardContent className="p-4 sm:p-6 w-full">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 gap-y-2">
+                      <h4 className="font-medium dark:text-white text-base sm:text-lg">Award {index + 1}</h4>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeArrayItem("awards", index)}
+                        className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4">
+                      <div>
+                        <Label className="text-foreground dark:text-white">Title</Label>
+                        <Input
+                          className="w-full"
+                          value={award.title || ""}
+                          onChange={e => updateArrayField("awards", index, "title", e.target.value)}
+                          placeholder="Award Title"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-foreground dark:text-white">Issuer</Label>
+                        <Input
+                          className="w-full"
+                          value={award.issuer || ""}
+                          onChange={e => updateArrayField("awards", index, "issuer", e.target.value)}
+                          placeholder="Awarding Organization"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-foreground dark:text-white">Date</Label>
+                        <Input
+                          className="w-full"
+                          value={award.date || ""}
+                          onChange={e => updateArrayField("awards", index, "date", e.target.value)}
+                          placeholder="2023"
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <Label className="text-foreground dark:text-white">Description</Label>
+                        <Textarea
+                          className="w-full resize-none"
+                          value={award.description || ""}
+                          onChange={e => updateArrayField("awards", index, "description", e.target.value)}
+                          placeholder="Description of the award..."
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => addArrayItem("awards", { title: "", issuer: "", date: "", description: "" })}
+                className="w-full"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Add Award
+              </Button>
+            </div>
+          </div>
+
+          {/* Volunteering */}
+          <div>
+            <h2 className="text-2xl font-semibold text-slate-800 dark:text-white mb-4 flex items-center">
+              <Users className="mr-2 h-6 w-6" />
+              Volunteering
+            </h2>
+            <div className="space-y-4">
+              {(resumeData.volunteerWork || []).map((vol, index) => (
+                <Card key={index} className="bg-slate-50 dark:bg-slate-700">
+                  <CardContent className="p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <h4 className="font-medium dark:text-white">Volunteering {index + 1}</h4>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeArrayItem("volunteerWork", index)}
+                        className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-foreground dark:text-white">Role</Label>
+                        <Input
+                          value={vol.role || ""}
+                          onChange={e => updateArrayField("volunteerWork", index, "role", e.target.value)}
+                          placeholder="Volunteer Role"
+                          className="bg-background dark:bg-slate-700 border-border dark:border-slate-600 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-slate-400"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-foreground dark:text-white">Organization</Label>
+                        <Input
+                          value={vol.organization || ""}
+                          onChange={e => updateArrayField("volunteerWork", index, "organization", e.target.value)}
+                          placeholder="Organization Name"
+                          className="bg-background dark:bg-slate-700 border-border dark:border-slate-600 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-slate-400"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-foreground dark:text-white">Start Date</Label>
+                        <Input
+                          value={vol.startDate || ""}
+                          onChange={e => updateArrayField("volunteerWork", index, "startDate", e.target.value)}
+                          placeholder="2022"
+                          className="bg-background dark:bg-slate-700 border-border dark:border-slate-600 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-slate-400"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-foreground dark:text-white">End Date</Label>
+                        <Input
+                          value={vol.endDate || ""}
+                          onChange={e => updateArrayField("volunteerWork", index, "endDate", e.target.value)}
+                          placeholder="Present"
+                          className="bg-background dark:bg-slate-700 border-border dark:border-slate-600 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-slate-400"
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <Label className="text-foreground dark:text-white">Description</Label>
+                        <Textarea
+                          value={vol.description || ""}
+                          onChange={e => updateArrayField("volunteerWork", index, "description", e.target.value)}
+                          placeholder="Describe your volunteering experience..."
+                          className="resize-none bg-background dark:bg-slate-700 border-border dark:border-slate-600 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-slate-400"
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => addArrayItem("volunteerWork", { role: "", organization: "", startDate: "", endDate: "", description: "" })}
+                className="w-full"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Add Volunteering
+              </Button>
+            </div>
+          </div>
+
+          {/* Publications */}
+          <div>
+            <h2 className="text-2xl font-semibold text-slate-800 dark:text-white mb-4 flex items-center">
+              <BookOpen className="mr-2 h-6 w-6" />
+              Publications
+            </h2>
+            <div className="space-y-4">
+              {(resumeData.publications || []).map((pub, index) => (
+                <Card key={index} className="bg-slate-50 dark:bg-slate-700">
+                  <CardContent className="p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <h4 className="font-medium dark:text-white">Publication {index + 1}</h4>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeArrayItem("publications", index)}
+                        className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-foreground dark:text-white">Title</Label>
+                        <Input
+                          value={pub.title || ""}
+                          onChange={e => updateArrayField("publications", index, "title", e.target.value)}
+                          placeholder="Publication Title"
+                          className="bg-background dark:bg-slate-700 border-border dark:border-slate-600 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-slate-400"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-foreground dark:text-white">Publisher</Label>
+                        <Input
+                          value={pub.publisher || ""}
+                          onChange={e => updateArrayField("publications", index, "publisher", e.target.value)}
+                          placeholder="Publisher Name"
+                          className="bg-background dark:bg-slate-700 border-border dark:border-slate-600 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-slate-400"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-foreground dark:text-white">Date</Label>
+                        <Input
+                          value={pub.date || ""}
+                          onChange={e => updateArrayField("publications", index, "date", e.target.value)}
+                          placeholder="2023-01"
+                          className="bg-background dark:bg-slate-700 border-border dark:border-slate-600 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-slate-400"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-foreground dark:text-white">Link</Label>
+                        <Input
+                          value={pub.link || ""}
+                          onChange={e => updateArrayField("publications", index, "link", e.target.value)}
+                          placeholder="https://publication-link.com"
+                          className="bg-background dark:bg-slate-700 border-border dark:border-slate-600 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-slate-400"
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => addArrayItem("publications", { title: "", publisher: "", date: "", link: "" })}
+                className="w-full"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Add Publication
               </Button>
             </div>
           </div>

@@ -691,7 +691,7 @@ export default function Builder() {
          </div>
        </nav>
 
-             <div className="w-[95vw] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+             <div className="w-[98vw] mx-auto px-2 sm:px-3 lg:px-4 py-8">
          <div className="mb-8">
            <h1 className="text-3xl font-bold text-slate-800 dark:text-white">Resume Builder</h1>
            <p className="text-slate-600 dark:text-slate-300 mt-2">Create your professional resume with live preview</p>
@@ -700,9 +700,9 @@ export default function Builder() {
         {/* Stacked layout: Form on top, Preview full width below */}
         <div className="flex flex-col lg:flex-row gap-2 overflow-x-hidden">
                      {/* Form Panel */}
-           <div className="w-full lg:w-2/5 overflow-x-hidden mb-4 lg:mb-0">
+           <div className="w-full lg:w-1/2 overflow-x-hidden mb-4 lg:mb-0">
              <Card className="shadow-xl border-0 bg-background/80 backdrop-blur-sm dark:bg-slate-800/90 dark:border-slate-700">
-               <CardContent className="p-8">
+               <CardContent className="p-4">
                  <div className="mb-6">
                    <label htmlFor="title" className="block text-sm font-medium text-foreground dark:text-white mb-2">
                      Resume Title
