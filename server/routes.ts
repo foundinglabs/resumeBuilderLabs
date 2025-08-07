@@ -128,36 +128,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/pdf/generate-puppeteer", generatePDFWithPuppeteer);
 
   // PDF Processing API endpoint
-  app.post("/api/pdf/extract", upload.single('pdf'), async (req, res) => {
+  app.post("/api/pdf/extract", async (req, res) => {
     try {
-      if (!req.file) {
-        return res.status(400).json({ 
-          success: false, 
-          error: "No PDF file provided" 
-        });
-      }
+      // Handle file upload with proper error handling
+      upload.single('pdf')(req, res, async (err) => {
+        if (err) {
+          console.error('Multer upload error:', err);
+          
+          // Handle specific Multer errors
+          if (err.code === 'LIMIT_FILE_SIZE') {
+            return res.status(400).json({
+              success: false,
+              error: 'File size too large. Maximum size is 10MB.'
+            });
+          }
+          
+          if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+            return res.status(400).json({
+              success: false,
+              error: 'Unexpected file field. Please upload a PDF file using the field name "pdf".'
+            });
+          }
+          
+          if (err.message && err.message.includes('Unexpected field')) {
+            return res.status(400).json({
+              success: false,
+              error: 'Invalid file field. Please upload a PDF file using the field name "pdf".'
+            });
+          }
+          
+          return res.status(400).json({
+            success: false,
+            error: 'File upload error. Please ensure you are uploading a valid PDF file.'
+          });
+        }
+        
+        // Check if file was uploaded
+        if (!req.file) {
+          return res.status(400).json({ 
+            success: false, 
+            error: "No PDF file provided. Please select a PDF file to upload." 
+          });
+        }
 
-      console.log('Processing PDF upload:', req.file.originalname, 'Size:', req.file.size);
+        console.log('Processing PDF upload:', req.file.originalname, 'Size:', req.file.size);
 
-      // Validate the uploaded file
-      const validation = validatePDFFile(req.file);
-      if (!validation.valid) {
-        return res.status(400).json({
-          success: false,
-          error: validation.error
-        });
-      }
+        // Validate the uploaded file
+        const validation = validatePDFFile(req.file);
+        if (!validation.valid) {
+          return res.status(400).json({
+            success: false,
+            error: validation.error
+          });
+        }
 
-      // Process the PDF buffer
-      const result = await processPDFBuffer(req.file.buffer);
+        // Process the PDF buffer
+        const result = await processPDFBuffer(req.file.buffer);
 
-      if (result.success) {
-        console.log('PDF processing successful for:', req.file.originalname);
-        res.json(result);
-      } else {
-        console.log('PDF processing failed for:', req.file.originalname, 'Error:', result.error);
-        res.status(422).json(result);
-      }
+        if (result.success) {
+          console.log('PDF processing successful for:', req.file.originalname);
+          res.json(result);
+        } else {
+          console.log('PDF processing failed for:', req.file.originalname, 'Error:', result.error);
+          res.status(422).json(result);
+        }
+      });
     } catch (error) {
       console.error('PDF processing endpoint error:', error);
       res.status(500).json({
