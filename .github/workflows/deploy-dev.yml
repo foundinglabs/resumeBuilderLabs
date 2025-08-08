@@ -1,0 +1,57 @@
+name: Deploy to Dev
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: Optional image tag (defaults to commit SHA)
+        required: false
+        type: string
+
+concurrency:
+  group: dev-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up gcloud auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Install gcloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          install_components: 'beta'
+
+      - name: Provide env file for dev from secret
+        shell: bash
+        run: |
+          mkdir -p envs
+          if [[ -n "${{ secrets.DEV_ENV_FILE }}" ]]; then
+            echo "Writing envs/dev.env from secret"
+            printf "%s" "${{ secrets.DEV_ENV_FILE }}" > envs/dev.env
+          elif [[ -n "${{ secrets.PRODUCTION_ENV }}" ]]; then
+            echo "Writing envs/dev.env from legacy secret"
+            printf "%s" "${{ secrets.PRODUCTION_ENV }}" > envs/dev.env
+          else
+            echo "Error: DEV_ENV_FILE secret not set" >&2
+            exit 1
+          fi
+          echo "Dev env keys:"; cut -d= -f1 envs/dev.env | sed 's/.*/  - &/'
+
+      - name: Build and Push Image
+        env:
+          GITHUB_REF: ${{ github.ref }}
+          GITHUB_SHA: ${{ inputs.image_tag || github.sha }}
+        run: |
+          chmod +x ./deploy.sh
+          ./deploy.sh dev 
