@@ -160,7 +160,7 @@ export interface ResumeData {
 function mapDefaultResumeToResumeData(defaultResume: any): ResumeData {
   // Map the defaultResume structure to ResumeData structure for the builder
   return {
-    personalInfo: {
+  personalInfo: {
       firstName: defaultResume.basics?.name?.split(' ')[0] || '',
       lastName: defaultResume.basics?.name?.split(' ').slice(1).join(' ') || '',
       email: defaultResume.basics?.email || '',
@@ -190,7 +190,7 @@ function mapDefaultResumeToResumeData(defaultResume: any): ResumeData {
     projectSkills: [],
     template: 'azurill',
     field: '',
-    socialLinks: {
+  socialLinks: {
       linkedin: defaultResume.basics?.customFields?.find((f: any) => f.name === 'LinkedIn')?.value || '',
       github: defaultResume.basics?.customFields?.find((f: any) => f.name === 'GitHub')?.value || '',
       portfolio: defaultResume.basics?.url?.href || '',
@@ -230,7 +230,7 @@ function mapDefaultResumeToResumeData(defaultResume: any): ResumeData {
       description: item.summary,
     })),
     softSkills: [],
-    technicalSkills: {
+  technicalSkills: {
       programming_languages: [],
       frameworks: [],
       tools: [],
