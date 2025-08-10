@@ -469,6 +469,21 @@ export default function Builder() {
     enabled: !!id,
   });
 
+  // Check for and restore pending resume data after login
+  useEffect(() => {
+    const pendingResumeData = localStorage.getItem('pending_resume_data');
+    if (pendingResumeData) {
+      try {
+        const parsedData = JSON.parse(pendingResumeData);
+        setResumeData(parsedData);
+        // Clear the pending data after restoring
+        localStorage.removeItem('pending_resume_data');
+      } catch (error) {
+        console.error('Error restoring pending resume data:', error);
+      }
+    }
+  }, []);
+
   // Load existing resume data
   useEffect(() => {
     if (existingResume) {

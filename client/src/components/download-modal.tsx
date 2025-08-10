@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Download, Loader2, CheckCircle2, FileText, File, Code } from 'lucide-react';
+import { Download, Loader2, CheckCircle2, FileText, File, Code, LogIn, UserPlus, X, Mail } from 'lucide-react';
+import { FcGoogle } from 'react-icons/fc';
 import { ResumeData } from '@/pages/builder';
 import { generatePDFWithPuppeteer } from '@/lib/pdf-utils-puppeteer';
 import { generateDOCX } from '@/lib/docx-utils';
@@ -10,6 +11,8 @@ import { generateJSON } from '@/lib/json-utils';
 import { MagicCard } from './ui/magic-card';
 import { ShimmerButton } from './ui/shimmer-button';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/hooks/useAuth';
+import { useLocation, Link } from 'wouter';
 
 interface DownloadModalProps {
   resumeData: ResumeData;
@@ -27,9 +30,20 @@ interface DownloadFormat {
 
 export function DownloadModal({ resumeData, className, children }: DownloadModalProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   const [downloadingFormat, setDownloadingFormat] = useState<string | null>(null);
   const [downloadSuccess, setDownloadSuccess] = useState<string | null>(null);
   const [selectedFormat, setSelectedFormat] = useState<string>('pdf-puppeteer');
+  const { user, signIn } = useAuth();
+  const [, setLocation] = useLocation();
+
+  const handleOpenChange = (open: boolean) => {
+    if (!user) {
+      setShowAuthPrompt(true);
+      return;
+    }
+    setIsOpen(open);
+  };
 
   const formats: DownloadFormat[] = [
     {
@@ -88,14 +102,123 @@ export function DownloadModal({ resumeData, className, children }: DownloadModal
     }
   };
 
+  const handleDownloadClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!user) {
+      setShowAuthPrompt(true);
+      return;
+    }
+    setIsOpen(true);
+  };
+
+  const handleAuthAction = async (action: 'login' | 'signup' | 'google') => {
+    // Save current resume data to localStorage before auth redirect
+    if (resumeData) {
+      localStorage.setItem('pending_resume_data', JSON.stringify(resumeData));
+    }
+    
+    if (action === 'google') {
+      try {
+        // Trigger Google OAuth sign-in
+        await signIn();
+        setShowAuthPrompt(false);
+        setIsOpen(true);
+      } catch (error) {
+        console.error('Google sign in failed:', error);
+      }
+      return;
+    }
+    
+    // Store the current path to redirect back after login/signup
+    localStorage.setItem('auth_redirect_path', window.location.pathname);
+    setLocation(`/${action}`);
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <>
+      {/* Auth Prompt Dialog */}
+      <Dialog open={showAuthPrompt} onOpenChange={setShowAuthPrompt}>
+        <DialogContent className="sm:max-w-md p-0 border-0 overflow-hidden">
+          <div className="relative">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setShowAuthPrompt(false)}
+              className="absolute right-2 top-2 h-8 w-8 p-0 rounded-full"
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close</span>
+            </Button>
+          </div>
+          <div className="p-6 pt-10">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold text-center mb-2">Sign In to Download</DialogTitle>
+              <DialogDescription className="text-center text-sm text-muted-foreground">
+                Create an account or sign in to download your resume and save your progress.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="mt-6 space-y-3">
+              <Button 
+                onClick={() => handleAuthAction('google')}
+                variant="outline"
+                className="w-full justify-center space-x-2 border border-gray-300 hover:bg-gray-50"
+              >
+                <FcGoogle className="h-5 w-5" />
+                <span>Continue with Google</span>
+              </Button>
+              
+              <div className="relative my-4">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs">
+                  <span className="bg-background px-2 text-muted-foreground">
+                    or continue with email
+                  </span>
+                </div>
+              </div>
+              
+              <Button 
+                onClick={() => handleAuthAction('login')}
+                variant="outline"
+                className="w-full justify-center space-x-2"
+              >
+                <Mail className="h-4 w-4" />
+                <span>Sign in with Email</span>
+              </Button>
+              
+              <div className="text-center text-sm text-muted-foreground mt-4">
+                <span>Don't have an account? </span>
+                <button 
+                  onClick={() => handleAuthAction('signup')}
+                  className="text-blue-600 hover:underline font-medium"
+                >
+                  Sign up
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="bg-gray-50 px-6 py-4 border-t">
+            <p className="text-xs text-muted-foreground text-center">
+              By continuing, you agree to our Terms of Service and Privacy Policy
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Download Dialog */}
+      <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        {children || (
+        {children ? (
+          <div onClick={handleDownloadClick}>
+            {children}
+          </div>
+        ) : (
           <ShimmerButton 
             className={cn("h-10 px-6", className)}
             shimmerColor="#60a5fa"
             background="hsl(var(--primary))"
+            onClick={handleDownloadClick}
           >
             <Download className="w-4 h-4 mr-2" />
             Download Resume
@@ -208,6 +331,7 @@ export function DownloadModal({ resumeData, className, children }: DownloadModal
           </div>
         </div>
       </DialogContent>
-    </Dialog>
+      </Dialog>
+    </>
   );
 }

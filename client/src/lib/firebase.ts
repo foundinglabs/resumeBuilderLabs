@@ -2,10 +2,10 @@ import { Console } from 'console';
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut, onAuthStateChanged, User } from 'firebase/auth';
 
-console.log(import.meta.env, 'ENV VARS');
+
 
 // Check if Firebase environment variables are defined
-console.log(import.meta.env.VITE_FIREBASE_API_KEY, "first one")
+
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY ,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -15,7 +15,7 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-console.log(firebaseConfig, "HIMANSHU")
+
 
 // Check if all required Firebase config values are present
 const requiredConfigKeys = ['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId'];

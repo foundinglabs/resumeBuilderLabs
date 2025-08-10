@@ -18,8 +18,6 @@ export default function NotFound() {
         </CardContent>
       </Card>
       
-      {/* Footer */}
-      <Footer />
     </div>
   );
 }
