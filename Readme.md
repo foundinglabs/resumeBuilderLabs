@@ -46,3 +46,29 @@ npm run dev
   - `POST /api/pdf/generate-puppeteer` Server-side PDF generation
   - `GET /api/pdf/health` PDF service health
   - `POST /api/refine-resume` | `POST /api/resume/refine` AI-based resume refinement 
+
+## Testing
+
+- Install deps: `npm ci`
+- Run unit tests: `npm run test`
+- Watch mode: `npm run test:watch`
+- CI mode with coverage + JUnit: `npm run test:ci`
+
+Outputs:
+- Coverage reports in `coverage/` (HTML at `coverage/index.html`, LCOV at `coverage/lcov.info`)
+- JUnit report at `test-results/junit.xml`
+
+## CI
+
+A GitHub Actions workflow at `.github/workflows/ci.yml` runs on pushes and PRs to `dev` and `main`:
+- Installs deps, runs type-check, executes unit tests with coverage
+- Uploads artifacts: LCOV, HTML coverage, and JUnit report
+
+## Notes for backend tests
+
+- Tests use Vitest with Supertest against the Express app registered by `server/routes.ts`
+- External services are mocked:
+  - `server/storage.ts` (database I/O)
+  - `server/pdf-processor.ts` (PDF parsing)
+  - `server/pdf-service-puppeteer.ts` (Puppeteer PDF generation)
+- No real DB, Puppeteer, or API keys are required for tests 
