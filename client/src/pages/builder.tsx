@@ -406,36 +406,8 @@ export default function Builder() {
     }
     window.scrollTo(0, 0);
   }, []);
-  // Sync resumeData to global store on mount and every change
-  useEffect(() => {
-    // Check if current template is a Reactive-Resume template
-    const isReactiveResumeTemplate = ['azurill', 'bronzor', 'chikorita', 'ditto', 'gengar', 'glalie', 'kakuna', 'leafish', 'nosepass', 'onyx', 'pikachu', 'rhyhorn'].includes(resumeData.template);
-    
-    if (isReactiveResumeTemplate) {
-      // For Reactive-Resume templates, use the proper data mapping
-      try {
-        // Ensure address is always a string for compatibility
-        const compatibleData = {
-          ...resumeData,
-          personalInfo: {
-            ...resumeData.personalInfo,
-            address: resumeData.personalInfo.address || ''
-          }
-        };
-        const mappedData = mapResumeGeniusToReactiveResume(compatibleData, resumeData.template);
-        setArtboardResume(mappedData);
-      } catch (error) {
-        console.error('Error mapping data for Reactive-Resume template:', error);
-        // Fallback to original mapping
-        const normalized = mapTopLevelToSections(ensureBasics(resumeData));
-        setArtboardResume(normalized);
-      }
-    } else {
-      // For custom templates, use the original mapping
-      const normalized = mapTopLevelToSections(ensureBasics(resumeData));
-      setArtboardResume(normalized);
-    }
-  }, [resumeData, setArtboardResume]);
+  // Sync to store disabled for preview; templates consume props directly
+  useEffect(() => {}, [resumeData]);
 
   // Load template data when template parameter changes
   useEffect(() => {

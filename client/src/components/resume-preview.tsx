@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import type { ResumeData } from "@/pages/builder";
 import { templateService } from '@/services/template-service';
 import EnhancedReactiveResumeRenderer from './EnhancedReactiveResumeRenderer';
@@ -11,71 +11,75 @@ import { Overleaf } from "@/templates/overleaf";
 import { Elegant } from "@/templates/elegant";
 import { useArtboardStore } from "@/store/artboard-store";
 import { mapResumeGeniusToReactiveResume } from '@/utils/reactive-resume-mapper';
+import type { SectionKey } from '@/utils/reactive-resume-schema';
 
 interface ResumePreviewProps {
   resumeData: ResumeData;
 }
 
 export function ResumePreview({ resumeData }: ResumePreviewProps) {
-  const { personalInfo, summary, experience, education, skills, template } = resumeData;
+  const { template } = resumeData;
   
-  // Get the mapped data from the artboard store for Reactive-Resume templates
   const artboardResume = useArtboardStore((state) => state.resume);
   const setArtboardResume = useArtboardStore((state) => state.setResume);
 
-  // Custom templates that need artboard store data
   const customTemplates = ['classic', 'modern', 'stylish', 'compact', 'overleaf', 'elegant'];
-  
-  // Ensure artboard store is populated for custom templates (needed for PDF generation)
+
+  // Remount key to force full refresh on data/template changes
+  const [remountId, setRemountId] = useState(0);
   useEffect(() => {
-    if (customTemplates.includes(template) && resumeData) {
-      try {
-        // Cast to the expected type - mapResumeGeniusToReactiveResume handles the mapping internally
-        const mappedData = mapResumeGeniusToReactiveResume(resumeData as any, template);
-        if (mappedData) {
-          setArtboardResume(mappedData);
-        }
-      } catch (error) {
-        console.error('Error mapping data for custom template:', error);
-      }
+    setRemountId((id) => id + 1);
+  }, [template, resumeData]);
+  
+  // Compute mapped data for custom templates
+  const mappedCustomData = useMemo(() => {
+    if (!customTemplates.includes(template)) return null;
+    try {
+      return mapResumeGeniusToReactiveResume(resumeData as any, template);
+    } catch (e) {
+      console.error('Mapping failed, falling back to raw data for custom template:', e);
+      return null;
+    }
+  }, [resumeData, template]);
+
+  // For custom templates, store mapped on every change
+  useEffect(() => {
+    if (mappedCustomData) setArtboardResume(mappedCustomData);
+  }, [mappedCustomData, setArtboardResume]);
+
+  // For reactive templates, ensure store does not cause stale data
+  useEffect(() => {
+    if (!customTemplates.includes(template)) {
+      setArtboardResume(null as any);
+    }
+  }, [template, setArtboardResume]);
+  useEffect(() => {
+    if (!customTemplates.includes(template)) {
+      setArtboardResume(null as any);
     }
   }, [resumeData, template, setArtboardResume]);
 
-  // Check if it's a Reactive-Resume template with error handling
-  let isReactiveResumeTemplate = false;
-  try {
-    isReactiveResumeTemplate = templateService.isReactiveResumeTemplate(template);
-  } catch (error) {
-    console.error('Error checking template type:', error);
-    // Fall back to custom template rendering
-    isReactiveResumeTemplate = false;
-  }
+  const isReactiveResumeTemplate = useMemo(() => {
+    try {
+      return templateService.isReactiveResumeTemplate(template);
+    } catch (e) {
+      console.error('Error checking template type:', e);
+      return false;
+    }
+  }, [template]);
 
   if (isReactiveResumeTemplate) {
-    // Use the mapped data from the artboard store for Reactive-Resume templates
-    const mappedData = artboardResume || resumeData;
-    
-    // Validate that we have proper Reactive-Resume data structure
-    const hasValidStructure = mappedData && 
-      mappedData.basics && 
-      mappedData.sections && 
-      mappedData.metadata;
-    
-    if (!hasValidStructure) {
-      console.warn('Invalid Reactive-Resume data structure, attempting to map:', mappedData);
-      // The EnhancedReactiveResumeRenderer will handle the mapping if needed
-    }
-    
+    const latestData = resumeData;
+
     return (
       <TemplateErrorBoundary>
-        <div id="resume-preview">
+        <div id="resume-preview" key={`reactive-${template}-${remountId}`}>
           <EnhancedReactiveResumeRenderer
-            resumeData={mappedData}
+            resumeData={latestData}
             templateId={template}
             className="w-full"
             onError={(error) => {
               console.error('Premium template rendering error:', error);
-              // Could add toast notification or error state here
             }}
           />
         </div>
@@ -83,7 +87,6 @@ export function ResumePreview({ resumeData }: ResumePreviewProps) {
     );
   }
 
-  // Wrapper component for consistent sizing and centering
   const ResumeWrapper = ({ children }: { children: React.ReactNode }) => (
     <div className="flex justify-center items-center w-full h-full">
       <div className="w-full mx-auto">
@@ -92,11 +95,29 @@ export function ResumePreview({ resumeData }: ResumePreviewProps) {
     </div>
   );
 
-  // Template router for custom templates
+  const deriveColumnsFromMetadata = (): [SectionKey[], SectionKey[]] => {
+    const data = artboardResume || mappedCustomData;
+    try {
+      const layout = data?.metadata?.layout?.[0];
+      if (Array.isArray(layout) && layout.length >= 2) {
+        const [main, sidebar] = layout as [SectionKey[], SectionKey[]];
+        return [main || [], sidebar || []];
+      }
+    } catch {}
+    return [
+      ['summary','experience','education','projects','skills','languages','interests'] as SectionKey[],
+      [] as SectionKey[]
+    ];
+  };
+
+  const dataForCustom = artboardResume || mappedCustomData; // ensure RR shape
+
   const renderTemplate = () => {
     switch (template) {
-      case 'classic':
-        return <Classic columns={[['summary','experience','education','projects','skills','languages','interests'], []]} isFirstPage={true} resumeData={resumeData} />;
+      case 'classic': {
+        const columns = deriveColumnsFromMetadata();
+        return <Classic columns={columns} isFirstPage={true} resumeData={dataForCustom} />;
+      }
       case 'modern':
         return <Modern columns={[
           [
@@ -115,22 +136,30 @@ export function ResumePreview({ resumeData }: ResumePreviewProps) {
             'languages',
             'interests'
           ]
-        ]} isFirstPage={true} resumeData={resumeData} />;
-      case 'stylish':
-        return <Stylish columns={[['summary','experience','projects','education'], ['skills','languages','interests']]} isFirstPage={true} resumeData={resumeData} />;
-      case 'compact':
-        return <Compact columns={[['summary','experience','projects','education','skills','languages','interests'], []]} isFirstPage={true} resumeData={resumeData} />;
-      case 'overleaf':
-        return <Overleaf columns={[['summary','experience','projects','education'], ['skills','languages','interests']]} isFirstPage={true} resumeData={resumeData} />;
-      case 'elegant':
-        return <Elegant columns={[['summary','experience','projects','education'], ['skills','languages','interests']]} isFirstPage={true} resumeData={resumeData} />;
+        ]} isFirstPage={true} resumeData={dataForCustom} />;
+      case 'stylish': {
+        const columns = deriveColumnsFromMetadata();
+        return <Stylish columns={columns} isFirstPage={true} resumeData={dataForCustom} />;
+      }
+      case 'compact': {
+        const columns = deriveColumnsFromMetadata();
+        return <Compact columns={columns} isFirstPage={true} resumeData={dataForCustom} />;
+      }
+      case 'overleaf': {
+        const columns = deriveColumnsFromMetadata();
+        return <Overleaf columns={columns} isFirstPage={true} resumeData={dataForCustom} />;
+      }
+      case 'elegant': {
+        const columns = deriveColumnsFromMetadata();
+        return <Elegant columns={columns} isFirstPage={true} resumeData={dataForCustom} />;
+      }
       default:
-        return <EnhancedReactiveResumeRenderer resumeData={resumeData} templateId="azurill" />; // Default fallback
+        return <EnhancedReactiveResumeRenderer resumeData={resumeData} templateId="azurill" />;
     }
   };
 
   return (
-    <div className="resume-preview" id="resume-preview">
+    <div className="resume-preview" id="resume-preview" key={`custom-${template}-${remountId}`}>
       <ResumeWrapper>
         <TemplateErrorBoundary>
         {renderTemplate()}

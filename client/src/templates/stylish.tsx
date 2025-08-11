@@ -7,9 +7,10 @@ import type {
   CustomSectionGroup,
 } from "../utils/reactive-resume-schema";
 import { cn, isEmptyString, isUrl, sanitize } from "../utils/reactive-resume-utils";
+import { BrandIcon } from "../components/brand-icon";
 
-const Header = () => {
-  const basics = useArtboardStore((state) => state?.resume?.basics);
+const Header = ({ resumeData }: { resumeData: any }) => {
+  const basics = resumeData?.basics;
   return (
     <div className="flex flex-col items-center justify-center py-8 bg-pink-600 text-white font-serif">
       <div className="text-2xl md:text-3xl font-bold mb-1 text-center">{basics?.name || "Jane Doe"}</div>
@@ -57,7 +58,7 @@ const Section = <T extends { visible?: boolean; id?: string }>(
       <div className="mb-2 font-bold text-pink-700">
         <h4 className="text-lg">{section.name}</h4>
       </div>
-      <div className={cn("grid gap-x-4 md:gap-x-6 gap-y-3", className)} style={{ gridTemplateColumns: `repeat(${'columns' in section ? section.columns : 1}, 1fr)` }}>
+      <div className={cn("grid gap-x-4 md:gap-x-6 gap-y-3", className)} style={{ gridTemplateColumns: `repeat(${"columns" in section ? section.columns : 1}, 1fr)` }}>
         {visibleItems.map((item) => (
           <div key={item.id || Math.random()} className="relative space-y-2 border-pink-200 border-l-2 pl-4">
             <div>{children?.(item as T)}</div>
@@ -68,8 +69,7 @@ const Section = <T extends { visible?: boolean; id?: string }>(
   );
 };
 
-const mapSectionToComponent = (section: string) => {
-  const resumeData = useArtboardStore((state) => state.resume);
+const mapSectionToComponent = (section: string, resumeData: any) => {
   const sec = resumeData?.sections?.[section];
   if (!sec) return null;
   
@@ -93,9 +93,9 @@ const mapSectionToComponent = (section: string) => {
         <Section<any> section={sec}>
           {(item) => (
             <TimelineItem>
-              <div className="font-bold text-gray-800">{item.position}</div>
+              <div className="font-bold text-gray-800">{item.position || item.title}</div>
               <div className="text-pink-700">{item.company}{item.location && ` (${item.location})`}</div>
-              <div className="text-xs text-pink-400">{item.date}</div>
+              <div className="text-xs text-pink-400">{item.date || [item.startDate, item.endDate].filter(Boolean).join(' - ')}</div>
               {item.summary && (
                 <div 
                   className="text-sm text-gray-600 mt-1 prose prose-pink prose-sm max-w-none" 
@@ -117,6 +117,12 @@ const mapSectionToComponent = (section: string) => {
                 <div 
                   className="text-sm text-gray-600 mt-1 prose prose-pink prose-sm max-w-none" 
                   dangerouslySetInnerHTML={{ __html: sanitize(item.description) }} 
+                />
+              )}
+              {item.summary && (
+                <div 
+                  className="text-sm text-gray-600 mt-1 prose prose-pink prose-sm max-w-none" 
+                  dangerouslySetInnerHTML={{ __html: sanitize(item.summary) }} 
                 />
               )}
               {item.technologies && Array.isArray(item.technologies) && item.technologies.length > 0 && (
@@ -146,10 +152,10 @@ const mapSectionToComponent = (section: string) => {
           {(item) => (
             <TimelineItem>
               <div className="font-bold text-gray-800">
-                {item.studyType}{item.area && `, ${item.area}`}
+                {item.studyType || item.degree}{(item.area || item.field_of_study) && `, ${item.area || item.field_of_study}`}
               </div>
-              <div className="text-pink-700">{item.institution}</div>
-              <div className="text-xs text-pink-400">{item.date}</div>
+              <div className="text-pink-700">{item.institution || item.school}</div>
+              <div className="text-xs text-pink-400">{item.date || item.graduationYear}</div>
               {item.score && <div className="text-xs text-gray-600">Score: {item.score}</div>}
               {item.location && <div className="text-xs text-gray-600">{item.location}</div>}
             </TimelineItem>
@@ -163,16 +169,22 @@ const mapSectionToComponent = (section: string) => {
           <div className="mb-2 font-bold text-pink-700">
             <h4 className="text-lg">{sec.name}</h4>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-col gap-2">
             {sec.items
               .filter((item: any) => item.visible !== false)
               .map((item: any) => (
-                <span 
-                  key={item.id || Math.random()}
-                  className="inline-block bg-pink-100 text-pink-800 text-xs font-medium px-3 py-1 rounded-full"
-                >
-                  {item.name}
-                </span>
+                <div key={item.id || Math.random()} className="flex flex-wrap items-baseline gap-2">
+                  <span 
+                    className="inline-block bg-pink-100 text-pink-800 text-xs font-medium px-3 py-1 rounded-full"
+                  >
+                    {item.name}
+                  </span>
+                  {Array.isArray(item.keywords) && item.keywords.length > 0 && (
+                    <span className="text-xs text-gray-600">
+                      {item.keywords.join(', ')}
+                    </span>
+                  )}
+                </div>
               ))}
           </div>
         </div>
@@ -184,8 +196,7 @@ const mapSectionToComponent = (section: string) => {
           {(item) => (
             <TimelineItem>
               <div className="font-bold text-gray-800">{item.name}</div>
-              {item.level && <div className="text-pink-700">{item.level}</div>}
-              {item.description && <div className="text-sm text-gray-600">{item.description}</div>}
+              {item.description && <div className="text-pink-700">{item.description}</div>}
             </TimelineItem>
           )}
         </Section>
@@ -215,10 +226,10 @@ const mapSectionToComponent = (section: string) => {
               <div className="font-bold text-gray-800">{item.title}</div>
               <div className="text-pink-700">{item.awarder}</div>
               <div className="text-xs text-pink-400">{item.date}</div>
-              {item.description && (
+              {(item.summary || item.description) && (
                 <div 
                   className="text-sm text-gray-600 mt-1 prose prose-pink prose-sm max-w-none" 
-                  dangerouslySetInnerHTML={{ __html: sanitize(item.description) }} 
+                  dangerouslySetInnerHTML={{ __html: sanitize(item.summary || item.description) }} 
                 />
               )}
             </TimelineItem>
@@ -234,10 +245,10 @@ const mapSectionToComponent = (section: string) => {
               <div className="font-bold text-gray-800">{item.name}</div>
               <div className="text-pink-700">{item.issuer}</div>
               <div className="text-xs text-pink-400">{item.date}</div>
-              {item.description && (
+              {(item.summary || item.description) && (
                 <div 
                   className="text-sm text-gray-600 mt-1 prose prose-pink prose-sm max-w-none" 
-                  dangerouslySetInnerHTML={{ __html: sanitize(item.description) }} 
+                  dangerouslySetInnerHTML={{ __html: sanitize(item.summary || item.description) }} 
                 />
               )}
             </TimelineItem>
@@ -250,18 +261,24 @@ const mapSectionToComponent = (section: string) => {
         <Section<any> section={sec}>
           {(item) => (
             <TimelineItem>
-              <div className="font-bold text-gray-800">{item.title}</div>
+              <div className="font-bold text-gray-800">{item.name || item.title}</div>
               <div className="text-pink-700">{item.publisher}</div>
               <div className="text-xs text-pink-400">{item.date}</div>
-              {item.link && (
+              {item.url && (
                 <a 
-                  href={item.link} 
+                  href={typeof item.url === 'string' ? item.url : item.url.href} 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="text-xs text-pink-600 underline hover:text-pink-800 break-all"
                 >
-                  {item.link}
+                  {typeof item.url === 'string' ? item.url : (item.url.label || item.url.href)}
                 </a>
+              )}
+              {(item.summary || item.description) && (
+                <div 
+                  className="text-sm text-gray-600 mt-1 prose prose-pink prose-sm max-w-none" 
+                  dangerouslySetInnerHTML={{ __html: sanitize(item.summary || item.description) }} 
+                />
               )}
             </TimelineItem>
           )}
@@ -273,13 +290,13 @@ const mapSectionToComponent = (section: string) => {
         <Section<any> section={sec}>
           {(item) => (
             <TimelineItem>
-              <div className="font-bold text-gray-800">{item.role}</div>
+              <div className="font-bold text-gray-800">{item.position || item.role}</div>
               <div className="text-pink-700">{item.organization}</div>
               <div className="text-xs text-pink-400">{item.date}</div>
-              {item.description && (
+              {(item.summary || item.description) && (
                 <div 
                   className="text-sm text-gray-600 mt-1 prose prose-pink prose-sm max-w-none" 
-                  dangerouslySetInnerHTML={{ __html: sanitize(item.description) }} 
+                  dangerouslySetInnerHTML={{ __html: sanitize(item.summary || item.description) }} 
                 />
               )}
             </TimelineItem>
@@ -293,11 +310,10 @@ const mapSectionToComponent = (section: string) => {
           {(item) => (
             <TimelineItem>
               <div className="font-bold text-gray-800">{item.name}</div>
-              <div className="text-pink-700">{item.reference}</div>
-              {item.description && (
+              {(item.summary || item.description) && (
                 <div 
                   className="text-sm text-gray-600 mt-1 prose prose-pink prose-sm max-w-none" 
-                  dangerouslySetInnerHTML={{ __html: sanitize(item.description) }} 
+                  dangerouslySetInnerHTML={{ __html: sanitize(item.summary || item.description) }} 
                 />
               )}
             </TimelineItem>
@@ -306,7 +322,6 @@ const mapSectionToComponent = (section: string) => {
       );
     }
     default: {
-      // Fallback: render any other section with a generic Section
       return (
         <Section<any> section={sec}>
           {(item) => (
@@ -324,17 +339,19 @@ const mapSectionToComponent = (section: string) => {
   }
 };
 
-export const Stylish = ({ columns, isFirstPage = false }: TemplateProps) => {
+export const Stylish = ({ columns, isFirstPage = false, resumeData: resumeDataProp }: TemplateProps) => {
+  const resumeDataFromStore = useArtboardStore((state) => state.resume);
+  const resumeData = resumeDataProp ?? resumeDataFromStore;
   const [main, sidebar] = columns;
   return (
     <div className="bg-white text-gray-700 w-full max-w-5xl mx-auto min-h-screen grid grid-cols-1 lg:grid-cols-3 gap-0 shadow-lg rounded-2xl overflow-hidden">
       {/* Sidebar */}
       <aside className="lg:col-span-1 bg-gradient-to-b from-pink-600 to-pink-400 p-6 md:p-8 flex flex-col gap-6 md:gap-8 text-white">
-        {isFirstPage && <Header />}
+        {isFirstPage && <Header resumeData={resumeData} />}
         {sidebar.map((section: string) => (
           <Fragment key={section}>
             <SectionTitle>{section.charAt(0).toUpperCase() + section.slice(1)}</SectionTitle>
-            {mapSectionToComponent(section)}
+            {mapSectionToComponent(section, resumeData)}
           </Fragment>
         ))}
       </aside>
@@ -343,7 +360,7 @@ export const Stylish = ({ columns, isFirstPage = false }: TemplateProps) => {
         {main.map((section: string) => (
           <Fragment key={section}>
             <SectionTitle>{section.charAt(0).toUpperCase() + section.slice(1)}</SectionTitle>
-            {mapSectionToComponent(section)}
+            {mapSectionToComponent(section, resumeData)}
           </Fragment>
         ))}
       </main>

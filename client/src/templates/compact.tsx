@@ -6,7 +6,8 @@ import type {
   SectionWithItem,
   CustomSectionGroup,
 } from "../utils/reactive-resume-schema";
-import { cn, isEmptyString, isUrl, sanitize } from "../utils/reactive-resume-utils";
+import { cn, isEmptyString, sanitize } from "../utils/reactive-resume-utils";
+import { BrandIcon } from "../components/brand-icon";
 
 // Icon map for section headers
 const iconMap: Record<string, string> = {
@@ -22,11 +23,12 @@ const iconMap: Record<string, string> = {
   publications: "ph-newspaper",
   volunteer: "ph-hand-heart",
   references: "ph-chat-circle-text",
+  profiles: "ph-globe",
 };
 
 // Header Component (Reduced padding)
-const Header = () => {
-  const basics = useArtboardStore((state) => state?.resume?.basics);
+const Header = ({ resumeData }: { resumeData: any }) => {
+  const basics = resumeData?.basics;
   return (
     <div className="flex flex-col md:flex-row md:items-center md:justify-between py-2 border-b border-green-200 mb-4">
       <div className="text-xl md:text-2xl font-bold text-green-800">{basics?.name || "Alex Smith"}</div>
@@ -47,6 +49,14 @@ const Header = () => {
           <span className="flex items-center gap-1">
             <i className="ph ph-bold ph-map-pin" />
             <span>{basics.location}</span>
+          </span>
+        )}
+        {basics?.url?.href && (
+          <span className="flex items-center gap-1">
+            <i className="ph ph-bold ph-link" />
+            <a href={basics.url.href} target="_blank" rel="noopener noreferrer" className="underline">
+              {basics.url.label || basics.url.href}
+            </a>
           </span>
         )}
       </div>
@@ -87,7 +97,7 @@ const Section = <T extends { visible?: boolean; id?: string }>({
       </div>
       <div
         className={cn("grid gap-x-4 gap-y-2", className)}
-        style={{ gridTemplateColumns: `repeat(${'columns' in section ? section.columns || 1 : 1}, 1fr)` }}
+        style={{ gridTemplateColumns: `repeat(${"columns" in section ? section.columns || 1 : 1}, 1fr)` }}
       >
         {visibleItems.map((item) => (
           <div
@@ -103,8 +113,7 @@ const Section = <T extends { visible?: boolean; id?: string }>({
 };
 
 // Map Section to Component
-const mapSectionToComponent = (section: SectionKey) => {
-  const resumeData = useArtboardStore((state) => state.resume);
+const mapSectionToComponent = (section: SectionKey, resumeData: any) => {
   const sec = resumeData?.sections?.[section];
   if (!sec) return null;
 
@@ -123,14 +132,39 @@ const mapSectionToComponent = (section: SectionKey) => {
         </section>
       );
 
+    case "profiles":
+      return (
+        <div key="profiles" className="mt-2">
+          <div className="mb-1 font-bold text-green-700">
+            <h4 className="text-sm">{sec.name}</h4>
+          </div>
+          <ul className="flex flex-wrap gap-2 text-xs">
+            {sec.items
+              .filter((item: any) => item.visible !== false)
+              .map((item: any) => (
+                <li key={item.id || Math.random()} className="flex items-center gap-1">
+                  <BrandIcon slug={item.icon || "globe"} />
+                  {item.url?.href ? (
+                    <a href={item.url.href} target="_blank" rel="noopener noreferrer" className="underline">
+                      {item.username}
+                    </a>
+                  ) : (
+                    <span>{item.username}</span>
+                  )}
+                </li>
+              ))}
+          </ul>
+        </div>
+      );
+
     case "experience":
       return (
         <Section<any> section={sec} key="experience">
           {(item) => (
             <div>
-              <div className="font-bold text-slate-800 text-xs sm:text-sm">{item.position}</div>
+              <div className="font-bold text-slate-800 text-xs sm:text-sm">{item.position || item.title}</div>
               <div className="text-green-700 text-xs">{item.company}{item.location && ` (${item.location})`}</div>
-              <div className="text-xs text-green-400">{item.date}</div>
+              <div className="text-xs text-green-400">{item.date || [item.startDate, item.endDate].filter(Boolean).join(' - ')}</div>
               {item.summary && (
                 <div
                   className="text-xs text-slate-700 mt-0.5 wysiwyg"
@@ -152,6 +186,12 @@ const mapSectionToComponent = (section: SectionKey) => {
                 <div
                   className="text-xs text-slate-700 mt-0.5 wysiwyg"
                   dangerouslySetInnerHTML={{ __html: sanitize(item.description) }}
+                />
+              )}
+              {item.summary && (
+                <div
+                  className="text-xs text-slate-700 mt-0.5 wysiwyg"
+                  dangerouslySetInnerHTML={{ __html: sanitize(item.summary) }}
                 />
               )}
               {item.technologies && Array.isArray(item.technologies) && item.technologies.length > 0 && (
@@ -190,11 +230,11 @@ const mapSectionToComponent = (section: SectionKey) => {
           {(item) => (
             <div>
               <div className="font-bold text-slate-800 text-xs sm:text-sm">
-                {item.degree}{item.field_of_study && `, ${item.field_of_study}`}
+                {item.studyType || item.degree}{(item.area || item.field_of_study) && `, ${item.area || item.field_of_study}`}
               </div>
-              <div className="text-green-700 text-xs">{item.school}</div>
-              <div className="text-xs text-green-400">{item.graduationYear}</div>
-              {item.gpa && <div className="text-xs text-slate-600">GPA: {item.gpa}</div>}
+              <div className="text-green-700 text-xs">{item.institution || item.school}</div>
+              <div className="text-xs text-green-400">{item.date || item.graduationYear}</div>
+              {(item.score || item.gpa) && <div className="text-xs text-slate-600">GPA: {item.score || item.gpa}</div>}
               {item.location && <div className="text-xs text-slate-600">{item.location}</div>}
               {item.honors && <div className="text-xs text-slate-600">{item.honors}</div>}
             </div>
@@ -208,16 +248,22 @@ const mapSectionToComponent = (section: SectionKey) => {
           <div className="mb-1 font-bold text-green-700">
             <h4 className="text-sm">{sec.name}</h4>
           </div>
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-col gap-1.5">
             {sec.items
               .filter((item: any) => item.visible !== false)
               .map((item: any) => (
-                <span
-                  key={item.id || Math.random()}
-                  className="inline-block bg-green-100 text-green-800 text-[10px] px-2 py-0.5 rounded"
-                >
-                  {item.name}
-                </span>
+                <div key={item.id || Math.random()} className="flex flex-wrap items-baseline gap-1.5">
+                  <span
+                    className="inline-block bg-green-100 text-green-800 text-[10px] px-2 py-0.5 rounded"
+                  >
+                    {item.name}
+                  </span>
+                  {Array.isArray(item.keywords) && item.keywords.length > 0 && (
+                    <span className="text-[11px] text-slate-600">
+                      {item.keywords.join(', ')}
+                    </span>
+                  )}
+                </div>
               ))}
           </div>
         </div>
@@ -229,8 +275,7 @@ const mapSectionToComponent = (section: SectionKey) => {
           {(item) => (
             <div>
               <div className="font-bold text-slate-800 text-xs">{item.name}</div>
-              {item.level && <div className="text-green-700 text-xs">{item.level}</div>}
-              {item.description && <div className="text-xs text-slate-600">{item.description}</div>}
+              {item.description && <div className="text-green-700 text-xs">{item.description}</div>}
             </div>
           )}
         </Section>
@@ -258,10 +303,10 @@ const mapSectionToComponent = (section: SectionKey) => {
               <div className="font-bold text-slate-800 text-xs">{item.title}</div>
               <div className="text-green-700 text-xs">{item.awarder}</div>
               <div className="text-xs text-green-400">{item.date}</div>
-              {item.description && (
+              {(item.summary || item.description) && (
                 <div
                   className="text-xs text-slate-700 mt-0.5 wysiwyg"
-                  dangerouslySetInnerHTML={{ __html: sanitize(item.description) }}
+                  dangerouslySetInnerHTML={{ __html: sanitize(item.summary || item.description) }}
                 />
               )}
             </div>
@@ -277,10 +322,10 @@ const mapSectionToComponent = (section: SectionKey) => {
               <div className="font-bold text-slate-800 text-xs">{item.name}</div>
               <div className="text-green-700 text-xs">{item.issuer}</div>
               <div className="text-xs text-green-400">{item.date}</div>
-              {item.description && (
+              {(item.summary || item.description) && (
                 <div
                   className="text-xs text-slate-700 mt-0.5 wysiwyg"
-                  dangerouslySetInnerHTML={{ __html: sanitize(item.description) }}
+                  dangerouslySetInnerHTML={{ __html: sanitize(item.summary || item.description) }}
                 />
               )}
             </div>
@@ -293,18 +338,24 @@ const mapSectionToComponent = (section: SectionKey) => {
         <Section<any> section={sec} key="publications">
           {(item) => (
             <div>
-              <div className="font-bold text-slate-800 text-xs">{item.title}</div>
+              <div className="font-bold text-slate-800 text-xs">{item.name || item.title}</div>
               <div className="text-green-700 text-xs">{item.publisher}</div>
               <div className="text-xs text-green-400">{item.date}</div>
-              {item.link && (
+              {item.url && (
                 <a
-                  href={item.link}
+                  href={typeof item.url === 'string' ? item.url : item.url.href}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="break-all text-[11px] text-green-600 underline hover:text-green-800"
                 >
-                  {item.link}
+                  {typeof item.url === 'string' ? item.url : (item.url.label || item.url.href)}
                 </a>
+              )}
+              {(item.summary || item.description) && (
+                <div
+                  className="text-xs text-slate-700 mt-0.5 wysiwyg"
+                  dangerouslySetInnerHTML={{ __html: sanitize(item.summary || item.description) }}
+                />
               )}
             </div>
           )}
@@ -316,13 +367,13 @@ const mapSectionToComponent = (section: SectionKey) => {
         <Section<any> section={sec} key="volunteer">
           {(item) => (
             <div>
-              <div className="font-bold text-slate-800 text-xs">{item.role}</div>
+              <div className="font-bold text-slate-800 text-xs">{item.position || item.role}</div>
               <div className="text-green-700 text-xs">{item.organization}</div>
               <div className="text-xs text-green-400">{item.date}</div>
-              {item.description && (
+              {(item.summary || item.description) && (
                 <div
                   className="text-xs text-slate-700 mt-0.5 wysiwyg"
-                  dangerouslySetInnerHTML={{ __html: sanitize(item.description) }}
+                  dangerouslySetInnerHTML={{ __html: sanitize(item.summary || item.description) }}
                 />
               )}
             </div>
@@ -335,12 +386,13 @@ const mapSectionToComponent = (section: SectionKey) => {
         <Section<any> section={sec} key="references">
           {(item) => (
             <div>
-              <div className="font-bold text-slate-800 text-xs">{item.name}</div>
-              <div className="text-green-700 text-xs">{item.reference}</div>
-              {item.description && (
+              <div className="text-xs text-slate-700">
+                <strong className="text-slate-800">{item.name}</strong>
+              </div>
+              {(item.summary || item.description) && (
                 <div
                   className="text-xs text-slate-700 mt-0.5 wysiwyg"
-                  dangerouslySetInnerHTML={{ __html: sanitize(item.description) }}
+                  dangerouslySetInnerHTML={{ __html: sanitize(item.summary || item.description) }}
                 />
               )}
             </div>
@@ -365,20 +417,34 @@ const mapSectionToComponent = (section: SectionKey) => {
   }
 };
 
-// Main Template - Reduced padding, wider than before
-export const Compact = ({ columns, isFirstPage = false }: TemplateProps) => {
-  const [main] = columns;
+// Main Template - Support two-column layout
+export const Compact = ({ columns, isFirstPage = false, resumeData: resumeDataProp }: TemplateProps) => {
+  const resumeDataFromStore = useArtboardStore((state) => state.resume);
+  const resumeData = resumeDataProp ?? resumeDataFromStore;
+  const [main = [], sidebar = []] = columns;
 
   return (
     <div className="bg-white text-slate-900 w-full max-w-4xl mx-auto p-3 md:p-4 print:p-3">
-      {isFirstPage && <Header />}
-      <div className="space-y-3">
-        {main.map((section: SectionKey) => (
-          <Fragment key={section}>
-            <SectionTitle section={section as string} />
-            {mapSectionToComponent(section)}
-          </Fragment>
-        ))}
+      {isFirstPage && <Header resumeData={resumeData} />}
+      <div className={cn("grid gap-4", sidebar.length > 0 ? "grid-cols-3" : "grid-cols-1")}> 
+        {sidebar.length > 0 && (
+          <aside className="col-span-1">
+            {sidebar.map((section: SectionKey) => (
+              <Fragment key={section}>
+                <SectionTitle section={section as string} />
+                {mapSectionToComponent(section, resumeData)}
+              </Fragment>
+            ))}
+          </aside>
+        )}
+        <main className={cn(sidebar.length > 0 ? "col-span-2" : "col-span-1", "space-y-3")}> 
+          {main.map((section: SectionKey) => (
+            <Fragment key={section}>
+              <SectionTitle section={section as string} />
+              {mapSectionToComponent(section, resumeData)}
+            </Fragment>
+          ))}
+        </main>
       </div>
     </div>
   );

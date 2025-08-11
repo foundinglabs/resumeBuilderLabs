@@ -32,133 +32,59 @@ export const EnhancedReactiveResumeRenderer: React.FC<ReactiveResumeRendererProp
         setIsLoading(true);
         setError(null);
 
-        // Validate input data
-        if (!resumeData) {
-          throw new Error('Resume data is required');
-        }
+        if (!resumeData) throw new Error('Resume data is required');
+        if (!templateId) throw new Error('Template ID is required');
 
-        if (!templateId) {
-          throw new Error('Template ID is required');
-        }
-
-        // Validate that templateId is a valid Reactive-Resume template
         const validTemplates = ['azurill', 'bronzor', 'chikorita', 'ditto', 'gengar', 'glalie', 'kakuna', 'leafish', 'nosepass', 'onyx', 'pikachu', 'rhyhorn'];
         if (!validTemplates.includes(templateId)) {
           throw new Error(`Invalid template ID: ${templateId}. Valid templates are: ${validTemplates.join(', ')}`);
         }
 
-        console.log('EnhancedReactiveResumeRenderer - Input data:', resumeData);
-        
-        // Check if data is already in Reactive-Resume format
-        const isReactiveResumeFormat = resumeData && 
-          resumeData.basics && 
-          resumeData.sections && 
-          resumeData.metadata &&
-          typeof resumeData.basics === 'object' &&
-          typeof resumeData.sections === 'object' &&
-          typeof resumeData.metadata === 'object' &&
-          // Additional check to ensure it's not just the initial structure
-          resumeData.basics.name &&
-          Object.keys(resumeData.sections).length > 0;
-        
-        console.log('EnhancedReactiveResumeRenderer - Is Reactive-Resume format:', isReactiveResumeFormat);
-        
-        let mappedData;
-        if (isReactiveResumeFormat) {
-          // Data is already in Reactive-Resume format
-          mappedData = resumeData;
-          console.log('Using existing Reactive-Resume format data');
-        } else {
-          // Data is in ResumeGenius format, need to map it
-          console.log('Mapping ResumeGenius data to Reactive-Resume format');
+        let mappedData = resumeData;
+        const isRR = mappedData && mappedData.basics && mappedData.sections && mappedData.metadata;
+        if (!isRR) {
           try {
             mappedData = mapResumeGeniusToReactiveResume(resumeData, templateId);
-          } catch (error) {
-            console.error('Error mapping data:', error);
-            // Fallback to using the original data
-            mappedData = resumeData;
+          } catch (e) {
+            console.error('Mapping error, using raw data:', e);
           }
         }
 
-        console.log('EnhancedReactiveResumeRenderer - Mapped data:', mappedData);
-
-        // Validate mapped data structure
         if (!mappedData || !mappedData.basics || !mappedData.sections || !mappedData.metadata) {
-          throw new Error('Invalid Reactive-Resume data structure. Data should be pre-mapped.');
+          throw new Error('Invalid Reactive-Resume data structure.');
         }
-        
-        // Extract columns from the layout metadata with better error handling
-        try {
-          // Check if metadata and layout exist
-          if (!mappedData.metadata || !mappedData.metadata.layout || !Array.isArray(mappedData.metadata.layout)) {
-            console.warn('No layout found in metadata, using fallback layout for template:', templateId);
-            setColumns([
-              ['summary', 'experience', 'education'],
-              ['skills', 'projects', 'awards']
-            ]);
-          } else {
-            const layout = mappedData.metadata.layout[0]; // Get first page layout
-            if (Array.isArray(layout) && layout.length >= 2) {
-              const [mainSections, sidebarSections] = layout;
-              setColumns([
-                Array.isArray(mainSections) ? mainSections : [],
-                Array.isArray(sidebarSections) ? sidebarSections : []
-              ]);
-            } else {
-              // Fallback to default layout
-              console.warn('Invalid layout structure, using fallback layout for template:', templateId);
-              setColumns([
-                ['summary', 'experience', 'education'],
-                ['skills', 'projects', 'awards']
-              ]);
-            }
-          }
-        } catch (layoutError) {
-          console.warn('Layout extraction error, using fallback:', layoutError);
+
+        // Extract layout columns
+        const layout = Array.isArray(mappedData.metadata?.layout) ? mappedData.metadata.layout[0] : null;
+        if (Array.isArray(layout) && layout.length >= 2) {
+          const [main, sidebar] = layout as [SectionKey[], SectionKey[]];
+          setColumns([main || [], sidebar || []]);
+        } else {
           setColumns([
             ['summary', 'experience', 'education'],
             ['skills', 'projects', 'awards']
           ]);
         }
-        
-        // Update the artboard store with mapped data
-        try {
-          setResume(mappedData);
-        } catch (storeError) {
-          console.warn('Store update error:', storeError);
-          // Continue anyway as this might not be critical
-        }
 
-        // Get the template component with error handling
-        let TemplateComp;
-        try {
-          TemplateComp = getTemplate(templateId as Template);
-          if (!TemplateComp) {
-            throw new Error(`Template component not found for: ${templateId}`);
-          }
-        } catch (templateError) {
-          console.error('Template loading error:', templateError);
-          throw new Error(`Failed to load template component: ${templateError instanceof Error ? templateError.message : 'Unknown template error'}`);
-        }
+        // Ensure reactive templates that read from store get fresh data
+        try { setResume(mappedData); } catch {}
 
+        // Load template component
+        const TemplateComp = getTemplate(templateId as Template);
+        if (!TemplateComp) throw new Error(`Template component not found for: ${templateId}`);
         setTemplateComponent(() => TemplateComp);
-
       } catch (err) {
         console.error('Error loading Reactive-Resume template:', err);
-        const errorMessage = `Failed to load template: ${err instanceof Error ? err.message : 'Unknown error'}`;
-        setError(errorMessage);
+        const msg = `Failed to load template: ${err instanceof Error ? err.message : 'Unknown error'}`;
+        setError(msg);
         onError?.(err);
       } finally {
         setIsLoading(false);
       }
     };
 
-    if (templateId && resumeData) {
-      loadTemplate();
-    } else {
-      setError('Missing template ID or resume data');
-      setIsLoading(false);
-    }
+    if (templateId && resumeData) loadTemplate();
+    else { setError('Missing template ID or resume data'); setIsLoading(false); }
   }, [templateId, resumeData, setResume]);
 
   if (isLoading) {
@@ -179,15 +105,7 @@ export const EnhancedReactiveResumeRenderer: React.FC<ReactiveResumeRendererProp
           <div className="text-4xl mb-4">⚠️</div>
           <p className="text-lg font-medium">Template Loading Error</p>
           <p className="text-sm mt-2 max-w-md">{error}</p>
-          <button
-            onClick={() => {
-              setError(null);
-              setIsLoading(true);
-            }}
-            className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
-          >
-            Retry
-          </button>
+          <button onClick={() => { setError(null); setIsLoading(true); }} className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors">Retry</button>
         </div>
       </div>
     );
@@ -205,14 +123,10 @@ export const EnhancedReactiveResumeRenderer: React.FC<ReactiveResumeRendererProp
     );
   }
 
-  // Wrap template component in error boundary
   const SafeTemplateComponent = () => {
     try {
       return (
-        <TemplateComponent 
-          columns={columns} 
-          isFirstPage={true}
-        />
+        <TemplateComponent columns={columns} isFirstPage={true} />
       );
     } catch (renderError) {
       console.error('Template render error:', renderError);
@@ -228,26 +142,8 @@ export const EnhancedReactiveResumeRenderer: React.FC<ReactiveResumeRendererProp
   };
 
   return (
-    <div 
-      ref={containerRef}
-      className={`reactive-resume-template ${className}`}
-      style={{
-        fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-        fontSize: '12px',
-        lineHeight: '1.5',
-        color: '#000000',
-        backgroundColor: '#ffffff',
-      }}
-    >
-      <div className="template-container" style={{ 
-        width: '210mm', 
-        minHeight: '297mm', 
-        margin: '0 auto',
-        padding: '14mm',
-        backgroundColor: '#ffffff',
-        boxShadow: '0 0 10px rgba(0,0,0,0.1)',
-        position: 'relative',
-      }}>
+    <div ref={containerRef} className={`reactive-resume-template ${className}`} style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', fontSize: '12px', lineHeight: '1.5', color: '#000000', backgroundColor: '#ffffff' }}>
+      <div className="template-container" style={{ width: '210mm', minHeight: '297mm', margin: '0 auto', padding: '14mm', backgroundColor: '#ffffff', boxShadow: '0 0 10px rgba(0,0,0,0.1)', position: 'relative' }}>
         <SafeTemplateComponent />
       </div>
     </div>
