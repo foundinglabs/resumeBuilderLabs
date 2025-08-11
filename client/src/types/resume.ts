@@ -28,6 +28,7 @@ export interface Resume {
         grayscale: boolean;
       };
     };
+    headline?: string;
   };
   metadata: {
     theme: {

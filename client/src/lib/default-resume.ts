@@ -6,7 +6,7 @@ export const defaultResume: Resume = {
     email: 'alex.johnson@email.com',
     phone: '+1 555-123-4567',
     location: 'San Francisco, CA',
-    url: { href: 'https://alexjohnson.dev', label: 'alexjohnson.dev' },
+    url: { href: 'https://alexjohnson.dev' },
     customFields: [
       { id: 'linkedin', name: 'LinkedIn', value: 'https://linkedin.com/in/alexjohnson', icon: 'linkedin' },
       { id: 'github', name: 'GitHub', value: 'https://github.com/alexjohnson', icon: 'github' }
@@ -40,6 +40,7 @@ export const defaultResume: Resume = {
   sections: {
     summary: {
       visible: true,
+      items: [],
       content: 'Experienced Full Stack Engineer with 7+ years in designing, developing, and deploying modern web applications. Passionate about building scalable, maintainable, and user-centric solutions using React, Node.js, and AWS. Strong advocate for clean code, DevOps, and continuous learning.',
       columns: 1,
       id: 'summary',
@@ -66,16 +67,6 @@ export const defaultResume: Resume = {
           date: '2018 - 2021',
           summary: 'Built and maintained payment APIs and dashboards. Improved system reliability and reduced latency by 30% through service refactoring and observability enhancements.',
           url: { href: 'https://stripe.com', label: 'stripe.com' },
-          visible: true,
-        },
-        {
-          id: 'exp3',
-          company: 'Acme Corp',
-          position: 'Frontend Developer',
-          location: 'Remote',
-          date: '2016 - 2018',
-          summary: 'Developed responsive UIs with React and Redux. Collaborated with designers and backend teams to deliver seamless user experiences.',
-          url: { href: 'https://acmecorp.com', label: 'acmecorp.com' },
           visible: true,
         },
       ],
@@ -134,16 +125,7 @@ export const defaultResume: Resume = {
           url: { href: 'https://alexjohnson.dev/image-processor', label: 'Live' },
           keywords: ['AWS Lambda', 'S3', 'Serverless'],
           visible: true,
-        },
-        {
-          id: 'proj3',
-          name: 'Personal Portfolio',
-          description: 'Designed and deployed a personal portfolio using Next.js and Vercel. Showcases projects, blog, and contact form.',
-          date: '2020',
-          url: { href: 'https://alexjohnson.dev', label: 'Portfolio' },
-          keywords: ['Next.js', 'Vercel', 'Portfolio'],
-          visible: true,
-        },
+        }
       ],
       name: 'Projects',
       id: 'projects',
@@ -151,8 +133,7 @@ export const defaultResume: Resume = {
     certifications: {
       visible: true,
       items: [
-        { id: 'cert1', name: 'AWS Certified Solutions Architect', issuer: 'Amazon', date: '2022', url: { href: 'https://aws.amazon.com/certification/', label: 'AWS' }, visible: true },
-        { id: 'cert2', name: 'Certified Kubernetes Administrator', issuer: 'CNCF', date: '2021', url: { href: 'https://www.cncf.io/certification/cka/', label: 'CKA' }, visible: true },
+        { id: 'cert1', name: 'AWS Certified Solutions Architect', issuer: 'Amazon', date: '2022', url: { href: 'https://aws.amazon.com/certification/', label: 'AWS' }, visible: true }
       ],
       separateLinks: false,
       name: 'Certifications',
@@ -161,8 +142,7 @@ export const defaultResume: Resume = {
     awards: {
       visible: true,
       items: [
-        { id: 'award1', title: 'Best Developer Award', awarder: 'Google', date: '2022', description: 'Recognized for outstanding contributions to the Google Cloud Console project.', url: { href: 'https://google.com', label: 'google.com' }, visible: true },
-        { id: 'award2', title: 'Hackathon Winner', awarder: 'Stripe', date: '2020', description: 'Led a team to victory in Stripe’s annual hackathon with a fintech innovation.', url: { href: 'https://stripe.com', label: 'stripe.com' }, visible: true },
+        { id: 'award1', title: 'Best Developer Award', awarder: 'Google', date: '2022', description: 'Recognized for outstanding contributions to the Google Cloud Console project.', url: { href: 'https://google.com', label: 'google.com' }, visible: true }
       ],
       separateLinks: false,
       name: 'Awards',
@@ -190,8 +170,7 @@ export const defaultResume: Resume = {
     volunteer: {
       visible: true,
       items: [
-        { id: 'vol1', organization: 'Code for Good', position: 'Mentor', location: 'Remote', date: '2021', summary: 'Mentored students in open source and web development.', url: { href: 'https://codeforgood.org', label: 'codeforgood.org' }, visible: true },
-        { id: 'vol2', organization: 'Tech Outreach', position: 'Workshop Speaker', location: 'San Francisco, CA', date: '2020', summary: 'Conducted workshops on React and cloud technologies.', url: { href: 'https://techoutreach.org', label: 'techoutreach.org' }, visible: true },
+        { id: 'vol1', organization: 'Code for Good', position: 'Mentor', location: 'Remote', date: '2021', summary: 'Mentored students in open source and web development.', url: { href: 'https://codeforgood.org', label: 'codeforgood.org' }, visible: true }
       ],
       separateLinks: false,
       name: 'Volunteer',
@@ -201,8 +180,7 @@ export const defaultResume: Resume = {
       visible: true,
       items: [
         { id: 'lang1', name: 'English', level: 5, description: 'Native proficiency', visible: true },
-        { id: 'lang2', name: 'Spanish', level: 3, description: 'Professional working proficiency', visible: true },
-        { id: 'lang3', name: 'German', level: 2, description: 'Conversational', visible: true },
+        { id: 'lang2', name: 'Spanish', level: 3, description: 'Professional working proficiency', visible: true }
       ],
       name: 'Languages',
       id: 'languages',
