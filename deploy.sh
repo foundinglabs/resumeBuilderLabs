@@ -6,11 +6,11 @@ set -euo pipefail
 #   ./deploy.sh [prod|dev]
 #
 # Behavior:
-# - Merges .env (kept intact, higher priority) with production.env into envs/{prod,dev}.env
+# - Uses envs/{prod,dev}.env if present; otherwise falls back to .env
 # - Builds Docker image, tags, and pushes to Artifact Registry
-# - Deploys to Cloud Run using the merged env file
+# - Deploys to Cloud Run using the selected env file
 # - For dev target, deploys to resume-builder-dev service
-# - For prod target, deploys to SERVICE_NAME from production.env
+# - For prod target, deploys to SERVICE_NAME from env file (or default)
 # - Protects prod deploys to only run on main branch in CI unless explicitly allowed
 
 TARGET=${1:-}
@@ -22,79 +22,12 @@ fi
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ENV_DIR="${ROOT_DIR}/envs"
 DOTENV_PATH="${ROOT_DIR}/.env"
-PRODENV_PATH="${ROOT_DIR}/production.env"
 
 mkdir -p "${ENV_DIR}"
 
-# Helper to load key=value pairs from a file into an associative array
-# Keeps order simple; ignores comments and blank lines
-read_env_file_into_map() {
-  local file_path="$1"
-  declare -n out_map_ref=$2
-  if [[ -f "$file_path" ]]; then
-    while IFS= read -r line || [[ -n "$line" ]]; do
-      # trim
-      line="${line%%$'\r'}"
-      [[ -z "$line" ]] && continue
-      [[ "$line" =~ ^\s*# ]] && continue
-      if [[ "$line" =~ ^[A-Za-z_][A-Za-z0-9_]*= ]]; then
-        local key="${line%%=*}"
-        local val="${line#*=}"
-        out_map_ref["$key"]="$val"
-      fi
-    done < "$file_path"
-  fi
-}
-
-# Merge .env (higher priority) with production.env
-# - Values from .env win over production.env
-# - If .env missing, production.env values are used
-merge_envs() {
-  declare -A base_map=()
-  declare -A extra_map=()
-  declare -A final_map=()
-
-  # Extra = production.env, Base = .env
-  read_env_file_into_map "$PRODENV_PATH" extra_map
-  read_env_file_into_map "$DOTENV_PATH" base_map
-
-  # Start with extra
-  for k in "${!extra_map[@]}"; do
-    final_map["$k"]="${extra_map[$k]}"
-  done
-  # Overlay base
-  for k in "${!base_map[@]}"; do
-    final_map["$k"]="${base_map[$k]}"
-  done
-
-  # Write to file arg1
-  local out_file="$1"
-  : > "$out_file"
-  # Preserve a stable ordering: keys sorted
-  for k in $(printf '%s\n' "${!final_map[@]}" | LC_ALL=C sort); do
-    printf '%s=%s\n' "$k" "${final_map[$k]}" >> "$out_file"
-  done
-}
-
-# Ensure production.env exists (used for registry/project settings)
-if [[ ! -f "$PRODENV_PATH" ]]; then
-  echo "Error: production.env not found at $PRODENV_PATH"
-  echo "Provide production.env or export equivalent environment variables."
-  exit 1
-fi
-
-# Create or use provided env files
+# Convert dotenv to YAML for Cloud Run consumption
 PROD_ENV_FILE="${ENV_DIR}/prod.env"
 DEV_ENV_FILE="${ENV_DIR}/dev.env"
-
-if [[ ! -f "$PROD_ENV_FILE" ]]; then
-  merge_envs "$PROD_ENV_FILE"
-fi
-if [[ ! -f "$DEV_ENV_FILE" ]]; then
-  merge_envs "$DEV_ENV_FILE"
-fi
-
-# Convert dotenv to YAML for Cloud Run consumption
 PROD_ENV_YAML="${ENV_DIR}/prod.env.yaml"
 DEV_ENV_YAML="${ENV_DIR}/dev.env.yaml"
 
@@ -118,13 +51,18 @@ dotenv_to_yaml() {
 
 echo "Generated/using env files:" && ls -l "$ENV_DIR"
 
-# Select env file based on target; then generate YAML
+# Select env file based on target; prefer envs/<target>.env, else fallback to .env
 if [[ "$TARGET" == "dev" ]]; then
-  ENV_FILE="$DEV_ENV_FILE"
+  ENV_FILE="$([[ -f "$DEV_ENV_FILE" ]] && echo "$DEV_ENV_FILE" || echo "$DOTENV_PATH")"
   ENV_FILE_YAML="$DEV_ENV_YAML"
 else
-  ENV_FILE="$PROD_ENV_FILE"
+  ENV_FILE="$([[ -f "$PROD_ENV_FILE" ]] && echo "$PROD_ENV_FILE" || echo "$DOTENV_PATH")"
   ENV_FILE_YAML="$PROD_ENV_YAML"
+fi
+
+if [[ ! -f "$ENV_FILE" ]]; then
+  echo "Error: No env file found. Expected one of: $PROD_ENV_FILE (for prod), $DEV_ENV_FILE (for dev), or $DOTENV_PATH"
+  exit 1
 fi
 
 dotenv_to_yaml "$ENV_FILE" "$ENV_FILE_YAML"
