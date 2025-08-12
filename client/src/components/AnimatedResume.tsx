@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
+import { Link } from 'wouter';
 
 // Constants for better maintainability
 const ANIMATION_CONFIG = {
@@ -139,7 +140,8 @@ const AnimatedResume: React.FC = () => {
   }), []);
 
   return (
-    <div className="relative w-full max-w-7xl mx-auto mt-2 px-4 sm:px-6 lg:px-8">
+    <Link href="/builder" className="block w-full">
+      <div className="relative w-full max-w-7xl mx-auto mt-2 px-4 sm:px-6 lg:px-8">
       {/* Resume Paper */}
       <motion.div
         className="bg-white rounded-2xl shadow-2xl relative overflow-hidden w-full cursor-pointer transform-gpu"
@@ -346,8 +348,20 @@ const AnimatedResume: React.FC = () => {
             }
           }}
         />
+        
+        {/* Click indicator */}
+        <motion.div
+          className="absolute bottom-4 right-4 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-medium shadow-lg"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 2, duration: 0.5 }}
+          whileHover={{ scale: 1.05 }}
+        >
+          Click to Build Resume →
+        </motion.div>
       </motion.div>
-    </div>
+      </div>
+    </Link>
   );
 };
 
