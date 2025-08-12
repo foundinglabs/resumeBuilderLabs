@@ -129,7 +129,8 @@ type LinkProps = {
 
 const Link = ({ url, icon, iconOnRight, label, className }: LinkProps) => {
   if (!url || !isUrl(url.href)) return null;
-
+  // Only show the label or the URL once, as a hyperlink
+  const displayLabel = label ?? url.label ?? url.href;
   return (
     <div className="flex items-center gap-x-1.5">
       {!iconOnRight && (icon ?? <i className="ph ph-bold ph-link text-primary" />)}
@@ -139,7 +140,7 @@ const Link = ({ url, icon, iconOnRight, label, className }: LinkProps) => {
         rel="noreferrer noopener nofollow"
         className={cn("inline-block", className)}
       >
-        {label ?? (url.label || url.href)}
+        {displayLabel}
       </a>
       {iconOnRight && (icon ?? <i className="ph ph-bold ph-link text-primary" />)}
     </div>
@@ -440,12 +441,14 @@ const Languages = () => {
 const isGitHubUrl = (url: string | URL | undefined): boolean => {
   if (!url) return false;
   const urlString = typeof url === 'string' ? url : url.href;
+  if (typeof urlString !== 'string') return false;
   return urlString.toLowerCase().includes('github.com');
 };
 
 const isLiveUrl = (url: string | URL | undefined): boolean => {
   if (!url) return false;
   const urlString = typeof url === 'string' ? url : url.href;
+  if (typeof urlString !== 'string') return false;
   return !isGitHubUrl(urlString) && (urlString.toLowerCase().includes('http://') || urlString.toLowerCase().includes('https://'));
 };
 
@@ -484,6 +487,7 @@ const Projects = () => {
                 ) : null}
               </div>
             )}
+            {/* Do NOT render the raw URL below the anchor */}
           </div>
         </div>
       )}

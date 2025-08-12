@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Download, Save, Sparkles, Upload, Briefcase, Palette } from "lucide-react";
+import { ArrowLeft, Download, Save, Upload, Briefcase } from "lucide-react";
 import { ResumeForm } from "@/components/resume-form";
 import { ResumePreview } from "@/components/resume-preview";
 import { ResumeUpload } from "@/components/resume-upload";
@@ -20,6 +20,7 @@ import type { Resume } from "@shared/schema";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { defaultResume } from '@/lib/default-resume';
 import { mapResumeGeniusToReactiveResume } from '@/utils/reactive-resume-mapper';
+import Footer from "@/components/Footer";
 
 export interface ResumeData {
   personalInfo: {
@@ -89,14 +90,6 @@ export interface ResumeData {
     description?: string;
   }>;
   
-  // Publications
-  publications?: Array<{
-    title: string;
-    publisher: string;
-    date: string;
-    link?: string;
-  }>;
-  
   // Languages spoken
   languages?: Array<{
     language: string;
@@ -164,170 +157,90 @@ export interface ResumeData {
   atsScore?: number;
 }
 
-const initialResumeData: ResumeData = {
+function mapDefaultResumeToResumeData(defaultResume: any): ResumeData {
+  // Map the defaultResume structure to ResumeData structure for the builder
+  return {
   personalInfo: {
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@email.com",
-    phone: "(555) 123-4567",
-    address: "San Francisco, CA",
-  },
-  summary: "Experienced software engineer with 5+ years of expertise in full-stack development. Passionate about creating scalable solutions and leading technical teams to deliver high-quality products.",
-  careerObjective: "To leverage my technical and leadership skills to build impactful software solutions that enhance user experience and business performance in a growth-focused organization.",
-  experience: [{
-    title: "Senior Software Engineer",
-    company: "Tech Solutions Inc.",
-    startDate: "2022",
-    endDate: "Present",
-    description: "Led development of microservices architecture\nManaged team of 4 junior developers\nImproved application performance by 40%",
-    location: "San Francisco, CA",
-    employment_type: "Full-time",
-  }],
-  education: [{
-    degree: "Bachelor of Science in Computer Science",
-    school: "University of California, Berkeley",
-    graduationYear: "2019",
-    gpa: "3.8",
-    field_of_study: "Computer Science",
-    location: "Berkeley, CA",
-    honors: "Magna Cum Laude",
-  }],
-  skills: ["JavaScript", "React", "Node.js", "Python", "SQL", "AWS", "Docker", "Git"],
-  projectSkills: ["React", "Redux", "MongoDB", "GraphQL", "Express.js"],
-  template: "classic",
-  field: "",
+      firstName: defaultResume.basics?.name?.split(' ')[0] || '',
+      lastName: defaultResume.basics?.name?.split(' ').slice(1).join(' ') || '',
+      email: defaultResume.basics?.email || '',
+      phone: defaultResume.basics?.phone || '',
+      address: defaultResume.basics?.location || '',
+    },
+    summary: defaultResume.sections?.summary?.content || '',
+    experience: (defaultResume.sections?.experience?.items || []).map((item: any) => ({
+      title: item.position,
+      company: item.company,
+      startDate: item.date?.split(' - ')[0] || '',
+      endDate: item.date?.split(' - ')[1] || '',
+      description: item.summary || '',
+      location: item.location || '',
+      employment_type: '',
+    })),
+    education: (defaultResume.sections?.education?.items || []).map((item: any) => ({
+      degree: item.studyType,
+      school: item.institution,
+      graduationYear: item.date,
+      gpa: item.score,
+      field_of_study: item.area,
+      location: item.location,
+      honors: '',
+    })),
+    skills: (defaultResume.sections?.skills?.items || []).map((item: any) => item.name),
+    projectSkills: [],
+    template: 'azurill',
+    field: '',
   socialLinks: {
-    linkedin: "https://linkedin.com/in/johndoe",
-    github: "https://github.com/johndoe",
-    portfolio: "https://johndoe.dev",
-    website: "https://johndoe.dev",
-  },
-  projects: [
-    {
-      title: "Multi-vendor Marketplace Backend",
-      description: "Built RESTful APIs and payment processing infrastructure for scalable e-commerce platform serving 1000+ vendors.",
-      technologies: ["Node.js", "Express", "MongoDB", "Stripe API", "Redis", "JWT"],
-      role: "Backend Developer",
-      link: "https://ecommerce-demo.dev",
-      duration: "8 months",
-      startDate: "2022-03",
-      endDate: "2022-10",
+      linkedin: defaultResume.basics?.customFields?.find((f: any) => f.name === 'LinkedIn')?.value || '',
+      github: defaultResume.basics?.customFields?.find((f: any) => f.name === 'GitHub')?.value || '',
+      portfolio: defaultResume.basics?.url?.href || '',
+      website: defaultResume.basics?.url?.href || '',
     },
-    {
-      title: "E-commerce Platform",
-      description: "Developed scalable backend services and integrated Stripe payments for a multi-vendor marketplace.",
-      technologies: ["Node.js", "MongoDB", "Express", "Stripe API"],
-      link: "https://ecommerce-demo.dev",
-      duration: "2022"
-    },
-  ],
-  awards: [
-    {
-      title: "Top Innovator Award",
-      issuer: "TechConf 2023",
-      date: "2023",
-      description: "Awarded for developing a real-time code collaboration tool.",
-    },
-    {
-      title: "Employee of the Year",
-      issuer: "Tech Solutions Inc.",
-      date: "2022",
-      description: "Recognized for outstanding performance and leadership.",
-    },
-  ],
-  publications: [
-    {
-      title: "Optimizing React Apps for Performance",
-      publisher: "DevTech Journal",
-      date: "2022-10",
-      link: "https://devtechjournal.com/react-optimization",
-    },
-    {
-      title: "Microservices in Node.js",
-      publisher: "Code Magazine",
-      date: "2021-06",
-      link: "https://codemag.com/microservices-nodejs",
-    },
-  ],
-  languages: [
-    {
-      language: "English",
-      proficiency: "Native",
-    },
-    {
-      language: "Spanish",
-      proficiency: "Professional",
-    },
-  ],
-  certifications: [
-    {
-      name: "AWS Certified Developer – Associate",
-      issuer: "Amazon Web Services",
-      date: "2023",
-      credential_id: "AWS-123456"
-    },
-    {
-      name: "Certified Kubernetes Application Developer",
-      issuer: "Cloud Native Computing Foundation",
-      date: "2022",
-      credential_id: "CKAD-654321"
-    },
-  ],
-  courses: [
-    {
-      title: "Advanced JavaScript Concepts",
-      provider: "Udemy",
-      date: "2022",
-    },
-    {
-      title: "Docker & Kubernetes for Developers",
-      provider: "Coursera",
-      date: "2023",
-    },
-  ],
-  internships: [
-    {
-      company: "DevLaunchpad",
-      title: "Software Engineering Intern",
-      startDate: "2018-06",
-      endDate: "2018-08",
-      location: "Remote",
-      description: "Built internal tools using React and Firebase\nContributed to open-source bug fixes\nLearned agile practices and SCRUM",
-    },
-  ],
-  freelanceWork: [
-    {
-      client: "StartUply",
-      title: "Freelance Web Developer",
-      startDate: "2021-01",
-      endDate: "2021-05",
-      description: "Developed a landing page and blog for a SaaS startup\nHandled mobile responsiveness and SEO optimization",
-    },
-  ],
-  volunteerWork: [
-    {
-      organization: "CodeForGood",
-      role: "Volunteer Mentor",
-      startDate: "2020",
-      endDate: "Present",
-      description: "Mentor young developers on Git, open-source, and JavaScript\nContributed to community education workshops",
-    },
-  ],
-  softSkills: [
-    "Team Leadership",
-    "Communication",
-    "Problem Solving",
-    "Adaptability",
-    "Time Management",
-  ],
+    projects: (defaultResume.sections?.projects?.items || []).map((item: any) => ({
+      title: item.name,
+      description: item.description,
+      technologies: item.keywords,
+      link: item.url?.href,
+      duration: item.date,
+    })),
+    awards: (defaultResume.sections?.awards?.items || []).map((item: any) => ({
+      title: item.title,
+      issuer: item.awarder,
+      date: item.date,
+      description: item.description,
+    })),
+    languages: (defaultResume.sections?.languages?.items || []).map((item: any) => ({
+      language: item.name,
+      proficiency: item.description,
+    })),
+    certifications: (defaultResume.sections?.certifications?.items || []).map((item: any) => ({
+      name: item.name,
+      issuer: item.issuer,
+      date: item.date,
+      credential_id: item.credential_id,
+    })),
+    courses: [],
+    internships: [],
+    freelanceWork: [],
+    volunteerWork: (defaultResume.sections?.volunteer?.items || []).map((item: any) => ({
+      role: item.position,
+      organization: item.organization,
+      startDate: item.date,
+      endDate: '',
+      description: item.summary,
+    })),
+    softSkills: [],
   technicalSkills: {
-    programming_languages: ["JavaScript", "Python", "TypeScript", "SQL"],
-    frameworks: ["React", "Node.js", "Express", "Next.js"],
-    tools: ["Git", "Docker", "Postman", "VS Code"],
-    databases: ["MongoDB", "PostgreSQL", "Firebase"],
-    cloud_platforms: ["AWS", "Vercel", "Heroku"],
-  },
-};
+      programming_languages: [],
+      frameworks: [],
+      tools: [],
+      databases: [],
+      cloud_platforms: [],
+    },
+  };
+}
+
+const initialResumeData: ResumeData = mapDefaultResumeToResumeData(defaultResume);
 
 // Industry/Field options for targeted resume generation
 const INDUSTRY_OPTIONS = [
@@ -430,11 +343,6 @@ function mapTopLevelToSections(resumeData: any) {
         items: sections.certifications?.items || resumeData.certifications || [],
         visible: sections.certifications?.visible !== false,
       },
-      publications: {
-        ...(sections.publications || {}),
-        items: sections.publications?.items || resumeData.publications || [],
-        visible: sections.publications?.visible !== false,
-      },
       volunteer: {
         ...(sections.volunteer || {}),
         items: sections.volunteer?.items || resumeData.volunteerWork || [],
@@ -468,17 +376,17 @@ export default function Builder() {
     if (saved) {
       try {
         const parsedData = JSON.parse(saved);
-        // If URL has template parameter, use that template
-        if (templateParam) {
-          return { ...parsedData, template: templateParam };
-        }
-        // If no template, default to classic
-        return { ...parsedData, template: parsedData.template || 'classic' };
-      } catch {
-        return { ...initialResumeData, template: templateParam || 'classic' };
-      }
-    }
-    return { ...initialResumeData, template: templateParam || 'classic' };
+                 // If URL has template parameter, use that template
+         if (templateParam) {
+           return { ...parsedData, template: templateParam };
+         }
+         // If no template, default to azurill
+         return { ...parsedData, template: parsedData.template || 'azurill' };
+       } catch {
+         return { ...initialResumeData, template: templateParam || 'azurill' };
+       }
+     }
+     return { ...initialResumeData, template: templateParam || 'azurill' };
   });
   
   const [title, setTitle] = useState(() => {
@@ -658,112 +566,112 @@ export default function Builder() {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-slate-50 pt-16 overflow-x-hidden">
-      {/* Navigation */}
-      <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b border-slate-200">
-        <div className="w-[95vw] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link href="/" className="flex items-center text-blue-600 hover:text-blue-700 text-sm sm:text-base">
-              <ArrowLeft className="mr-1 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-              <span className="font-medium hidden sm:inline">Back to Home</span>
-              <span className="font-medium sm:hidden">Back</span>
-            </Link>
-            <div className="flex items-center space-x-2 sm:space-x-4">
-              <Button
-                onClick={handleSave}
-                disabled={saveMutation.isPending}
-                variant="outline"
-                className="font-medium text-xs sm:text-sm px-2 sm:px-4 py-2 sm:py-2"
-              >
-                <Save className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">{saveMutation.isPending ? "Saving..." : "Save"}</span>
-                <span className="sm:hidden">{saveMutation.isPending ? "..." : "Save"}</span>
-              </Button>
-              <DownloadModal resumeData={resumeData}>
-                <Button className="bg-blue-600 hover:bg-blue-700 font-medium text-xs sm:text-sm px-2 sm:px-4 py-2 sm:py-2">
-                  <Download className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-                  <span className="hidden sm:inline">Download Resume</span>
-                  <span className="sm:hidden">Download</span>
-                </Button>
-              </DownloadModal>
-              <LoginSignupButton />
-            </div>
-          </div>
-        </div>
-      </nav>
+     return (
+     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pt-16 overflow-x-hidden">
+       {/* Navigation */}
+       <nav className="fixed top-0 w-full bg-white dark:bg-slate-800 z-50 border-b border-slate-200 dark:border-slate-700 shadow-sm">
+         <div className="w-[95vw] mx-auto px-4 sm:px-6 lg:px-8">
+           <div className="flex justify-between items-center h-16">
+             <Link href="/" className="flex items-center text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm sm:text-base">
+               <ArrowLeft className="mr-1 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+               <span className="font-medium hidden sm:inline">Back to Home</span>
+               <span className="font-medium sm:hidden">Back</span>
+             </Link>
+             <div className="flex items-center space-x-2 sm:space-x-4">
+               <Button
+                 onClick={handleSave}
+                 disabled={saveMutation.isPending}
+                 variant="outline"
+                 className="font-medium text-xs sm:text-sm px-2 sm:px-4 py-2 sm:py-2 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700"
+               >
+                 <Save className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                 <span className="hidden sm:inline">{saveMutation.isPending ? "Saving..." : "Save"}</span>
+                 <span className="sm:hidden">{saveMutation.isPending ? "..." : "Save"}</span>
+               </Button>
+               <DownloadModal resumeData={resumeData}>
+                 <Button className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 font-medium text-xs sm:text-sm px-2 sm:px-4 py-2 sm:py-2">
+                   <Download className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                   <span className="hidden sm:inline">Download Resume</span>
+                   <span className="sm:hidden">Download</span>
+                 </Button>
+               </DownloadModal>
+               <LoginSignupButton />
+             </div>
+           </div>
+         </div>
+       </nav>
 
-      <div className="w-[95vw] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-800">Resume Builder</h1>
-          <p className="text-slate-600 mt-2">Create your professional resume with live preview</p>
-        </div>
+             <div className="w-[98vw] mx-auto px-2 sm:px-3 lg:px-4 py-8">
+         <div className="mb-8">
+           <h1 className="text-3xl font-bold text-slate-800 dark:text-white">Resume Builder</h1>
+           <p className="text-slate-600 dark:text-slate-300 mt-2">Create your professional resume with live preview</p>
+         </div>
 
         {/* Stacked layout: Form on top, Preview full width below */}
         <div className="flex flex-col lg:flex-row gap-2 overflow-x-hidden">
-          {/* Form Panel */}
-          <div className="w-full lg:w-2/5 overflow-x-hidden mb-4 lg:mb-0">
-            <Card className="bg-white shadow-lg">
-              <CardContent className="p-8">
-                <div className="mb-6">
-                  <label htmlFor="title" className="block text-sm font-medium text-slate-700 mb-2">
-                    Resume Title
-                  </label>
-                  <input
-                    id="title"
-                    type="text"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="My Resume"
-                  />
-                </div>
+                     {/* Form Panel */}
+           <div className="w-full lg:w-1/2 overflow-x-hidden mb-4 lg:mb-0">
+             <Card className="shadow-xl border-0 bg-background/80 backdrop-blur-sm dark:bg-slate-800/90 dark:border-slate-700">
+               <CardContent className="p-4">
+                 <div className="mb-6">
+                   <label htmlFor="title" className="block text-sm font-medium text-foreground dark:text-white mb-2">
+                     Resume Title
+                   </label>
+                   <input
+                     id="title"
+                     type="text"
+                     value={title}
+                     onChange={(e) => setTitle(e.target.value)}
+                     className="w-full px-4 py-2 border border-border dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent bg-background dark:bg-slate-700 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-slate-400"
+                     placeholder="My Resume"
+                   />
+                 </div>
 
-                {/* Industry/Field Selection */}
-                <div className="mb-6">
-                  <Label htmlFor="field" className="block text-sm font-medium text-slate-700 mb-2">
-                    <Briefcase className="inline h-4 w-4 mr-1" />
-                    Professional Field
-                  </Label>
-                  <Select
-                    value={resumeData.field ? resumeData.field : undefined}
-                    onValueChange={(value) => setResumeData(prev => ({ ...prev, field: value }))}
-                  >
-                    <SelectTrigger className="w-full text-gray-700">
-                      <SelectValue placeholder="Select your professional field for targeted content" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {INDUSTRY_OPTIONS.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          <span className="flex items-center">
-                            <span className="mr-2">{option.icon}</span>
-                            {option.label}
-                          </span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-slate-500 mt-1">
-                    This helps generate relevant content and skills for your industry
-                  </p>
-                </div>
+                                 {/* Industry/Field Selection */}
+                 <div className="mb-6">
+                   <Label htmlFor="field" className="block text-sm font-medium text-foreground dark:text-white mb-2">
+                     <Briefcase className="inline h-4 w-4 mr-1" />
+                     Professional Field
+                   </Label>
+                   <Select
+                     value={resumeData.field ? resumeData.field : undefined}
+                     onValueChange={(value) => setResumeData(prev => ({ ...prev, field: value }))}
+                   >
+                     <SelectTrigger className="w-full text-foreground dark:text-white bg-background dark:bg-slate-700 border-border dark:border-slate-600">
+                       <SelectValue placeholder="Select your professional field for targeted content" />
+                     </SelectTrigger>
+                     <SelectContent className="bg-background dark:bg-slate-800 border-border dark:border-slate-600">
+                       {INDUSTRY_OPTIONS.map((option) => (
+                         <SelectItem key={option.value} value={option.value} className="text-foreground dark:text-white dark:hover:bg-slate-700">
+                           <span className="flex items-center">
+                             <span className="mr-2">{option.icon}</span>
+                             {option.label}
+                           </span>
+                         </SelectItem>
+                       ))}
+                     </SelectContent>
+                   </Select>
+                   <p className="text-xs text-muted-foreground dark:text-slate-400 mt-1">
+                     This helps generate relevant content and skills for your industry
+                   </p>
+                 </div>
 
-                {/* Upload Section */}
-                <div className="mb-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-lg font-medium text-slate-700">Quick Start</h3>
-                    {!showUpload && (
-                      <Button
-                        onClick={() => setShowUpload(true)}
-                        variant="outline"
-                        size="sm"
-                        className="text-blue-600 border-blue-600 hover:bg-blue-50"
-                      >
-                        <Upload className="mr-2 h-4 w-4" />
-                        Upload Resume
-                      </Button>
-                    )}
-                  </div>
+                                 {/* Upload Section */}
+                 <div className="mb-6">
+                   <div className="flex items-center justify-between mb-3">
+                     <h3 className="text-lg font-medium text-foreground dark:text-white">Quick Start</h3>
+                     {!showUpload && (
+                       <Button
+                         onClick={() => setShowUpload(true)}
+                         variant="outline"
+                         size="sm"
+                         className="text-blue-600 border-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:border-blue-400 dark:hover:bg-slate-700"
+                       >
+                         <Upload className="mr-2 h-4 w-4" />
+                         Upload Resume
+                       </Button>
+                     )}
+                   </div>
                   
                   {showUpload && (
                     <div className="mb-4">
@@ -791,92 +699,93 @@ export default function Builder() {
             </Card>
           </div>
 
-          {/* Live Preview Panel - Full Width */}
-          <div className="w-full lg:w-3/5 overflow-x-hidden">
-            <Card className="bg-white shadow-lg h-fit flex flex-col items-center">
-              <CardContent className="p-8 md:p-12 w-full">
-                <div className="mb-4 flex items-center justify-between w-full max-w-3xl mx-auto">
-                  <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold text-slate-800">Live Preview</h2>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-xs sm:text-sm text-slate-500">Template:</span>
-                    <Select
-                      value={resumeData.template}
-                      onValueChange={(value) => {
-                        try {
-                          console.log('Template selection changed to:', value);
-                          setResumeData(prev => ({ ...prev, template: value }));
-                        } catch (error) {
-                          console.error('Error changing template:', error);
-                          toast({
-                            title: "Template Error",
-                            description: "Failed to change template. Please try again.",
-                            variant: "destructive",
-                          });
-                        }
-                      }}
-                    >
-                      <SelectTrigger className="w-32 sm:w-48 md:w-56 max-w-full text-xs sm:text-sm px-2 py-1 sm:px-3 sm:py-2 rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <SelectValue placeholder="Choose a template" />
-                      </SelectTrigger>
-                      <SelectContent className="w-32 sm:w-48 md:w-56 max-w-full rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none overflow-auto max-h-[40vh] sm:max-h-[50vh] text-xs sm:text-sm">
-                        <div className="px-2 sm:px-3 py-1 sm:py-2 text-xs font-medium text-slate-500 uppercase tracking-wide">
-                          Custom Templates
-                        </div>
-                        {allTemplates.filter(t => !t.isReactiveResume).map((template) => (
-                          <SelectItem key={template.id} value={template.id} className="w-full truncate px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm">
-                            <span className="flex items-center truncate">
-                              <span className="w-2 h-2 sm:w-3 sm:h-3 rounded-full mr-1 sm:mr-2 flex-shrink-0" style={{
-                                backgroundColor: template.color?.includes('slate') ? '#64748b' : 
-                                               template.color?.includes('blue') ? '#3b82f6' :
-                                               template.color?.includes('pink') ? '#ec4899' :
-                                               template.color?.includes('emerald') ? '#10b981' :
-                                               template.color?.includes('yellow') ? '#f59e0b' :
-                                               '#8b5cf6'
-                              }}></span>
-                              <span className="truncate">{template.name}</span>
-                            </span>
-                          </SelectItem>
-                        ))}
-                        <div className="px-2 sm:px-3 py-1 sm:py-2 text-xs font-medium text-slate-500 uppercase tracking-wide border-t mt-1 pt-2">
-                          Premium Templates
-                        </div>
-                        {allTemplates.filter(t => t.isReactiveResume).map((template) => (
-                          <SelectItem key={template.id} value={template.id} className="w-full truncate px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm">
-                            <span className="flex items-center truncate">
-                              <span className="w-2 h-2 sm:w-3 sm:h-3 rounded-full mr-1 sm:mr-2 flex-shrink-0" style={{
-                                backgroundColor: template.color?.includes('blue') ? '#3b82f6' :
-                                               template.color?.includes('gray') ? '#6b7280' :
-                                               template.color?.includes('green') ? '#10b981' :
-                                               template.color?.includes('purple') ? '#8b5cf6' :
-                                               template.color?.includes('indigo') ? '#6366f1' :
-                                               template.color?.includes('cyan') ? '#06b6d4' :
-                                               template.color?.includes('yellow') ? '#f59e0b' :
-                                               template.color?.includes('emerald') ? '#10b981' :
-                                               template.color?.includes('stone') ? '#78716c' :
-                                               template.color?.includes('slate') ? '#64748b' :
-                                               template.color?.includes('amber') ? '#f59e0b' :
-                                               '#fb7185'
-                              }}></span>
-                              <span className="truncate">⭐ {template.name}</span>
-                            </span>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="w-full flex justify-center">
-                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 md:px-2 md:py-8 shadow-md w-full max-w-none overflow-auto">
-                    <ErrorBoundary fallback={<div className="text-red-500 p-4">Preview error - Template may have issues</div>}>
-                      <ResumePreview resumeData={resumeData} />
-                    </ErrorBoundary>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                                {/* Live Preview Panel - Full Width */}
+           <div className="w-full lg:w-3/5 overflow-x-hidden">
+             <Card className="shadow-xl border-0 bg-background/80 backdrop-blur-sm dark:bg-slate-800/90 dark:border-slate-700 h-fit flex flex-col items-center">
+               <CardContent className="p-4 md:p-6 w-full">
+                 <div className="mb-4 flex items-center justify-between w-full max-w-3xl mx-auto">
+                   <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold text-foreground dark:text-white">Live Preview</h2>
+                   <div className="flex items-center space-x-2">
+                     <span className="text-xs sm:text-sm text-muted-foreground dark:text-slate-400">Template:</span>
+                     <Select
+                       value={resumeData.template}
+                       onValueChange={(value) => {
+                         try {
+                           console.log('Template selection changed to:', value);
+                           setResumeData(prev => ({ ...prev, template: value }));
+                         } catch (error) {
+                           console.error('Error changing template:', error);
+                           toast({
+                             title: "Template Error",
+                             description: "Failed to change template. Please try again.",
+                             variant: "destructive",
+                           });
+                         }
+                       }}
+                     >
+                       <SelectTrigger className="w-32 sm:w-48 md:w-56 max-w-full text-xs sm:text-sm px-2 py-1 sm:px-3 sm:py-2 rounded-xl border border-border/50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-background/50 text-foreground hover:border-border transition-all duration-200">
+                         <SelectValue placeholder="Choose a template" />
+                       </SelectTrigger>
+                       <SelectContent className="w-32 sm:w-48 md:w-56 max-w-full rounded-xl shadow-xl bg-background ring-1 ring-border/50 focus:outline-none overflow-auto max-h-[40vh] sm:max-h-[50vh] text-xs sm:text-sm">
+                         <div className="px-2 sm:px-3 py-1 sm:py-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                           Custom Templates
+                         </div>
+                         {allTemplates.filter(t => !t.isReactiveResume).map((template) => (
+                           <SelectItem key={template.id} value={template.id} className="w-full truncate px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm">
+                             <span className="flex items-center truncate">
+                               <span className="w-2 h-2 sm:w-3 sm:h-3 rounded-full mr-1 sm:mr-2 flex-shrink-0" style={{
+                                 backgroundColor: template.color?.includes('slate') ? '#64748b' : 
+                                                template.color?.includes('blue') ? '#3b82f6' :
+                                                template.color?.includes('pink') ? '#ec4899' :
+                                                template.color?.includes('emerald') ? '#10b981' :
+                                                template.color?.includes('yellow') ? '#f59e0b' :
+                                                '#8b5cf6'
+                               }}></span>
+                               <span className="truncate">{template.name}</span>
+                             </span>
+                           </SelectItem>
+                         ))}
+
+                         {allTemplates.filter(t => t.isReactiveResume).map((template) => (
+                           <SelectItem key={template.id} value={template.id} className="w-full truncate px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm">
+                             <span className="flex items-center truncate">
+                               <span className="w-2 h-2 sm:w-3 sm:h-3 rounded-full mr-1 sm:mr-2 flex-shrink-0" style={{
+                                 backgroundColor: template.color?.includes('blue') ? '#3b82f6' :
+                                                template.color?.includes('gray') ? '#6b7280' :
+                                                template.color?.includes('green') ? '#10b981' :
+                                                template.color?.includes('purple') ? '#8b5cf6' :
+                                                template.color?.includes('indigo') ? '#6366f1' :
+                                                template.color?.includes('cyan') ? '#06b6d4' :
+                                                template.color?.includes('yellow') ? '#f59e0b' :
+                                                template.color?.includes('emerald') ? '#10b981' :
+                                                template.color?.includes('stone') ? '#78716c' :
+                                                template.color?.includes('slate') ? '#64748b' :
+                                                template.color?.includes('amber') ? '#f59e0b' :
+                                                '#fb7185'
+                               }}></span>
+                               <span className="truncate">⭐ {template.name}</span>
+                             </span>
+                           </SelectItem>
+                         ))}
+                       </SelectContent>
+                     </Select>
+                   </div>
+                 </div>
+                 <div className="w-full flex justify-center">
+                   <div className="rounded-2xl border border-border/30 bg-muted/30 backdrop-blur-sm p-4 md:px-2 md:py-8 shadow-lg w-full max-w-none overflow-auto">
+                     <ErrorBoundary fallback={<div className="text-red-500 p-4">Preview error - Template may have issues</div>}>
+                       <ResumePreview resumeData={resumeData} />
+                     </ErrorBoundary>
+                   </div>
+                 </div>
+               </CardContent>
+             </Card>
+           </div>
         </div>
       </div>
+      
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

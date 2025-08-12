@@ -117,64 +117,97 @@ import { z } from "zod";
 import multer from "multer";
 
 // server/pdf-processor.ts
-import pdf from "pdf-parse";
+var pdfModule = null;
+async function getPdfParser() {
+  if (!pdfModule) {
+    const pdfParse = await import("pdf-parse");
+    pdfModule = pdfParse.default;
+  }
+  return pdfModule;
+}
 async function processPDFBuffer(buffer) {
   try {
     console.log("Processing PDF buffer of size:", buffer.length);
-    const data = await pdf(buffer);
-    if (!data || !data.text) {
-      return {
-        success: false,
-        error: "No text could be extracted from the PDF file"
-      };
-    }
-    const cleanText = data.text.replace(/\n\s*\n/g, "\n").replace(/\s+/g, " ").trim();
-    if (cleanText.length < 50) {
-      return {
-        success: false,
-        error: "PDF appears to contain very little text content. It may be image-based or encrypted."
-      };
-    }
-    console.log(`Successfully extracted ${cleanText.length} characters from PDF`);
-    return {
-      success: true,
-      text: cleanText,
-      metadata: {
-        pages: data.numpages,
-        title: data.info?.Title,
-        author: data.info?.Author,
-        subject: data.info?.Subject,
-        keywords: data.info?.Keywords,
-        creator: data.info?.Creator,
-        producer: data.info?.Producer,
-        creationDate: data.info?.CreationDate,
-        modificationDate: data.info?.ModDate
+    let data;
+    try {
+      const pdf = await getPdfParser();
+      data = await pdf(buffer, {
+        normalizeWhitespace: true,
+        disableCombineTextItems: false
+      });
+      if (data?.text?.trim().length > 50) {
+        const cleanText = data.text.replace(/\n\s*\n/g, "\n").replace(/\s+/g, " ").trim();
+        return {
+          success: true,
+          text: cleanText,
+          metadata: {
+            pages: data.numpages,
+            title: data.info?.Title,
+            author: data.info?.Author,
+            subject: data.info?.Subject,
+            keywords: data.info?.Keywords,
+            creator: data.info?.Creator,
+            producer: data.info?.Producer,
+            creationDate: data.info?.CreationDate ? new Date(data.info.CreationDate) : void 0,
+            modificationDate: data.info?.ModDate ? new Date(data.info.ModDate) : void 0
+          }
+        };
       }
-    };
-  } catch (error) {
-    console.error("Error processing PDF:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-    if (errorMessage.includes("password") || errorMessage.includes("encrypted")) {
+    } catch (parseError) {
+      console.warn("pdf-parse failed, trying pdfjs-dist...", parseError);
+    }
+    try {
+      const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.js");
+      const uint8Array = new Uint8Array(buffer);
+      const loadingTask = pdfjsLib.getDocument({ data: uint8Array });
+      const pdfDocument = await loadingTask.promise;
+      let fullText = "";
+      for (let i = 1; i <= pdfDocument.numPages; i++) {
+        const page = await pdfDocument.getPage(i);
+        const content = await page.getTextContent();
+        const pageText = content.items.map((item) => item.str || "").join(" ");
+        fullText += pageText + "\n";
+      }
+      const cleanText = fullText.replace(/\n\s*\n/g, "\n").replace(/\s+/g, " ").trim();
+      if (cleanText.length < 50) {
+        return {
+          success: false,
+          error: "PDF appears to be image-based or scanned. Little text could be extracted. Please convert to DOCX using SmallPDF.com or ILovePDF.com."
+        };
+      }
       return {
-        success: false,
-        error: "This PDF is password-protected or encrypted. Please remove the password and try again."
+        success: true,
+        text: cleanText,
+        metadata: {
+          pages: pdfDocument.numPages
+        }
       };
-    } else if (errorMessage.includes("Invalid") || errorMessage.includes("corrupt")) {
+    } catch (fallbackError) {
+      console.error("pdfjs-dist fallback also failed:", fallbackError);
       return {
         success: false,
-        error: "The PDF file appears to be corrupted or invalid. Please try a different file."
-      };
-    } else if (errorMessage.includes("not supported") || errorMessage.includes("version")) {
-      return {
-        success: false,
-        error: "This PDF version is not supported. Please try saving it in a different format or use a DOCX file."
-      };
-    } else {
-      return {
-        success: false,
-        error: `PDF processing failed: ${errorMessage}. Please try converting to DOCX format for better compatibility.`
+        error: "Failed to parse PDF: unsupported format or corrupted file. Please convert to DOCX using an online converter."
       };
     }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (message.includes("password") || message.includes("encrypted")) {
+      return {
+        success: false,
+        error: "This PDF is password-protected. Please remove the password and try again."
+      };
+    }
+    if (message.includes("corrupt") || message.includes("invalid")) {
+      return {
+        success: false,
+        error: "The PDF file is corrupted or invalid. Please try a different file."
+      };
+    }
+    console.error("Unexpected PDF processing error:", error);
+    return {
+      success: false,
+      error: "We could not extract text from this PDF. It may be scanned, complex, or in an unsupported format.\n\n\u2705 Try this:\n1. Go to https://smallpdf.com/pdf-to-word\n2. Convert your PDF to DOCX\n3. Upload the DOCX file instead\n\nDOCX files work perfectly with our system!"
+    };
   }
 }
 function validatePDFFile(file) {
@@ -514,6 +547,291 @@ async function handleRefineResume(req, res) {
   }
 }
 
+// server/pdf-service-puppeteer.ts
+import puppeteer from "puppeteer";
+var PuppeteerPDFService = class {
+  static browser = null;
+  static async getBrowser() {
+    if (!this.browser) {
+      this.browser = await puppeteer.launch({
+        headless: true,
+        args: [
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--disable-web-security",
+          "--disable-features=VizDisplayCompositor",
+          "--disable-dev-shm-usage",
+          "--no-first-run"
+        ]
+      });
+    }
+    return this.browser;
+  }
+  static async generatePDF(options) {
+    const { resumeData, templateId, filename } = options;
+    console.log("Starting Puppeteer PDF generation for:", filename);
+    const browser = await this.getBrowser();
+    const page = await browser.newPage();
+    try {
+      await page.setViewport({ width: 1920, height: 2400 });
+      const baseUrl = process.env.NODE_ENV === "development" ? "http://localhost:5000" : process.env.PUBLIC_URL || "http://localhost:5000";
+      const pdfUrl = `${baseUrl}/builder?pdf=true&template=${templateId}`;
+      console.log("Navigating to:", pdfUrl);
+      await page.evaluateOnNewDocument((data) => {
+        window.localStorage.setItem("resume_builder_data", JSON.stringify(data));
+        window.localStorage.setItem("pdf_generation_mode", "true");
+      }, resumeData);
+      await page.goto(pdfUrl, {
+        waitUntil: "networkidle0",
+        timeout: 3e4
+      });
+      await new Promise((resolve) => setTimeout(resolve, 3e3));
+      const resumeElement = "#resume-preview";
+      console.log("Using standardized selector:", resumeElement);
+      await page.waitForSelector(resumeElement, { timeout: 1e4 });
+      const element = await page.$(resumeElement);
+      if (!element) {
+        throw new Error("Resume preview element not found. Please ensure the resume is properly loaded.");
+      }
+      const width = await page.evaluate((el) => el.scrollWidth, element);
+      const height = await page.evaluate((el) => el.scrollHeight, element);
+      if (!width || !height) {
+        throw new Error("Could not get element dimensions");
+      }
+      console.log("Element dimensions:", { width, height });
+      const resumeHTML = await page.evaluate((el) => {
+        const clone = el.cloneNode(true);
+        const interactiveElements = clone.querySelectorAll("button, input, select, textarea, [contenteditable], .toolbar, .controls");
+        interactiveElements.forEach((element2) => element2.remove());
+        const styleElements = clone.querySelectorAll("style, script");
+        styleElements.forEach((element2) => element2.remove());
+        const computedStyles = window.getComputedStyle(el);
+        clone.style.cssText = computedStyles.cssText;
+        const allElements = clone.querySelectorAll("*");
+        allElements.forEach((element2) => {
+          const attrs = element2.attributes;
+          for (let i = attrs.length - 1; i >= 0; i--) {
+            const attr = attrs[i];
+            if (attr.name.startsWith("data-") || attr.name.startsWith("aria-")) {
+              element2.removeAttribute(attr.name);
+            }
+          }
+        });
+        return clone.outerHTML;
+      }, element);
+      const styles = await page.evaluate(() => {
+        const styleSheets = Array.from(document.styleSheets);
+        let cssText = "";
+        styleSheets.forEach((sheet) => {
+          try {
+            const rules = Array.from(sheet.cssRules || sheet.rules);
+            rules.forEach((rule) => {
+              cssText += rule.cssText + "\n";
+            });
+          } catch (e) {
+          }
+        });
+        return cssText;
+      });
+      const pdfPage = await browser.newPage();
+      try {
+        await pdfPage.setViewport({
+          width,
+          height
+        });
+        const htmlContent = `
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta charset="utf-8">
+              <style>
+                ${styles}
+                
+                /* Additional PDF-specific styles */
+                body {
+                  margin: 0;
+                  padding: 0;
+                  background: white;
+                  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                  -webkit-font-smoothing: antialiased;
+                  -moz-osx-font-smoothing: grayscale;
+                  text-rendering: optimizeLegibility;
+                }
+                
+                /* PDF container styling */
+                #resume-preview {
+                  margin: 0 !important;
+                  padding: 0 !important;
+                  background: white !important;
+                  width: 100% !important;
+                  height: auto !important;
+                  overflow: visible !important;
+                }
+                
+                /* Custom template specific fixes */
+                .bg-pink-600, .bg-pink-400, .from-pink-600, .to-pink-400 {
+                  background: #db2777 !important;
+                  color: white !important;
+                }
+                
+                .bg-gradient-to-b {
+                  background: linear-gradient(to bottom, var(--tw-gradient-stops)) !important;
+                }
+                
+                /* Ensure proper dimensions for custom templates */
+                .max-w-5xl, .w-full {
+                  max-width: none !important;
+                  width: 100% !important;
+                }
+                
+                .shadow-lg, .shadow-2xl {
+                  box-shadow: none !important;
+                }
+                
+                .rounded-2xl, .rounded-xl {
+                  border-radius: 0 !important;
+                }
+                
+                /* Grid layout fixes */
+                .grid {
+                  display: grid !important;
+                }
+                
+                .grid-cols-1 {
+                  grid-template-columns: repeat(1, 1fr) !important;
+                }
+                
+                @media (min-width: 1024px) {
+                  .lg\\:grid-cols-3 {
+                    grid-template-columns: repeat(3, 1fr) !important;
+                  }
+                  .lg\\:col-span-1 {
+                    grid-column: span 1 / span 1 !important;
+                  }
+                  .lg\\:col-span-2 {
+                    grid-column: span 2 / span 2 !important;
+                  }
+                }
+                
+                .template-container {
+                  margin: 0 !important;
+                  padding: 0 !important;
+                  background-color: white !important;
+                  box-shadow: none !important;
+                  width: 100% !important;
+                  min-height: 100% !important;
+                  position: relative !important;
+                }
+                
+                /* Ensure all text is visible */
+                * {
+                  color-adjust: exact !important;
+                  -webkit-print-color-adjust: exact !important;
+                }
+                
+                /* Remove any print-specific styles that might interfere */
+                @media print {
+                  * { box-shadow: none !important; }
+                }
+              </style>
+            </head>
+            <body>
+              ${resumeHTML}
+            </body>
+          </html>
+        `;
+        await pdfPage.setContent(htmlContent, {
+          waitUntil: "networkidle0",
+          timeout: 3e4
+        });
+        await new Promise((resolve) => setTimeout(resolve, 2e3));
+        const pdfBuffer2 = await pdfPage.pdf({
+          format: "A4",
+          printBackground: true,
+          margin: {
+            top: "0.2in",
+            right: "0.2in",
+            bottom: "0.2in",
+            left: "0.2in"
+          },
+          displayHeaderFooter: false,
+          preferCSSPageSize: true
+        });
+        await pdfPage.close();
+        console.log("PDF generated successfully with template container only");
+        return Buffer.from(pdfBuffer2);
+      } catch (error) {
+        await pdfPage.close();
+        throw error;
+      }
+      const pdfBuffer = await page.pdf({
+        width,
+        height,
+        printBackground: true,
+        margin: {
+          top: "0.1in",
+          right: "0.1in",
+          bottom: "0.1in",
+          left: "0.1in"
+        },
+        displayHeaderFooter: false,
+        preferCSSPageSize: false
+      });
+      console.log("PDF generated successfully with template container only");
+      return Buffer.from(pdfBuffer);
+    } catch (error) {
+      console.error("Puppeteer PDF generation error:", error);
+      throw error;
+    } finally {
+      await page.close();
+    }
+  }
+  static async cleanup() {
+    if (this.browser) {
+      await this.browser.close();
+      this.browser = null;
+    }
+  }
+};
+async function generatePDFWithPuppeteer(req, res) {
+  try {
+    const { resumeData, templateId, filename } = req.body;
+    if (!resumeData || !templateId || !filename) {
+      return res.status(400).json({
+        success: false,
+        error: "Missing required fields: resumeData, templateId, filename"
+      });
+    }
+    console.log("Generating PDF with Puppeteer for:", filename);
+    const pdfBuffer = await PuppeteerPDFService.generatePDF({
+      resumeData,
+      templateId,
+      filename
+    });
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}.pdf"`);
+    res.setHeader("Content-Length", pdfBuffer.length);
+    res.send(pdfBuffer);
+  } catch (error) {
+    console.error("PDF generation failed:", error);
+    res.status(500).json({
+      success: false,
+      error: "PDF generation failed: " + error.message
+    });
+  }
+}
+process.on("exit", async () => {
+  await PuppeteerPDFService.cleanup();
+});
+process.on("SIGINT", async () => {
+  await PuppeteerPDFService.cleanup();
+  process.exit(0);
+});
+process.on("SIGTERM", async () => {
+  await PuppeteerPDFService.cleanup();
+  process.exit(0);
+});
+
 // server/routes.ts
 var upload = multer({
   storage: multer.memoryStorage(),
@@ -531,13 +849,21 @@ var upload = multer({
 });
 async function registerRoutes(app2) {
   let mockUser;
+  let databaseAvailable = true;
   try {
     mockUser = await storage.initializeMockUser();
+    console.log("Database connected successfully, mock user initialized");
   } catch (error) {
     console.error("Failed to initialize mock user:", error);
+    console.log("Running in offline mode without database");
+    databaseAvailable = false;
+    mockUser = { id: 1, username: "demo_user" };
   }
   app2.get("/api/resumes", async (req, res) => {
     try {
+      if (!databaseAvailable) {
+        return res.json([]);
+      }
       const mockUserId = mockUser?.id || 1;
       const resumes2 = await storage.getResumesByUser(mockUserId);
       res.json(resumes2);
@@ -598,30 +924,66 @@ async function registerRoutes(app2) {
       res.status(500).json({ message: "Failed to delete resume" });
     }
   });
-  app2.post("/api/pdf/extract", upload.single("pdf"), async (req, res) => {
+  app2.get("/api/health", (req, res) => {
+    res.json({
+      status: "healthy",
+      database: databaseAvailable ? "connected" : "offline",
+      puppeteer: "available",
+      timestamp: (/* @__PURE__ */ new Date()).toISOString()
+    });
+  });
+  app2.post("/api/pdf/generate-puppeteer", generatePDFWithPuppeteer);
+  app2.post("/api/pdf/extract", async (req, res) => {
     try {
-      if (!req.file) {
-        return res.status(400).json({
-          success: false,
-          error: "No PDF file provided"
-        });
-      }
-      console.log("Processing PDF upload:", req.file.originalname, "Size:", req.file.size);
-      const validation = validatePDFFile(req.file);
-      if (!validation.valid) {
-        return res.status(400).json({
-          success: false,
-          error: validation.error
-        });
-      }
-      const result = await processPDFBuffer(req.file.buffer);
-      if (result.success) {
-        console.log("PDF processing successful for:", req.file.originalname);
-        res.json(result);
-      } else {
-        console.log("PDF processing failed for:", req.file.originalname, "Error:", result.error);
-        res.status(422).json(result);
-      }
+      upload.single("pdf")(req, res, async (err) => {
+        if (err) {
+          console.error("Multer upload error:", err);
+          if (err.code === "LIMIT_FILE_SIZE") {
+            return res.status(400).json({
+              success: false,
+              error: "File size too large. Maximum size is 10MB."
+            });
+          }
+          if (err.code === "LIMIT_UNEXPECTED_FILE") {
+            return res.status(400).json({
+              success: false,
+              error: 'Unexpected file field. Please upload a PDF file using the field name "pdf".'
+            });
+          }
+          if (err.message && err.message.includes("Unexpected field")) {
+            return res.status(400).json({
+              success: false,
+              error: 'Invalid file field. Please upload a PDF file using the field name "pdf".'
+            });
+          }
+          return res.status(400).json({
+            success: false,
+            error: "File upload error. Please ensure you are uploading a valid PDF file."
+          });
+        }
+        if (!req.file) {
+          return res.status(400).json({
+            success: false,
+            error: "No PDF file provided. Please select a PDF file to upload."
+          });
+        }
+        console.log("Processing PDF upload:", req.file.originalname, "Size:", req.file.size);
+        const validation = validatePDFFile(req.file);
+        if (!validation.valid) {
+          return res.status(400).json({
+            success: false,
+            error: validation.error
+          });
+        }
+        const result = await processPDFBuffer(req.file.buffer);
+        if (result.success) {
+          console.log("PDF processing successful for:", req.file.originalname);
+          res.json(result);
+        } else {
+          console.log("PDF processing failed for:", req.file.originalname, "Error:", result.error);
+          res.status(422).json(result);
+        }
+      });
     } catch (error) {
       console.error("PDF processing endpoint error:", error);
       res.status(500).json({
@@ -660,6 +1022,8 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
+import dotenv from "dotenv";
+dotenv.config();
 var vite_config_default = defineConfig({
   plugins: [
     react(),

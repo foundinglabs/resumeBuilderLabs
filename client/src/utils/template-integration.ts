@@ -1,5 +1,6 @@
 // Template Integration Utility
 // Bridges ResumeGenius custom templates with Reactive-Resume templates
+import { TemplateConfigManager } from '../../../shared/template-config';
 
 export interface TemplateInfo {
   id: string;
@@ -20,7 +21,8 @@ export const customTemplates: TemplateInfo[] = [
     description: "Traditional, clean, and ATS-friendly layout.",
     color: "bg-slate-600",
     hoverColor: "hover:bg-slate-700",
-    isReactiveResume: false
+    isReactiveResume: false,
+    previewImage: "/templates/jpg/classic.jpg"
   },
   {
     id: "modern",
@@ -37,6 +39,7 @@ export const customTemplates: TemplateInfo[] = [
     color: "bg-pink-600",
     hoverColor: "hover:bg-pink-700",
     isReactiveResume: false
+    ,previewImage: "/templates/jpg/stylish.jpg"
   },
   {
     id: "compact",
@@ -44,7 +47,7 @@ export const customTemplates: TemplateInfo[] = [
     description: "Space-efficient, single-column layout for concise resumes.",
     color: "bg-emerald-600",
     hoverColor: "hover:bg-emerald-700",
-    isReactiveResume: false
+     previewImage: "/templates/jpg/compact.jpg"
   },
   {
     id: "overleaf",
@@ -53,6 +56,7 @@ export const customTemplates: TemplateInfo[] = [
     color: "bg-yellow-500",
     hoverColor: "hover:bg-yellow-600",
     isReactiveResume: false
+    ,previewImage: "/templates/jpg/overleaf.jpg"
   },
   {
     id: "elegant",
@@ -188,23 +192,31 @@ export const reactiveResumeTemplates: TemplateInfo[] = [
   }
 ];
 
-// Combined templates list
+// Combined templates list - filtered by centralized config
 export const allTemplates: TemplateInfo[] = [
-  ...customTemplates,
-  ...reactiveResumeTemplates
+  ...customTemplates.filter(template => TemplateConfigManager.isTemplateEnabled(template.id)),
+  ...reactiveResumeTemplates.filter(template => TemplateConfigManager.isTemplateEnabled(template.id))
 ];
 
 // Helper functions
 export const getTemplateById = (id: string): TemplateInfo | undefined => {
-  return allTemplates.find(template => template.id === id);
+  const template = [...customTemplates, ...reactiveResumeTemplates].find(template => template.id === id);
+  // Only return if template is enabled in centralized config
+  return template && TemplateConfigManager.isTemplateEnabled(id) ? template : undefined;
 };
 
 export const getCustomTemplates = (): TemplateInfo[] => {
-  return customTemplates;
+  // Filter templates based on centralized config
+  return customTemplates.filter(template => 
+    TemplateConfigManager.isTemplateEnabled(template.id)
+  );
 };
 
 export const getReactiveResumeTemplates = (): TemplateInfo[] => {
-  return reactiveResumeTemplates;
+  // Filter templates based on centralized config
+  return reactiveResumeTemplates.filter(template => 
+    TemplateConfigManager.isTemplateEnabled(template.id)
+  );
 };
 
 export const getTemplatePreviewUrl = (template: TemplateInfo): string => {

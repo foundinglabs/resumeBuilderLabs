@@ -15,6 +15,7 @@ import {
   X,
   Home
 } from "lucide-react";
+import Footer from "@/components/Footer";
 
 interface DemoStep {
   id: string;
@@ -582,6 +583,9 @@ export default function Demo() {
           </motion.div>
         )}
       </AnimatePresence>
+      
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

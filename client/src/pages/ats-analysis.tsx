@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from 'react';
-import { Upload, FileText, AlertCircle, CheckCircle2, Target, TrendingUp, AlertTriangle, Award, Download, ArrowLeft, Hash, BarChart3, RefreshCcw, Edit, Briefcase, Users, Clock, Zap, Eye } from 'lucide-react';
+import React, { useState, useCallback, useEffect } from 'react';
+import { Upload, FileText, AlertCircle, CheckCircle2, Target, TrendingUp, AlertTriangle, Award, Download, ArrowLeft, BarChart3, RefreshCcw, Edit, Briefcase, Users, Clock, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LoginSignupButton } from '@/components/LoginSignupButton';
 import { processFile, validateFile, type FileProcessingResult } from '@/lib/file-processing';
 import { refineResumeWithGemini, type RefinedResumeData } from '@/lib/gemini-api';
+import Footer from "@/components/Footer";
 
 interface ATSScore {
   overall: number;
@@ -701,7 +702,7 @@ export default function ATSAnalysis() {
     URL.revokeObjectURL(url);
   };
 
-  const downloadPDFReport = () => {
+  const downloadPDFReport = async () => {
     if (!analysis || !uploadedFile) return;
     
     const reportData = generateReportData(analysis, uploadedFile.name);
@@ -799,26 +800,45 @@ export default function ATSAnalysis() {
     
     document.body.appendChild(reportDiv);
     
-    // Use html2pdf to generate PDF
-    import('html2pdf.js').then((html2pdf) => {
-      const opt = {
-        margin: 1,
-        filename: `ats-analysis-report-${new Date().toISOString().split('T')[0]}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-      };
-      
-      html2pdf.default().from(reportDiv).set(opt).save().then(() => {
-        document.body.removeChild(reportDiv);
+    // Use Puppeteer PDF generation via server API
+    try {
+      const response = await fetch('/api/pdf/generate-puppeteer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          resumeData: { content: reportDiv.innerHTML },
+          templateId: 'ats-report',
+          filename: `ats-analysis-report-${new Date().toISOString().split('T')[0]}`
+        }),
       });
-    });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate PDF');
+      }
+
+      const pdfBlob = await response.blob();
+      const url = window.URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `ats-analysis-report-${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Failed to generate PDF report. Please try again.');
+    } finally {
+      document.body.removeChild(reportDiv);
+    }
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-600';
-    if (score >= 60) return 'text-yellow-600';
-    return 'text-red-600';
+    if (score >= 80) return 'text-green-600 dark:text-green-400';
+    if (score >= 60) return 'text-yellow-600 dark:text-yellow-400';
+    return 'text-red-600 dark:text-red-400';
   };
 
   const getScoreBadgeVariant = (score: number) => {
@@ -827,27 +847,88 @@ export default function ATSAnalysis() {
     return 'destructive';
   };
 
+  // Animated score component
+  const AnimatedScore = ({ score, className = "" }: { score: number; className?: string }) => {
+    const [displayScore, setDisplayScore] = useState(0);
+    const [isAnimating, setIsAnimating] = useState(false);
+
+    useEffect(() => {
+      setIsAnimating(true);
+      const duration = 1500; // 1.5 seconds
+      const steps = 60;
+      const increment = score / steps;
+      let current = 0;
+      
+      const timer = setInterval(() => {
+        current += increment;
+        if (current >= score) {
+          setDisplayScore(score);
+          setIsAnimating(false);
+          clearInterval(timer);
+        } else {
+          setDisplayScore(Math.floor(current));
+        }
+      }, duration / steps);
+
+      return () => clearInterval(timer);
+    }, [score]);
+
+    return (
+      <div className={`${className} ${isAnimating ? 'animate-pulse' : ''}`}>
+        {displayScore}
+      </div>
+    );
+  };
+
+  // Animated progress component
+  const AnimatedProgress = ({ value, className = "" }: { value: number; className?: string }) => {
+    const [progress, setProgress] = useState(0);
+
+    useEffect(() => {
+      const duration = 1000; // 1 second
+      const steps = 40;
+      const increment = value / steps;
+      let current = 0;
+      
+      const timer = setInterval(() => {
+        current += increment;
+        if (current >= value) {
+          setProgress(value);
+          clearInterval(timer);
+        } else {
+          setProgress(current);
+        }
+      }, duration / steps);
+
+      return () => clearInterval(timer);
+    }, [value]);
+
+    return (
+      <Progress value={progress} className={className} />
+    );
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30 dark:from-background dark:via-background dark:to-muted/20">
       <div className="container mx-auto px-4 py-8">
         {/* Navigation */}
-        <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b border-slate-200">
+        <nav className="fixed top-0 w-full bg-background/95 backdrop-blur-md z-50 border-b border-border dark:bg-background/90">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               <div className="flex items-center">
                 <Link href="/">
-                  <Button variant="ghost" className="flex items-center text-slate-600 hover:text-blue-700 text-base font-medium">
+                  <Button variant="ghost" className="flex items-center text-muted-foreground hover:text-primary text-base font-medium dark:text-muted-foreground/90 dark:hover:text-primary/90">
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Back to Home
                   </Button>
                 </Link>
               </div>
               <div className="hidden md:flex items-center space-x-8">
-                <Link href="/builder" className="text-slate-600 hover:text-blue-600 transition-colors">Resume Builder</Link>
-                <Link href="/ats-analysis" className="text-slate-600 hover:text-blue-600 transition-colors">ATS Analysis</Link>
-                <Link href="/text-extractor" className="text-slate-600 hover:text-blue-600 transition-colors">Text Extractor</Link>
+                <Link href="/builder" className="text-muted-foreground hover:text-primary transition-colors dark:text-muted-foreground/90 dark:hover:text-primary/90">Resume Builder</Link>
+                <Link href="/ats-analysis" className="text-muted-foreground hover:text-primary transition-colors dark:text-muted-foreground/90 dark:hover:text-primary/90">ATS Analysis</Link>
+
                 <LoginSignupButton />
-                <span className="text-slate-600 hover:text-blue-600 transition-colors cursor-pointer">Help</span>
+                <span className="text-muted-foreground hover:text-primary transition-colors cursor-pointer dark:text-muted-foreground/90 dark:hover:text-primary/90">Help</span>
               </div>
             </div>
           </div>
@@ -855,11 +936,11 @@ export default function ATSAnalysis() {
         <div className="pt-20" />
 
         {/* Title Section */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-slate-800 mb-4">
+        <div className="text-center mb-8 animate-fadeInUp">
+          <h1 className="text-4xl font-bold text-foreground mb-4 dark:text-foreground/95 animate-typewriter">
             ATS Resume Analysis
           </h1>
-          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto dark:text-muted-foreground/90 animate-fadeInUp animation-delay-2000">
             Get detailed insights on how well your resume performs with Applicant Tracking Systems (ATS).
             Upload your resume for comprehensive scoring and actionable recommendations.
           </p>
@@ -867,30 +948,30 @@ export default function ATSAnalysis() {
 
         {/* Job Description Input Section */}
         {!analysis && (
-          <Card className="max-w-4xl mx-auto mb-8 border-blue-200 bg-blue-50/30">
+          <Card className="max-w-4xl mx-auto mb-8 border-primary/30 bg-primary/10 dark:border-primary/40 dark:bg-primary/20 animate-fadeInUp">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <Briefcase className="h-5 w-5 text-blue-600" />
-                <span>Job Description (Optional but Recommended)</span>
+                <Briefcase className="h-5 w-5 text-primary dark:text-primary/90 animate-pulse-slow" />
+                <span className="dark:text-foreground/95">Job Description (Optional but Recommended)</span>
               </CardTitle>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-muted-foreground dark:text-muted-foreground/90">
                 Paste the job description you're targeting for personalized ATS analysis and job match scoring.
               </p>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <Label htmlFor="job-description">Job Description</Label>
+                <Label htmlFor="job-description" className="dark:text-foreground/95">Job Description</Label>
                 <Textarea
                   id="job-description"
                   placeholder="Paste the complete job description here. Include required skills, experience requirements, and responsibilities to get the most accurate job match analysis..."
-                  className="min-h-[120px] resize-none"
+                  className="min-h-[120px] resize-none dark:bg-background dark:border-border dark:text-foreground/95"
                   value={jobDescription}
                   onChange={(e) => setJobDescription(e.target.value)}
                 />
-                <div className="flex items-center justify-between text-xs text-gray-500">
+                <div className="flex items-center justify-between text-xs text-muted-foreground dark:text-muted-foreground/80">
                   <span>{jobDescription.length} characters</span>
                   {jobDescription && (
-                    <span className="text-blue-600">✓ Job description will be analyzed for keyword matching</span>
+                    <span className="text-primary dark:text-primary/90">✓ Job description will be analyzed for keyword matching</span>
                   )}
                 </div>
               </div>
@@ -899,7 +980,7 @@ export default function ATSAnalysis() {
                   <Button 
                     onClick={handleReanalyze} 
                     disabled={isAnalyzing}
-                    className="w-full"
+                    className="w-full dark:bg-primary dark:hover:bg-primary/90"
                   >
                     {isAnalyzing ? (
                       <>
@@ -921,13 +1002,13 @@ export default function ATSAnalysis() {
 
         {/* Upload Section */}
         {!analysis && (
-          <Card className="max-w-2xl mx-auto mb-6 sm:mb-8">
+          <Card className="max-w-2xl mx-auto mb-6 sm:mb-8 dark:bg-card/50 animate-slideInUp">
             <CardContent className="p-4 sm:p-6 lg:p-8">
               <div
                 className={`border-2 border-dashed rounded-lg p-4 sm:p-6 lg:p-8 text-center transition-colors ${
                   isDragging
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-slate-300 hover:border-slate-400'
+                    ? 'border-primary bg-primary/20 dark:bg-primary/30'
+                    : 'border-border hover:border-primary/60 dark:hover:border-primary/50'
                 } ${isAnalyzing ? 'opacity-50 pointer-events-none' : ''}`}
                 onDrop={handleDrop}
                 onDragOver={(e) => e.preventDefault()}
@@ -935,33 +1016,33 @@ export default function ATSAnalysis() {
                 onDragLeave={() => setIsDragging(false)}
               >
                 <div className="flex flex-col items-center space-y-3 sm:space-y-4">
-                  <div className="p-3 sm:p-4 bg-blue-100 rounded-full">
-                    <Target className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
+                  <div className="p-3 sm:p-4 bg-primary/20 dark:bg-primary/30 rounded-full animate-float">
+                    <Target className="h-6 w-6 sm:h-8 sm:w-8 text-primary dark:text-primary/90" />
                   </div>
                   
                   {isAnalyzing ? (
                     <div className="space-y-2 sm:space-y-3">
-                      <div className="animate-spin w-6 h-6 sm:w-8 sm:h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
-                      <p className="text-slate-600 text-sm sm:text-base">Analyzing your resume...</p>
-                      <p className="text-xs sm:text-sm text-slate-500">This may take a few moments</p>
+                      <div className="animate-spin w-6 h-6 sm:w-8 sm:h-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
+                      <p className="text-muted-foreground text-sm sm:text-base dark:text-muted-foreground/90">Analyzing your resume...</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground/70 dark:text-muted-foreground/80">This may take a few moments</p>
                     </div>
                   ) : (
                     <>
                       <div className="space-y-2">
-                        <h3 className="text-base sm:text-lg font-semibold text-slate-700">
+                        <h3 className="text-base sm:text-lg font-semibold text-foreground dark:text-foreground/95">
                           Upload Your Resume
                         </h3>
-                        <p className="text-slate-500 text-sm sm:text-base">
+                        <p className="text-muted-foreground text-sm sm:text-base dark:text-muted-foreground/90">
                           Drag and drop your resume file here, or click to browse
                         </p>
-                        <p className="text-xs text-slate-400">
+                        <p className="text-xs text-muted-foreground/60 dark:text-muted-foreground/70">
                           Supports PDF and DOCX files up to 10MB
                         </p>
                       </div>
 
                       <Button
                         onClick={() => document.getElementById('file-input')?.click()}
-                        className="bg-blue-600 hover:bg-blue-700 text-sm sm:text-base"
+                        className="bg-primary hover:bg-primary/90 text-sm sm:text-base dark:bg-primary dark:hover:bg-primary/90"
                       >
                         <Upload className="mr-2 h-4 w-4" />
                         Choose File
@@ -980,19 +1061,19 @@ export default function ATSAnalysis() {
               </div>
 
               {error && (
-                <Alert className="mt-4 border-red-200 bg-red-50">
-                  <AlertCircle className="h-4 w-4 text-red-600" />
-                  <AlertDescription className="text-red-700 text-sm sm:text-base">
+                <Alert className="mt-4 border-destructive/30 bg-destructive/20 dark:border-destructive/40 dark:bg-destructive/30">
+                  <AlertCircle className="h-4 w-4 text-destructive dark:text-destructive/90" />
+                  <AlertDescription className="text-destructive text-sm sm:text-base dark:text-destructive/90">
                     {error}
                   </AlertDescription>
                 </Alert>
               )}
 
               {uploadedFile && !error && (
-                <div className="mt-4 flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                <div className="mt-4 flex items-center justify-between p-3 bg-muted/60 dark:bg-muted/40 rounded-lg">
                   <div className="flex items-center space-x-2 sm:space-x-3">
-                    <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-slate-500" />
-                    <span className="text-xs sm:text-sm font-medium text-slate-700 truncate">
+                    <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground dark:text-muted-foreground/90" />
+                    <span className="text-xs sm:text-sm font-medium text-foreground dark:text-foreground/95 truncate">
                       {uploadedFile.name}
                     </span>
                   </div>
@@ -1000,7 +1081,7 @@ export default function ATSAnalysis() {
                     variant="ghost"
                     size="sm"
                     onClick={handleReset}
-                    className="text-slate-500 hover:text-slate-700 text-xs sm:text-sm"
+                    className="text-muted-foreground hover:text-foreground text-xs sm:text-sm dark:text-muted-foreground/90 dark:hover:text-foreground/95"
                   >
                     Remove
                   </Button>
@@ -1014,24 +1095,25 @@ export default function ATSAnalysis() {
         {analysis && (
           <div className="max-w-6xl mx-auto space-y-6">
             {/* Overall Score */}
-            <Card className="text-center">
+            <Card className="text-center dark:bg-card/60 animate-fadeInUp">
               <CardContent className="p-8">
                 <div className="flex flex-col items-center space-y-4">
                   <div className="flex items-center space-x-4">
-                    <Award className="h-8 w-8 text-blue-600" />
-                    <h2 className="text-2xl font-bold text-slate-800">ATS Compatibility Score</h2>
+                    <Award className="h-8 w-8 text-primary dark:text-primary/90 animate-bounce-gentle" />
+                    <h2 className="text-2xl font-bold text-foreground dark:text-foreground/95">ATS Compatibility Score</h2>
                   </div>
                   
                   <div className="flex items-center space-x-6">
                     <div className="text-center">
-                      <div className={`text-5xl font-bold ${getScoreColor(analysis.score.overall)}`}>
-                        {analysis.score.overall}
-                      </div>
-                      <div className="text-slate-500">Overall Score</div>
+                      <AnimatedScore 
+                        score={analysis.score.overall} 
+                        className={`text-5xl font-bold ${getScoreColor(analysis.score.overall)}`}
+                      />
+                      <div className="text-muted-foreground dark:text-muted-foreground/90">Overall Score</div>
                     </div>
                     <div className="flex flex-col space-y-2">
-                      <Progress value={analysis.score.overall} className="w-48" />
-                      <Badge variant={getScoreBadgeVariant(analysis.score.overall)}>
+                      <AnimatedProgress value={analysis.score.overall} className="w-48" />
+                      <Badge variant={getScoreBadgeVariant(analysis.score.overall)} className="animate-fadeInUp animation-delay-2000">
                         {analysis.score.overall >= 80 ? 'Excellent' : 
                          analysis.score.overall >= 60 ? 'Good' : 'Needs Improvement'}
                       </Badge>
@@ -1043,43 +1125,47 @@ export default function ATSAnalysis() {
 
             {/* Detailed Scores */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card>
+              <Card className="dark:bg-card/60 animate-fadeInUp animation-delay-2000">
                 <CardContent className="p-6 text-center">
-                  <div className={`text-2xl font-bold ${getScoreColor(analysis.score.keyword_density)}`}>
-                    {analysis.score.keyword_density}%
-                  </div>
-                  <div className="text-sm text-slate-600">Keyword Density</div>
-                  <Progress value={analysis.score.keyword_density} className="mt-2" />
+                  <AnimatedScore 
+                    score={analysis.score.keyword_density} 
+                    className={`text-2xl font-bold ${getScoreColor(analysis.score.keyword_density)}`}
+                  />
+                  <div className="text-sm text-muted-foreground dark:text-muted-foreground/90">Keyword Density</div>
+                  <AnimatedProgress value={analysis.score.keyword_density} className="mt-2" />
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="dark:bg-card/60 animate-fadeInUp animation-delay-4000">
                 <CardContent className="p-6 text-center">
-                  <div className={`text-2xl font-bold ${getScoreColor(analysis.score.format_score)}`}>
-                    {analysis.score.format_score}%
-                  </div>
-                  <div className="text-sm text-slate-600">Format Quality</div>
-                  <Progress value={analysis.score.format_score} className="mt-2" />
+                  <AnimatedScore 
+                    score={analysis.score.format_score} 
+                    className={`text-2xl font-bold ${getScoreColor(analysis.score.format_score)}`}
+                  />
+                  <div className="text-sm text-muted-foreground dark:text-muted-foreground/90">Format Quality</div>
+                  <AnimatedProgress value={analysis.score.format_score} className="mt-2" />
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="dark:bg-card/60 animate-fadeInUp animation-delay-2000">
                 <CardContent className="p-6 text-center">
-                  <div className={`text-2xl font-bold ${getScoreColor(analysis.score.section_score)}`}>
-                    {analysis.score.section_score}%
-                  </div>
-                  <div className="text-sm text-slate-600">Section Completeness</div>
-                  <Progress value={analysis.score.section_score} className="mt-2" />
+                  <AnimatedScore 
+                    score={analysis.score.section_score} 
+                    className={`text-2xl font-bold ${getScoreColor(analysis.score.section_score)}`}
+                  />
+                  <div className="text-sm text-muted-foreground dark:text-muted-foreground/90">Section Completeness</div>
+                  <AnimatedProgress value={analysis.score.section_score} className="mt-2" />
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="dark:bg-card/60 animate-fadeInUp animation-delay-4000">
                 <CardContent className="p-6 text-center">
-                  <div className={`text-2xl font-bold ${getScoreColor(analysis.score.readability)}`}>
-                    {analysis.score.readability}%
-                  </div>
-                  <div className="text-sm text-slate-600">Readability</div>
-                  <Progress value={analysis.score.readability} className="mt-2" />
+                  <AnimatedScore 
+                    score={analysis.score.readability} 
+                    className={`text-2xl font-bold ${getScoreColor(analysis.score.readability)}`}
+                  />
+                  <div className="text-sm text-muted-foreground dark:text-muted-foreground/90">Readability</div>
+                  <AnimatedProgress value={analysis.score.readability} className="mt-2" />
                 </CardContent>
               </Card>
             </div>
@@ -1233,16 +1319,16 @@ export default function ATSAnalysis() {
             </Card>
 
             {/* Production-Level Advanced Analysis */}
-            <Card className="max-w-6xl mx-auto">
+            <Card className="max-w-6xl mx-auto dark:bg-card/60">
               <CardHeader>
-                <CardTitle className="text-center">Advanced Production-Level Analysis</CardTitle>
-                <p className="text-center text-sm text-gray-600">
+                <CardTitle className="text-center dark:text-foreground/95">Advanced Production-Level Analysis</CardTitle>
+                <p className="text-center text-sm text-muted-foreground dark:text-muted-foreground/90">
                   Comprehensive insights with job matching, formatting analysis, and optimization recommendations
                 </p>
               </CardHeader>
               <CardContent className="p-0">
                 <Tabs defaultValue="overview" className="w-full">
-                  <TabsList className="grid w-full grid-cols-6">
+                  <TabsList className="grid w-full grid-cols-6 dark:bg-muted/50">
                     <TabsTrigger value="overview">Overview</TabsTrigger>
                     <TabsTrigger value="job-match">Job Match</TabsTrigger>
                     <TabsTrigger value="formatting">Formatting</TabsTrigger>
@@ -1254,27 +1340,27 @@ export default function ATSAnalysis() {
                   {/* Overview Tab */}
                   <TabsContent value="overview" className="mt-6 p-6">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      <Card>
+                      <Card className="dark:bg-card/50">
                         <CardHeader>
                           <CardTitle className="flex items-center space-x-2">
-                            <Users className="h-5 w-5 text-blue-600" />
-                            <span>Experience Level Analysis</span>
+                            <Users className="h-5 w-5 text-primary dark:text-primary/90" />
+                            <span className="dark:text-foreground/95">Experience Level Analysis</span>
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
                           <div className="space-y-4">
                             <div className="flex items-center justify-between">
-                              <span>Experience Level:</span>
-                              <Badge variant="outline" className="text-sm">
+                              <span className="dark:text-foreground/90">Experience Level:</span>
+                              <Badge variant="outline" className="text-sm dark:border-border">
                                 {analysis.experience_level.charAt(0).toUpperCase() + analysis.experience_level.slice(1)}
                               </Badge>
                             </div>
                             <div className="space-y-2">
-                              <h4 className="font-medium">Contextual Advice:</h4>
+                              <h4 className="font-medium dark:text-foreground/95">Contextual Advice:</h4>
                               {analysis.contextual_advice?.map((advice, index) => (
                                 <div key={index} className="flex items-start space-x-2">
-                                  <Eye className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                                  <span className="text-sm text-gray-700">{advice}</span>
+                                  <Eye className="h-4 w-4 text-primary dark:text-primary/90 mt-0.5 flex-shrink-0" />
+                                  <span className="text-sm text-muted-foreground dark:text-muted-foreground/90">{advice}</span>
                                 </div>
                               ))}
                             </div>
@@ -1282,30 +1368,39 @@ export default function ATSAnalysis() {
                         </CardContent>
                       </Card>
 
-                      <Card>
+                      <Card className="dark:bg-card/50">
                         <CardHeader>
                           <CardTitle className="flex items-center space-x-2">
-                            <BarChart3 className="h-5 w-5 text-green-600" />
-                            <span>Resume Statistics</span>
+                            <BarChart3 className="h-5 w-5 text-green-600 dark:text-green-400" />
+                            <span className="dark:text-foreground/95">Resume Statistics</span>
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                           <div className="grid grid-cols-2 gap-4">
-                            <div className="text-center p-3 bg-blue-50 rounded">
-                              <div className="text-2xl font-bold text-blue-600">{analysis.word_count}</div>
-                              <div className="text-xs text-gray-600">Words</div>
+                            <div className="text-center p-3 bg-blue-50 dark:bg-blue-950/40 rounded animate-fadeInUp animation-delay-2000">
+                              <AnimatedScore 
+                                score={analysis.word_count} 
+                                className="text-2xl font-bold text-blue-600 dark:text-blue-400"
+                              />
+                              <div className="text-xs text-muted-foreground dark:text-muted-foreground/90">Words</div>
                             </div>
-                            <div className="text-center p-3 bg-green-50 rounded">
-                              <div className="text-2xl font-bold text-green-600">{analysis.estimated_read_time}</div>
-                              <div className="text-xs text-gray-600">Read Time</div>
+                            <div className="text-center p-3 bg-green-50 dark:bg-green-950/40 rounded animate-fadeInUp animation-delay-4000">
+                              <div className="text-2xl font-bold text-green-600 dark:text-green-400 animate-pulse-slow">{analysis.estimated_read_time}</div>
+                              <div className="text-xs text-muted-foreground dark:text-muted-foreground/90">Read Time</div>
                             </div>
-                            <div className="text-center p-3 bg-purple-50 rounded">
-                              <div className="text-2xl font-bold text-purple-600">{analysis.sections_detected.length}</div>
-                              <div className="text-xs text-gray-600">Sections</div>
+                            <div className="text-center p-3 bg-purple-50 dark:bg-purple-950/40 rounded animate-fadeInUp animation-delay-2000">
+                              <AnimatedScore 
+                                score={analysis.sections_detected.length} 
+                                className="text-2xl font-bold text-purple-600 dark:text-purple-400"
+                              />
+                              <div className="text-xs text-muted-foreground dark:text-muted-foreground/90">Sections</div>
                             </div>
-                            <div className="text-center p-3 bg-orange-50 rounded">
-                              <div className="text-2xl font-bold text-orange-600">{analysis.keywords_found.length}</div>
-                              <div className="text-xs text-gray-600">Keywords</div>
+                            <div className="text-center p-3 bg-orange-50 dark:bg-orange-950/40 rounded animate-fadeInUp animation-delay-4000">
+                              <AnimatedScore 
+                                score={analysis.keywords_found.length} 
+                                className="text-2xl font-bold text-orange-600 dark:text-orange-400"
+                              />
+                              <div className="text-xs text-muted-foreground dark:text-muted-foreground/90">Keywords</div>
                             </div>
                           </div>
                         </CardContent>
@@ -1318,32 +1413,32 @@ export default function ATSAnalysis() {
                     {analysis.job_match_analysis ? (
                       <div className="space-y-6">
                         <div className="text-center">
-                          <h3 className="text-2xl font-bold mb-2">Job Match Analysis</h3>
-                          <p className="text-gray-600">How well does your resume align with the job requirements?</p>
+                          <h3 className="text-2xl font-bold mb-2 dark:text-foreground/95">Job Match Analysis</h3>
+                          <p className="text-muted-foreground dark:text-muted-foreground/90">How well does your resume align with the job requirements?</p>
                         </div>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <Card>
+                          <Card className="dark:bg-card/50">
                             <CardHeader>
-                              <CardTitle className="text-green-700">Required Skills Match</CardTitle>
+                              <CardTitle className="text-green-700 dark:text-green-400">Required Skills Match</CardTitle>
                             </CardHeader>
                             <CardContent>
                               <div className="space-y-4">
                                 <div>
-                                  <h4 className="font-medium text-green-600 mb-2">Found Skills ({analysis.job_match_analysis.required_skills_found.length})</h4>
+                                  <h4 className="font-medium text-green-600 dark:text-green-400 mb-2">Found Skills ({analysis.job_match_analysis.required_skills_found.length})</h4>
                                   <div className="flex flex-wrap gap-1">
                                     {analysis.job_match_analysis.required_skills_found.map((skill, index) => (
-                                      <Badge key={index} variant="default" className="text-xs bg-green-100 text-green-800">
+                                      <Badge key={index} variant="default" className="text-xs bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200">
                                         {skill}
                                       </Badge>
                                     ))}
                                   </div>
                                 </div>
                                 <div>
-                                  <h4 className="font-medium text-red-600 mb-2">Missing Skills ({analysis.job_match_analysis.required_skills_missing.length})</h4>
+                                  <h4 className="font-medium text-red-600 dark:text-red-400 mb-2">Missing Skills ({analysis.job_match_analysis.required_skills_missing.length})</h4>
                                   <div className="flex flex-wrap gap-1">
                                     {analysis.job_match_analysis.required_skills_missing.map((skill, index) => (
-                                      <Badge key={index} variant="outline" className="text-xs border-red-200 text-red-700">
+                                      <Badge key={index} variant="outline" className="text-xs border-red-200 dark:border-red-800 text-red-700 dark:text-red-300">
                                         {skill}
                                       </Badge>
                                     ))}
@@ -1353,37 +1448,37 @@ export default function ATSAnalysis() {
                             </CardContent>
                           </Card>
 
-                          <Card>
+                          <Card className="dark:bg-card/50">
                             <CardHeader>
-                              <CardTitle className="text-blue-700">Experience Requirements</CardTitle>
+                              <CardTitle className="text-blue-700 dark:text-blue-400">Experience Requirements</CardTitle>
                             </CardHeader>
                             <CardContent>
                               <div className="space-y-4">
                                 <div className="flex items-center justify-between">
-                                  <span>Experience Match:</span>
+                                  <span className="dark:text-foreground/90">Experience Match:</span>
                                   <Badge variant={analysis.job_match_analysis.experience_level_match ? "default" : "destructive"}>
                                     {analysis.job_match_analysis.experience_level_match ? "✓ Meets Requirements" : "✗ Below Requirements"}
                                   </Badge>
                                 </div>
                                 <div className="flex items-center justify-between">
-                                  <span>Industry Alignment:</span>
-                                  <span className="font-medium">{analysis.job_match_analysis.industry_alignment}%</span>
+                                  <span className="dark:text-foreground/90">Industry Alignment:</span>
+                                  <span className="font-medium dark:text-foreground/95">{analysis.job_match_analysis.industry_alignment}%</span>
                                 </div>
                                 <div>
-                                  <h4 className="font-medium mb-2">Quantifiable Requirements</h4>
+                                  <h4 className="font-medium mb-2 dark:text-foreground/95">Quantifiable Requirements</h4>
                                   {analysis.job_match_analysis.quantifiable_requirements.found.length > 0 && (
                                     <div className="mb-2">
-                                      <span className="text-sm text-green-600">Found:</span>
+                                      <span className="text-sm text-green-600 dark:text-green-400">Found:</span>
                                       {analysis.job_match_analysis.quantifiable_requirements.found.map((req, index) => (
-                                        <div key={index} className="text-sm ml-2">• {req}</div>
+                                        <div key={index} className="text-sm ml-2 text-muted-foreground dark:text-muted-foreground/90">• {req}</div>
                                       ))}
                                     </div>
                                   )}
                                   {analysis.job_match_analysis.quantifiable_requirements.missing.length > 0 && (
                                     <div>
-                                      <span className="text-sm text-red-600">Missing:</span>
+                                      <span className="text-sm text-red-600 dark:text-red-400">Missing:</span>
                                       {analysis.job_match_analysis.quantifiable_requirements.missing.map((req, index) => (
-                                        <div key={index} className="text-sm ml-2">• {req}</div>
+                                        <div key={index} className="text-sm ml-2 text-muted-foreground dark:text-muted-foreground/90">• {req}</div>
                                       ))}
                                     </div>
                                   )}
@@ -1395,10 +1490,10 @@ export default function ATSAnalysis() {
                       </div>
                     ) : (
                       <div className="text-center py-8">
-                        <Briefcase className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">No Job Description Provided</h3>
-                        <p className="text-gray-600 mb-4">Add a job description above to unlock detailed job matching analysis</p>
-                        <Button onClick={() => window.scrollTo(0, 0)} variant="outline">
+                        <Briefcase className="h-12 w-12 text-muted-foreground dark:text-muted-foreground/80 mx-auto mb-4" />
+                        <h3 className="text-lg font-medium text-foreground dark:text-foreground/95 mb-2">No Job Description Provided</h3>
+                        <p className="text-muted-foreground dark:text-muted-foreground/90 mb-4">Add a job description above to unlock detailed job matching analysis</p>
+                        <Button onClick={() => window.scrollTo(0, 0)} variant="outline" className="dark:border-border dark:text-foreground/90">
                           Add Job Description
                         </Button>
                       </div>
@@ -1410,7 +1505,7 @@ export default function ATSAnalysis() {
                     <div className="space-y-6">
                       <div className="text-center">
                         <h3 className="text-2xl font-bold mb-2">Formatting Analysis</h3>
-                        <p className="text-gray-600">ATS-friendly formatting assessment</p>
+                        <p className="text-muted-foreground">ATS-friendly formatting assessment</p>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1570,47 +1665,50 @@ export default function ATSAnalysis() {
                   <TabsContent value="readability" className="mt-6 p-6">
                     <div className="space-y-6">
                       <div className="text-center">
-                        <h3 className="text-2xl font-bold mb-2">Readability Metrics</h3>
-                        <p className="text-gray-600">How easy is your resume to read and understand?</p>
+                        <h3 className="text-2xl font-bold mb-2 dark:text-foreground/95">Readability Metrics</h3>
+                        <p className="text-muted-foreground dark:text-muted-foreground/90">How easy is your resume to read and understand?</p>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <Card>
+                        <Card className="dark:bg-card/50 animate-fadeInUp animation-delay-2000">
                           <CardHeader>
-                            <CardTitle>Grade Level</CardTitle>
+                            <CardTitle className="dark:text-foreground/95">Grade Level</CardTitle>
                           </CardHeader>
                           <CardContent className="text-center">
-                            <div className="text-3xl font-bold text-blue-600">
-                              {analysis.readability_metrics?.flesch_kincaid_grade.toFixed(1) || 'N/A'}
-                            </div>
-                            <div className="text-sm text-gray-600">Flesch-Kincaid Grade</div>
-                            <p className="text-xs text-gray-500 mt-2">Ideal: 8-12th grade level</p>
+                            <AnimatedScore 
+                              score={analysis.readability_metrics?.flesch_kincaid_grade || 0} 
+                              className="text-3xl font-bold text-blue-600 dark:text-blue-400"
+                            />
+                            <div className="text-sm text-muted-foreground dark:text-muted-foreground/90">Flesch-Kincaid Grade</div>
+                            <p className="text-xs text-muted-foreground/70 dark:text-muted-foreground/80 mt-2">Ideal: 8-12th grade level</p>
                           </CardContent>
                         </Card>
 
-                        <Card>
+                        <Card className="dark:bg-card/50 animate-fadeInUp animation-delay-4000">
                           <CardHeader>
-                            <CardTitle>Sentence Length</CardTitle>
+                            <CardTitle className="dark:text-foreground/95">Sentence Length</CardTitle>
                           </CardHeader>
                           <CardContent className="text-center">
-                            <div className="text-3xl font-bold text-purple-600">
-                              {analysis.readability_metrics?.average_sentence_length.toFixed(1) || 'N/A'}
-                            </div>
-                            <div className="text-sm text-gray-600">Words per sentence</div>
-                            <p className="text-xs text-gray-500 mt-2">Ideal: 15-20 words</p>
+                            <AnimatedScore 
+                              score={analysis.readability_metrics?.average_sentence_length || 0} 
+                              className="text-3xl font-bold text-purple-600 dark:text-purple-400"
+                            />
+                            <div className="text-sm text-muted-foreground dark:text-muted-foreground/90">Words per sentence</div>
+                            <p className="text-xs text-muted-foreground/70 dark:text-muted-foreground/80 mt-2">Ideal: 15-20 words</p>
                           </CardContent>
                         </Card>
 
-                        <Card>
+                        <Card className="dark:bg-card/50 animate-fadeInUp animation-delay-2000">
                           <CardHeader>
-                            <CardTitle>Passive Voice</CardTitle>
+                            <CardTitle className="dark:text-foreground/95">Passive Voice</CardTitle>
                           </CardHeader>
                           <CardContent className="text-center">
-                            <div className="text-3xl font-bold text-orange-600">
-                              {analysis.readability_metrics?.passive_voice_percentage.toFixed(1) || 'N/A'}%
-                            </div>
-                            <div className="text-sm text-gray-600">Passive voice usage</div>
-                            <p className="text-xs text-gray-500 mt-2">Ideal: Under 10%</p>
+                            <AnimatedScore 
+                              score={analysis.readability_metrics?.passive_voice_percentage || 0} 
+                              className="text-3xl font-bold text-orange-600 dark:text-orange-400"
+                            />
+                            <div className="text-sm text-muted-foreground dark:text-muted-foreground/90">Passive voice usage</div>
+                            <p className="text-xs text-muted-foreground/70 dark:text-muted-foreground/80 mt-2">Ideal: Under 10%</p>
                           </CardContent>
                         </Card>
                       </div>
@@ -1621,23 +1719,23 @@ export default function ATSAnalysis() {
             </Card>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4">
-              <Button onClick={handleReset} variant="outline" className="w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4 animate-fadeInUp animation-delay-4000">
+              <Button onClick={handleReset} variant="outline" className="w-full sm:w-auto dark:border-border dark:text-foreground/90 dark:hover:bg-muted/50 hover:scale-105 transition-transform">
                 <RefreshCcw className="mr-2 h-4 w-4" />
                 Analyze Another Resume
               </Button>
               <div className="flex space-x-2">
-                <Button onClick={downloadPDFReport} variant="outline" className="flex items-center">
+                <Button onClick={downloadPDFReport} variant="outline" className="flex items-center dark:border-border dark:text-foreground/90 dark:hover:bg-muted/50 hover:scale-105 transition-transform">
                   <Download className="mr-2 h-4 w-4" />
                   PDF Report
                 </Button>
-                <Button onClick={downloadJSONReport} variant="outline" className="flex items-center">
+                <Button onClick={downloadJSONReport} variant="outline" className="flex items-center dark:border-border dark:text-foreground/90 dark:hover:bg-muted/50 hover:scale-105 transition-transform">
                   <Download className="mr-2 h-4 w-4" />
                   JSON Report
                 </Button>
               </div>
               <Link href="/builder">
-                <Button className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700">
+                <Button className="w-full sm:w-auto bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90 hover:scale-105 transition-transform">
                   <Edit className="mr-2 h-4 w-4" />
                   Edit Resume
                 </Button>
@@ -1646,6 +1744,9 @@ export default function ATSAnalysis() {
           </div>
         )}
       </div>
+      
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

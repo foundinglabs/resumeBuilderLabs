@@ -42,6 +42,6 @@ export const getTemplate = (template: Template) => {
     case "compact": return Compact;
     case "overleaf": return Overleaf;
     case "elegant": return Elegant;
-    default: return Classic;
+    default: return Azurill;
   }
 };

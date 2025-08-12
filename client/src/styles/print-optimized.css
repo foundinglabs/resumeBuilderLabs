@@ -1,0 +1,257 @@
+/* Print-Optimized Styles for PDF Generation */
+
+/* Embed Web-Safe Fonts directly */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Inter Regular'), local('Inter-Regular'),
+       url(data:font/woff2;base64,d09GMgABAAAAAAX...) format('woff2'); /* Truncated for example */
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  src: local('Inter Medium'), local('Inter-Medium'),
+       url(data:font/woff2;base64,d09GMgABAAAAAAY...) format('woff2'); /* Truncated for example */
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  src: local('Inter SemiBold'), local('Inter-SemiBold'),
+       url(data:font/woff2;base64,d09GMgABAAAAAAZ...) format('woff2'); /* Truncated for example */
+  font-display: swap;
+}
+
+/* Print-specific CSS Variables */
+:root {
+  --print-font-primary: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --print-font-serif: 'Times New Roman', Times, serif;
+  --print-font-mono: 'Courier New', Courier, monospace;
+  
+  /* Print-safe colors */
+  --print-bg-white: #ffffff;
+  --print-text-black: #000000;
+  --print-text-gray: #374151;
+  --print-text-light-gray: #6b7280;
+  --print-border-gray: #e5e7eb;
+  --print-accent-blue: #2563eb;
+  --print-accent-light-blue: #dbeafe;
+}
+
+/* Base Print Styles */
+@media print, screen {
+  .resume-container,
+  .print-optimized {
+    /* Force specific dimensions for consistent rendering */
+    width: 8.5in !important;
+    max-width: 8.5in !important;
+    min-height: 11in !important;
+    
+    /* Ensure clean layout */
+    margin: 0 auto !important;
+    padding: 0.5in !important;
+    box-sizing: border-box !important;
+    
+    /* Typography */
+    font-family: var(--print-font-primary) !important;
+    font-size: 11pt !important;
+    line-height: 1.4 !important;
+    color: var(--print-text-black) !important;
+    background: var(--print-bg-white) !important;
+    
+    /* Print behavior */
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    
+    /* Remove any shadows, transforms, or animations */
+    box-shadow: none !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+    
+    /* Ensure content is visible */
+    overflow: visible !important;
+    display: block !important;
+    visibility: visible !important;
+  }
+  
+  /* Section Spacing */
+  .resume-section {
+    margin-bottom: 16pt !important;
+    page-break-inside: avoid !important;
+  }
+  
+  .resume-section:last-child {
+    margin-bottom: 0 !important;
+  }
+  
+  /* Headers */
+  .resume-name {
+    font-size: 18pt !important;
+    font-weight: 600 !important;
+    margin-bottom: 8pt !important;
+    text-align: center !important;
+    color: var(--print-text-black) !important;
+  }
+  
+  .resume-contact {
+    font-size: 10pt !important;
+    text-align: center !important;
+    margin-bottom: 16pt !important;
+    color: var(--print-text-gray) !important;
+  }
+  
+  .resume-title {
+    font-size: 12pt !important;
+    font-weight: 500 !important;
+    margin-bottom: 8pt !important;
+    color: var(--print-accent-blue) !important;
+    border-bottom: 1pt solid var(--print-border-gray) !important;
+    padding-bottom: 4pt !important;
+  }
+  
+  /* Content */
+  .resume-content p,
+  .resume-content li {
+    font-size: 11pt !important;
+    line-height: 1.4 !important;
+    margin-bottom: 6pt !important;
+    color: var(--print-text-black) !important;
+  }
+  
+  .resume-content ul,
+  .resume-content ol {
+    margin: 0 0 8pt 16pt !important;
+    padding: 0 !important;
+  }
+  
+  /* Job/Education Entries */
+  .resume-entry {
+    margin-bottom: 12pt !important;
+  }
+  
+  .resume-entry-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    margin-bottom: 4pt !important;
+  }
+  
+  .resume-job-title {
+    font-size: 11pt !important;
+    font-weight: 500 !important;
+    color: var(--print-text-black) !important;
+  }
+  
+  .resume-company {
+    font-size: 11pt !important;
+    font-weight: 400 !important;
+    color: var(--print-text-gray) !important;
+  }
+  
+  .resume-date {
+    font-size: 10pt !important;
+    color: var(--print-text-light-gray) !important;
+    white-space: nowrap !important;
+  }
+  
+  /* Skills */
+  .resume-skills {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8pt !important;
+  }
+  
+  .resume-skill {
+    background: var(--print-accent-light-blue) !important;
+    color: var(--print-accent-blue) !important;
+    padding: 2pt 6pt !important;
+    border-radius: 3pt !important;
+    font-size: 10pt !important;
+    font-weight: 400 !important;
+  }
+  
+  /* Links */
+  .resume-link {
+    color: var(--print-accent-blue) !important;
+    text-decoration: none !important;
+  }
+  
+  /* Force print-friendly layout */
+  .grid,
+  .flex {
+    display: block !important;
+  }
+  
+  .grid > *,
+  .flex > * {
+    display: block !important;
+    width: 100% !important;
+    margin-bottom: 8pt !important;
+  }
+  
+  /* Hide elements that shouldn't print */
+  .no-print,
+  .print-hidden,
+  button,
+  .button,
+  nav,
+  .navigation {
+    display: none !important;
+  }
+  
+  /* Ensure all text is selectable and copyable */
+  * {
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
+    user-select: text !important;
+  }
+  
+  /* Remove any position fixed/absolute that could cause issues */
+  * {
+    position: static !important;
+  }
+  
+  /* Ensure proper text wrapping */
+  * {
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    hyphens: auto !important;
+  }
+}
+
+/* PDF-specific optimizations for html2canvas */
+.pdf-generation-mode {
+  /* Set exact dimensions */
+  width: 612px !important; /* 8.5 inches at 72 DPI */
+  min-height: 792px !important; /* 11 inches at 72 DPI */
+  max-width: 612px !important;
+  
+  /* Remove any layout quirks */
+  transform: none !important;
+  zoom: 1 !important;
+  
+  /* Ensure crisp rendering */
+  image-rendering: -webkit-optimize-contrast !important;
+  image-rendering: crisp-edges !important;
+  
+  /* Typography rendering */
+  text-rendering: optimizeLegibility !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* High-DPI display adjustments */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .pdf-generation-mode {
+    /* Compensate for high-DPI scaling */
+    transform: scale(1) !important;
+  }
+} 
