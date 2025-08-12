@@ -73,7 +73,7 @@ export function ResumePreview({ resumeData }: ResumePreviewProps) {
 
     return (
       <TemplateErrorBoundary>
-        <div id="resume-preview" key={`reactive-${template}-${remountId}`}>
+        <div id="resume-preview" className="w-full h-full p-0 m-0" key={`reactive-${template}-${remountId}`}>
           <EnhancedReactiveResumeRenderer
             resumeData={latestData}
             templateId={template}
@@ -88,8 +88,8 @@ export function ResumePreview({ resumeData }: ResumePreviewProps) {
   }
 
   const ResumeWrapper = ({ children }: { children: React.ReactNode }) => (
-    <div className="flex justify-center items-center w-full h-full">
-      <div className="w-full mx-auto">
+    <div className="w-full h-full">
+      <div className="w-full h-full mx-0">
         {children}
       </div>
     </div>
@@ -159,7 +159,7 @@ export function ResumePreview({ resumeData }: ResumePreviewProps) {
   };
 
   return (
-    <div className="resume-preview" id="resume-preview" key={`custom-${template}-${remountId}`}>
+    <div className="resume-preview w-full h-full p-0 m-0" id="resume-preview" key={`custom-${template}-${remountId}`}>
       <ResumeWrapper>
         <TemplateErrorBoundary>
         {renderTemplate()}

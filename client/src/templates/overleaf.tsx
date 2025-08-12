@@ -8,6 +8,7 @@ import type {
 } from "../utils/reactive-resume-schema";
 import { cn, isEmptyString, sanitize } from "../utils/reactive-resume-utils";
 import { BrandIcon } from "../components/brand-icon";
+import { Github, ExternalLink, Link } from "lucide-react";
 
 const Header = ({ resumeData }: { resumeData: any }) => {
   const basics = resumeData?.basics;
@@ -32,7 +33,7 @@ const Header = ({ resumeData }: { resumeData: any }) => {
 };
 
 const SectionTitle = ({ children }: { children: React.ReactNode }) => (
-  <h2 className="border-b border-orange-600 pb-1 font-bold text-orange-800 font-serif text-sm md:text-base mb-3 mt-6 md:mt-8">{children}</h2>
+  <h2 className="border-b border-orange-600 pb-1 font-bold text-orange-800 font-serif text-sm md:text-base mb-4 mt-8 md:mt-10">{children}</h2>
 );
 
 const Section = <T extends { visible?: boolean; id?: string }>(
@@ -55,13 +56,13 @@ const Section = <T extends { visible?: boolean; id?: string }>(
   if (visibleItems.length === 0) return null;
 
   return (
-    <section id={'id' in section ? section.id : section.name} className="grid">
-      <div className="mb-2 font-bold text-orange-700">
+    <section id={'id' in section ? section.id : section.name} className="grid mb-8">
+      <div className="mb-3 font-bold text-orange-700">
         <h4 className="text-base md:text-lg">{section.name}</h4>
       </div>
-      <div className={cn("grid gap-x-4 md:gap-x-6 gap-y-3", className)} style={{ gridTemplateColumns: `repeat(${"columns" in section ? section.columns : 1}, 1fr)` }}>
+      <div className={cn("grid gap-x-4 md:gap-x-6 gap-y-4", className)} style={{ gridTemplateColumns: `repeat(${"columns" in section ? section.columns : 1}, 1fr)` }}>
         {visibleItems.map((item) => (
-          <div key={item.id || Math.random()} className="relative space-y-2 border-orange-200 border-l-2 pl-4">
+          <div key={item.id || Math.random()} className="relative space-y-3 border-orange-200 border-l-2 pl-4">
             <div>{children?.(item as T)}</div>
           </div>
         ))}
@@ -78,8 +79,8 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
     case "summary": {
       if (!sec?.visible || isEmptyString(sec?.content)) return null;
       return (
-        <section id={sec.id} className="mb-6">
-          <div className="mb-2 font-bold text-orange-700">
+        <section id={sec.id} className="mb-8">
+          <div className="mb-3 font-bold text-orange-700">
             <h4 className="text-base md:text-lg">{sec.name}</h4>
           </div>
           <div 
@@ -91,11 +92,11 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
     }
     case "profiles": {
       return (
-        <div className="mb-6">
-          <div className="mb-2 font-bold text-orange-700">
+        <div className="mb-8">
+          <div className="mb-3 font-bold text-orange-700">
             <h4 className="text-base md:text-lg">{sec.name}</h4>
           </div>
-          <ul className="flex flex-wrap gap-2 text-sm">
+          <ul className="flex flex-wrap gap-3 text-sm">
             {sec.items
               .filter((item: any) => item.visible !== false)
               .map((item: any) => (
@@ -120,11 +121,11 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
           {(item) => (
             <div>
               <div className="font-bold text-slate-800">{item.position || item.title}</div>
-              <div className="text-orange-700">{item.company}{item.location && ` (${item.location})`}</div>
-              <div className="text-xs text-orange-400">{item.date || [item.startDate, item.endDate].filter(Boolean).join(' - ')}</div>
+              <div className="text-orange-700 mb-1">{item.company}{item.location && ` (${item.location})`}</div>
+              <div className="text-xs text-orange-400 mb-2">{item.date || [item.startDate, item.endDate].filter(Boolean).join(' - ')}</div>
               {item.summary && (
                 <div 
-                  className="text-sm text-slate-600 mt-1 prose prose-orange prose-sm max-w-none font-serif" 
+                  className="text-sm text-slate-600 prose prose-orange prose-sm max-w-none font-serif" 
                   dangerouslySetInnerHTML={{ __html: sanitize(item.summary) }} 
                 />
               )}
@@ -138,21 +139,42 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
         <Section<any> section={sec}>
           {(item) => (
             <div>
-              <div className="font-bold text-slate-800">{item.name}</div>
+              <div className="flex items-center gap-2 mb-3">
+                <div className="font-bold text-slate-800">{item.name}</div>
+                {item.url && (
+                  <a 
+                    href={typeof item.url === 'string' ? item.url : item.url.href} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-orange-600 hover:text-orange-800 transition-colors"
+                    title="View project"
+                  >
+                    {(typeof item.url === 'string' ? item.url : item.url?.href)?.includes?.('github') ? 
+                      <Github className="w-4 h-4" /> : 
+                      (typeof item.url === 'string' ? item.url : item.url?.href)?.includes?.('live') || 
+                      (typeof item.url === 'string' ? item.url : item.url?.href)?.includes?.('demo') ||
+                      (typeof item.url === 'string' ? item.url : item.url?.href)?.includes?.('vercel') ||
+                      (typeof item.url === 'string' ? item.url : item.url?.href)?.includes?.('netlify') ? 
+                      <Link className="w-4 h-4" /> : 
+                      <ExternalLink className="w-4 h-4" />
+                    }
+                  </a>
+                )}
+              </div>
               {item.description && (
                 <div 
-                  className="text-sm text-slate-600 mt-1 prose prose-orange prose-sm max-w-none font-serif" 
+                  className="text-sm text-slate-600 mb-3 prose prose-orange prose-sm max-w-none font-serif" 
                   dangerouslySetInnerHTML={{ __html: sanitize(item.description) }} 
                 />
               )}
               {item.summary && (
                 <div 
-                  className="text-sm text-slate-600 mt-1 prose prose-orange prose-sm max-w-none font-serif" 
+                  className="text-sm text-slate-600 mb-3 prose prose-orange prose-sm max-w-none font-serif" 
                   dangerouslySetInnerHTML={{ __html: sanitize(item.summary) }} 
                 />
               )}
               {item.technologies && Array.isArray(item.technologies) && item.technologies.length > 0 && (
-                <div className="flex flex-wrap gap-1 mt-2">
+                <div className="flex flex-wrap gap-2 mb-3">
                   {item.technologies.map((tech: string, idx: number) => (
                     <span
                       key={idx}
@@ -163,16 +185,17 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
                   ))}
                 </div>
               )}
-              <div className="text-xs text-orange-400 mt-1">{item.date}</div>
-              {item.url && (
-                <a 
-                  href={typeof item.url === 'string' ? item.url : item.url.href} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-xs text-orange-600 underline hover:text-orange-800 break-all"
-                >
-                  {typeof item.url === 'string' ? item.url : (item.url.label || item.url.href)}
-                </a>
+              {item.keywords && Array.isArray(item.keywords) && item.keywords.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {item.keywords.map((keyword: string, idx: number) => (
+                    <span
+                      key={idx}
+                      className="inline-block bg-orange-50 text-orange-700 text-[10px] font-medium px-2 py-0.5 rounded border border-orange-200"
+                    >
+                      {keyword}
+                    </span>
+                  ))}
+                </div>
               )}
             </div>
           )}
@@ -184,13 +207,13 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
         <Section<any> section={sec}>
           {(item) => (
             <div>
-              <div className="font-bold text-slate-800">
+              <div className="font-bold text-slate-800 mb-1">
                 {item.studyType || item.degree}{(item.area || item.field_of_study) && `, ${item.area || item.field_of_study}`}
               </div>
-              <div className="text-orange-700">{item.institution || item.school}</div>
-              <div className="text-xs text-orange-400">{item.date || item.graduationYear}</div>
-              {(item.score || item.gpa) && <div className="text-xs text-slate-600">GPA: {item.score || item.gpa}</div>}
-              {item.location && <div className="text-xs text-slate-600">{item.location}</div>}
+              <div className="text-orange-700 mb-1">{item.institution || item.school}</div>
+              <div className="text-xs text-orange-400 mb-1">{item.date || item.graduationYear}</div>
+              {(item.score || item.gpa) && <div className="text-xs text-slate-600 mb-1">GPA: {item.score || item.gpa}</div>}
+              {item.location && <div className="text-xs text-slate-600 mb-1">{item.location}</div>}
               {item.honors && <div className="text-xs text-slate-600">{item.honors}</div>}
             </div>
           )}
@@ -199,11 +222,11 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
     }
     case "skills": {
       return (
-        <div className="mb-6">
-          <div className="mb-2 font-bold text-orange-700">
+        <div className="mb-8">
+          <div className="mb-3 font-bold text-orange-700">
             <h4 className="text-base md:text-lg">{sec.name}</h4>
           </div>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-3">
             {sec.items
               .filter((item: any) => item.visible !== false)
               .map((item: any) => (
@@ -229,7 +252,7 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
         <Section<any> section={sec}>
           {(item) => (
             <div>
-              <div className="font-bold text-slate-800">{item.name}</div>
+              <div className="font-bold text-slate-800 mb-1">{item.name}</div>
               {item.description && <div className="text-orange-700 text-sm">{item.description}</div>}
             </div>
           )}
@@ -241,7 +264,7 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
         <Section<any> section={sec}>
           {(item) => (
             <div>
-              <div className="font-bold text-slate-800">{item.name}</div>
+              <div className="font-bold text-slate-800 mb-1">{item.name}</div>
               {Array.isArray(item.keywords) && item.keywords.length > 0 && (
                 <div className="text-sm text-slate-600">
                   {item.keywords.join(', ')}
@@ -257,12 +280,12 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
         <Section<any> section={sec}>
           {(item) => (
             <div>
-              <div className="font-bold text-slate-800">{item.title}</div>
-              <div className="text-orange-700">{item.awarder}</div>
-              <div className="text-xs text-orange-400">{item.date}</div>
+              <div className="font-bold text-slate-800 mb-1">{item.title}</div>
+              <div className="text-orange-700 mb-1">{item.awarder}</div>
+              <div className="text-xs text-orange-400 mb-2">{item.date}</div>
               {(item.summary || item.description) && (
                 <div 
-                  className="text-sm text-slate-600 mt-1 prose prose-orange prose-sm max-w-none font-serif" 
+                  className="text-sm text-slate-600 prose prose-orange prose-sm max-w-none font-serif" 
                   dangerouslySetInnerHTML={{ __html: sanitize(item.summary || item.description) }} 
                 />
               )}
@@ -276,12 +299,12 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
         <Section<any> section={sec}>
           {(item) => (
             <div>
-              <div className="font-bold text-slate-800">{item.name}</div>
-              <div className="text-orange-700">{item.issuer}</div>
-              <div className="text-xs text-orange-400">{item.date}</div>
+              <div className="font-bold text-slate-800 mb-1">{item.name}</div>
+              <div className="text-orange-700 mb-1">{item.issuer}</div>
+              <div className="text-xs text-orange-400 mb-2">{item.date}</div>
               {(item.summary || item.description) && (
                 <div 
-                  className="text-sm text-slate-600 mt-1 prose prose-orange prose-sm max-w-none font-serif" 
+                  className="text-sm text-slate-600 prose prose-orange prose-sm max-w-none font-serif" 
                   dangerouslySetInnerHTML={{ __html: sanitize(item.summary || item.description) }} 
                 />
               )}
@@ -295,22 +318,22 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
         <Section<any> section={sec}>
           {(item) => (
             <div>
-              <div className="font-bold text-slate-800">{item.name || item.title}</div>
-              <div className="text-orange-700">{item.publisher}</div>
-              <div className="text-xs text-orange-400">{item.date}</div>
+              <div className="font-bold text-slate-800 mb-1">{item.name || item.title}</div>
+              <div className="text-orange-700 mb-1">{item.publisher}</div>
+              <div className="text-xs text-orange-400 mb-1">{item.date}</div>
               {item.url && (
                 <a 
                   href={typeof item.url === 'string' ? item.url : item.url.href} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-xs text-orange-600 underline hover:text-orange-800 break-all"
+                  className="text-xs text-orange-600 underline hover:text-orange-800 break-all mb-2 block"
                 >
                   {typeof item.url === 'string' ? item.url : (item.url.label || item.url.href)}
                 </a>
               )}
               {(item.summary || item.description) && (
                 <div 
-                  className="text-sm text-slate-600 mt-1 prose prose-orange prose-sm max-w-none font-serif" 
+                  className="text-sm text-slate-600 prose prose-orange prose-sm max-w-none font-serif" 
                   dangerouslySetInnerHTML={{ __html: sanitize(item.summary || item.description) }} 
                 />
               )}
@@ -324,12 +347,12 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
         <Section<any> section={sec}>
           {(item) => (
             <div>
-              <div className="font-bold text-slate-800">{item.position || item.role}</div>
-              <div className="text-orange-700">{item.organization}</div>
-              <div className="text-xs text-orange-400">{item.date}</div>
+              <div className="font-bold text-slate-800 mb-1">{item.position || item.role}</div>
+              <div className="text-orange-700 mb-1">{item.organization}</div>
+              <div className="text-xs text-orange-400 mb-2">{item.date}</div>
               {(item.summary || item.description) && (
                 <div 
-                  className="text-sm text-slate-600 mt-1 prose prose-orange prose-sm max-w-none font-serif" 
+                  className="text-sm text-slate-600 prose prose-orange prose-sm max-w-none font-serif" 
                   dangerouslySetInnerHTML={{ __html: sanitize(item.summary || item.description) }} 
                 />
               )}
@@ -343,10 +366,10 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
         <Section<any> section={sec}>
           {(item) => (
             <div>
-              <div className="font-bold text-slate-800">{item.name}</div>
+              <div className="font-bold text-slate-800 mb-2">{item.name}</div>
               {(item.summary || item.description) && (
                 <div 
-                  className="text-sm text-slate-600 mt-1 prose prose-orange prose-sm max-w-none font-serif" 
+                  className="text-sm text-slate-600 prose prose-orange prose-sm max-w-none font-serif" 
                   dangerouslySetInnerHTML={{ __html: sanitize(item.summary || item.description) }} 
                 />
               )}
@@ -383,19 +406,17 @@ export const Overleaf = ({ columns, isFirstPage = false, resumeData: resumeDataP
       {/* Header (full width, above columns) */}
       <div className="col-span-full">{isFirstPage && <Header resumeData={resumeData} />}</div>
       {/* Sidebar */}
-      <aside className="md:col-span-1 bg-orange-50 p-6 md:p-8 flex flex-col gap-6 md:gap-8 border-r border-orange-300">
+      <aside className="md:col-span-1 bg-orange-50 p-6 md:p-8 flex flex-col gap-8 md:gap-10 border-r border-orange-300">
         {sidebar.map((section: string) => (
           <Fragment key={section}>
-            <SectionTitle>{section.charAt(0).toUpperCase() + section.slice(1)}</SectionTitle>
             {mapSectionToComponent(section, resumeData)}
           </Fragment>
         ))}
       </aside>
       {/* Main Content */}
-      <main className="md:col-span-2 p-6 md:p-10">
+      <main className="md:col-span-2 p-6 md:p-10 space-y-6">
         {main.map((section: string) => (
           <Fragment key={section}>
-            <SectionTitle>{section.charAt(0).toUpperCase() + section.slice(1)}</SectionTitle>
             {mapSectionToComponent(section, resumeData)}
           </Fragment>
         ))}

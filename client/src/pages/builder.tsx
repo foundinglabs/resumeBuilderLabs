@@ -759,8 +759,8 @@ export default function Builder() {
                    </div>
                  </div>
                  <div className="w-full flex justify-center">
-                   <div className="rounded-2xl border border-border/30 bg-muted/30 backdrop-blur-sm p-4 md:px-2 md:py-8 shadow-lg w-full max-w-none overflow-auto">
-                     <ErrorBoundary fallback={<div className="text-red-500 p-4">Preview error - Template may have issues</div>}>
+                   <div className="rounded-none border-0 bg-transparent p-0 shadow-none w-full max-w-none overflow-auto">
+                     <ErrorBoundary fallback={<div className="text-red-500 ">Preview error - Template may have issues</div>}>
                        <ResumePreview resumeData={resumeData} />
                      </ErrorBoundary>
                    </div>

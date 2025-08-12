@@ -1,795 +1,392 @@
+import React from "react";
+import { Mail, Phone, MapPin, Globe, Github, Linkedin, Calendar, Award as AwardIcon, Users, Briefcase } from "lucide-react";
+import { useArtboardStore } from "../store/artboard-store";
+import { sanitize } from "../utils/reactive-resume-utils";
+import type { TemplateProps } from "../types/template";
 import type {
+  URL as ResumeURL,
+  Experience,
+  Education,
+  Project,
+  Skill,
   Award,
   Certification,
-  CustomSection,
-  CustomSectionGroup,
-  Interest,
   Language,
   Profile,
-  Project,
-  Publication,
-  Reference,
-  SectionKey,
-  SectionWithItem,
-  Skill,
-  URL,
-  CustomField,
 } from "../utils/reactive-resume-schema";
-import {
-  Education as EducationType,
-  Experience as ExperienceType,
-  Volunteer as VolunteerType,
-} from "../utils/reactive-resume-schema";
-import { cn, isEmptyString, isUrl, sanitize } from "../utils/reactive-resume-utils";
-import get from "lodash.get";
-import React, { Fragment } from "react";
-import { BrandIcon } from "../components/brand-icon";
-import { Picture } from "../components/picture";
-import { useArtboardStore } from "../store/artboard-store";
-import type { TemplateProps } from "../types/template";
 
-const Header = () => {
-  const basics = useArtboardStore((state) => state.resume.basics);
+// Safe helpers
+function getHref(url: string | ResumeURL | undefined): string {
+  if (!url) return "";
+  if (typeof url === "string") return url;
+  return url?.href ?? "";
+}
 
-  // Ditto Theme: Creative Purple/Violet
-  const themeColors = {
-    primary: '#7c3aed', // Violet 600
-    primaryLight: '#8b5cf6', // Violet 500
-    primaryDark: '#6d28d9', // Violet 700
-    accent: '#f5f3ff', // Violet 50
-    border: '#e4d4fd', // Violet 200
-    muted: '#6b7280' // Gray 500
-  };
+function isGitHubUrl(url: string | ResumeURL | undefined): boolean {
+  const u = getHref(url)?.toLowerCase?.() || "";
+  return u.includes("github.com");
+}
 
-  return (
-    <div 
-      className="relative grid grid-cols-3 gap-6 p-8 mb-8 rounded-lg shadow-lg overflow-hidden"
-      style={{ backgroundColor: themeColors.primary }}
-    >
-      {/* Background decoration */}
-      <div 
-        className="absolute inset-0 opacity-10"
-        style={{ 
-          background: `linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%)`
-        }}
-      />
-      
-      <div className="relative z-10">
-        <Picture className="mx-auto border-4 border-white shadow-lg" />
-      </div>
+function isLinkedInUrl(url: string | ResumeURL | undefined): boolean {
+  const u = getHref(url)?.toLowerCase?.() || "";
+  return u.includes("linkedin.com");
+}
 
-      <div className="relative z-10 col-span-2 text-white">
-        <div className="space-y-2 mb-6">
-          <h2 className="text-4xl font-bold text-white">{basics.name}</h2>
-          <p className="text-xl text-white opacity-90 font-medium">{basics.headline}</p>
-        </div>
+function getInitials(name?: string): string {
+  if (!name) return "";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+  return `${parts[0].charAt(0)}${parts[parts.length - 1].charAt(0)}`.toUpperCase();
+}
 
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
-          {basics.location && (
-            <>
-              <div className="flex items-center gap-x-2">
-                <i className="ph ph-bold ph-map-pin text-white" />
-                <span className="text-white">{basics.location}</span>
-              </div>
-              <div className="w-1 h-1 rounded-full bg-white opacity-60" />
-            </>
-          )}
+function hasContent(html?: string): boolean {
+  if (!html) return false;
+  const text = html.replace(/<[^>]*>/g, "").trim();
+  return text.length > 0;
+}
 
-          {basics.phone && (
-            <>
-              <div className="flex items-center gap-x-2">
-                <i className="ph ph-bold ph-phone text-white" />
-                <a href={`tel:${basics.phone}`} target="_blank" rel="noreferrer" className="text-white hover:text-white visited:text-white no-underline transition-opacity" style={{color: 'white !important'}}>
-                  {basics.phone}
-                </a>
-              </div>
-              <div className="w-1 h-1 rounded-full bg-white opacity-60" />
-            </>
-          )}
-          
-          {basics.email && (
-            <>
-              <div className="flex items-center gap-x-2">
-                <i className="ph ph-bold ph-at text-white" />
-                <a href={`mailto:${basics.email}`} target="_blank" rel="noreferrer" className="text-white hover:text-white visited:text-white no-underline transition-opacity" style={{color: 'white !important'}}>
-                  {basics.email}
-                </a>
-              </div>
-              <div className="w-1 h-1 rounded-full bg-white opacity-60" />
-            </>
-          )}
-          
-          {basics.url && isUrl(basics.url.href) && (
-            <>
-              <Link url={basics.url} />
-              <div className="w-1 h-1 rounded-full bg-white opacity-60" />
-            </>
-          )}
-          
-          {basics.customFields && basics.customFields.map((item: CustomField) => (
-            <Fragment key={item.id}>
-              <div className="flex items-center gap-x-2">
-                <i className={cn(`ph ph-bold ph-${item.icon}`, "text-white")} />
-                {isUrl(item.value) ? (
-                  <a href={item.value} target="_blank" rel="noreferrer noopener nofollow" className="text-white hover:opacity-80 transition-opacity">
-                    {item.name || item.value}
-                  </a>
-                ) : (
-                  <span className="text-white">{[item.name, item.value].filter(Boolean).join(": ")}</span>
-                )}
-              </div>
-              <div className="w-1 h-1 rounded-full bg-white opacity-60" />
-            </Fragment>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-};
+function levelToLabel(level?: number, description?: string): string {
+  if (description && description.trim()) return description;
+  if (typeof level !== "number") return "";
+  if (level >= 5) return "Native";
+  if (level === 4) return "Fluent";
+  if (level === 3) return "Professional";
+  if (level === 2) return "Conversational";
+  if (level === 1) return "Basic";
+  return "";
+}
 
-const Summary = () => {
-  const section = useArtboardStore((state) => state.resume.sections.summary);
+function capArray<T>(arr: T[] = [], max: number): { items: T[]; more: number } {
+  if (!Array.isArray(arr)) return { items: [], more: 0 };
+  const items = arr.slice(0, Math.max(0, max));
+  const more = Math.max(0, arr.length - items.length);
+  return { items, more };
+}
 
-  if (!section.visible || isEmptyString(section.content)) return null;
+// Bullet extraction for summaries: prefer list items if present; otherwise split paragraphs/lines
+function extractBulletLines(summaryHtml: string): string[] {
+  const safe = sanitize(summaryHtml || "");
+  const liMatches = Array.from(safe.matchAll(/<li[^>]*>([\s\S]*?)<\/li>/gi)).map((m) => m[1] || "");
+  const base = liMatches.length > 0 ? liMatches : safe.split(/<br\s*\/?>|<\/p>|\n/gi);
+  return base
+    .map((s) => s.replace(/<[^>]*>/g, "").replace(/^\s*[•\-\u2022]?\s*/, "").trim())
+    .filter(Boolean);
+}
 
-  return (
-    <section id={section.id} className="mb-8">
-      <h4 className="section-header-modern text-primary mb-4">{section.name}</h4>
-
-      <div
-        dangerouslySetInnerHTML={{ __html: sanitize(section.content) }}
-        style={{ columns: section.columns }}
-        className="wysiwyg text-foreground leading-relaxed"
-      />
-    </section>
-  );
-};
-
-type RatingProps = { level: number };
-
-const Rating = ({ level }: RatingProps) => (
-  <div className="flex items-center gap-x-1.5 mt-2">
-    {Array.from({ length: 5 }).map((_, index) => (
-      <div
-        key={index}
-        className={cn(
-          "h-3 w-6 border-2 border-primary rounded transition-colors",
-          level > index ? "bg-primary" : "bg-transparent"
-        )}
-      />
-    ))}
-  </div>
-);
-
-type LinkProps = {
-  url: URL;
-  icon?: React.ReactNode;
-  iconOnRight?: boolean;
-  label?: string;
-  className?: string;
-};
-
-const Link = ({ url, icon, iconOnRight, label, className }: LinkProps) => {
-  if (!url || !isUrl(url.href)) return null;
-
-  return (
-    <div className="flex items-center gap-x-2">
-      {!iconOnRight && (icon ?? <i className="ph ph-bold ph-link text-white" />)}
-      <a
-        href={url.href}
-        target="_blank"
-        rel="noreferrer noopener nofollow"
-        className={cn("text-white hover:opacity-80 transition-opacity", className)}
-      >
-        {label ?? (url.label || url.href)}
-      </a>
-      {iconOnRight && (icon ?? <i className="ph ph-bold ph-link text-white" />)}
-    </div>
-  );
-};
-
-type LinkedEntityProps = {
-  name: string;
-  url: URL;
-  separateLinks: boolean;
-  className?: string;
-};
-
-const LinkedEntity = ({ name, url, separateLinks, className }: LinkedEntityProps) => {
-  return !separateLinks && isUrl(url.href) ? (
-    <a
-      href={url.href}
-      target="_blank"
-      rel="noreferrer noopener nofollow"
-      className={cn("text-primary hover:underline font-bold", className)}
-    >
-      {name}
-      <i className="ph ph-bold ph-globe ml-1" />
-    </a>
-  ) : (
-    <div className={cn("font-bold text-foreground", className)}>{name}</div>
-  );
-};
-
-type SectionProps<T> = {
-  section: SectionWithItem<T> | CustomSectionGroup;
-  children?: (item: T) => React.ReactNode;
-  className?: string;
-  urlKey?: keyof T;
-  levelKey?: keyof T;
-  summaryKey?: keyof T;
-  keywordsKey?: keyof T;
-};
-
-const Section = <T,>({
-  section,
-  children,
-  className,
-  urlKey,
-  levelKey,
-  summaryKey,
-  keywordsKey,
-}: SectionProps<T>) => {
-  if (!section.visible || section.items.length === 0) return null;
-
-  return (
-    <section id={section.id} className="mb-8">
-      <h4 className="section-header-modern text-primary mb-4">
-        {section.name}
-      </h4>
-
-      <div
-        className="grid gap-x-8 gap-y-6"
-        style={{ gridTemplateColumns: `repeat(${section.columns}, 1fr)` }}
-      >
-        {section.items
-          .filter((item) => item.visible)
-          .map((item) => {
-            const url = (urlKey && get(item, urlKey)) as URL | undefined;
-            const level = (levelKey && get(item, levelKey, 0)) as number | undefined;
-            const summary = (summaryKey && get(item, summaryKey, "")) as string | undefined;
-            const keywords = (keywordsKey && get(item, keywordsKey, [])) as string[] | undefined;
-
-            return (
-              <div
-                key={item.id}
-                className={cn("relative space-y-3 pl-6", className)}
-              >
-                {/* Vertical accent line */}
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-transparent rounded-full" />
-                
-                <div className="relative">
-                  {children?.(item as T)}
-                  {url !== undefined && section.separateLinks && <Link url={url} />}
-                </div>
-
-                {summary !== undefined && !isEmptyString(summary) && (
-                  <div
-                    dangerouslySetInnerHTML={{ __html: sanitize(summary) }}
-                    className="wysiwyg text-foreground text-sm leading-relaxed"
-                  />
-                )}
-
-                {level !== undefined && level > 0 && <Rating level={level} />}
-
-                {keywords !== undefined && keywords.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    {keywords.map((keyword, index) => (
-                      <span
-                        key={index}
-                        className="px-2 py-1 bg-accent text-foreground text-xs rounded-full border border-border"
-                      >
-                        {keyword}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-      </div>
-    </section>
-  );
-};
-
-const Profiles = () => {
-  const section = useArtboardStore((state) => state.resume.sections.profiles);
-
-  return (
-    <Section<Profile> section={section}>
-      {(item) => (
-        <div className="space-y-1">
-          {isUrl(item.url.href) ? (
-            <a 
-              href={item.url.href} 
-              target="_blank" 
-              rel="noreferrer noopener nofollow"
-              className="flex items-center gap-2 text-primary hover:underline"
-            >
-              <BrandIcon slug={item.icon} />
-              <span className="font-medium">{item.username}</span>
-            </a>
-          ) : (
-            <div className="flex items-center gap-2">
-              <BrandIcon slug={item.icon} />
-              <span className="font-medium">{item.username}</span>
-            </div>
-          )}
-          {!item.icon && <p className="text-sm text-muted">{item.network}</p>}
-        </div>
-      )}
-    </Section>
-  );
-};
-
-const Experience = () => {
-  const section = useArtboardStore((state) => state.resume.sections.experience);
-
-  return (
-    <Section<ExperienceType> section={section} urlKey="url" summaryKey="summary">
-      {(item) => (
-        <div className="flex items-start justify-between gap-6">
-          <div className="flex-1">
-            <LinkedEntity
-              name={item.company}
-              url={item.url}
-              separateLinks={section.separateLinks}
-              className="text-primary text-lg"
-            />
-            <div className="text-foreground font-semibold text-base mt-1">{item.position}</div>
-          </div>
-
-          <div className="shrink-0 text-right">
-            <div className="font-bold text-primary bg-accent px-3 py-1 rounded-full text-sm">
-              {item.date}
-            </div>
-            <div className="text-muted text-sm mt-1">{item.location}</div>
-          </div>
-        </div>
-      )}
-    </Section>
-  );
-};
-
-const Education = () => {
-  const section = useArtboardStore((state) => state.resume.sections.education);
-
-  return (
-    <Section<EducationType> section={section} urlKey="url" summaryKey="summary">
-      {(item) => (
-        <div className="flex items-start justify-between gap-6">
-          <div className="flex-1">
-            <LinkedEntity
-              name={item.institution}
-              url={item.url}
-              separateLinks={section.separateLinks}
-              className="text-primary text-lg"
-            />
-            <div className="text-foreground font-semibold">{item.area}</div>
-            {item.score && <div className="text-sm text-muted mt-1">Score: {item.score}</div>}
-          </div>
-
-          <div className="shrink-0 text-right">
-            <div className="font-bold text-primary bg-accent px-3 py-1 rounded-full text-sm">
-              {item.date}
-            </div>
-            <div className="text-muted text-sm mt-1">{item.studyType}</div>
-          </div>
-        </div>
-      )}
-    </Section>
-  );
-};
-
-const Awards = () => {
-  const section = useArtboardStore((state) => state.resume.sections.awards);
-
-  return (
-    <Section<Award> section={section} urlKey="url" summaryKey="summary">
-      {(item) => (
-        <div className="flex items-start justify-between gap-6">
-          <div className="flex-1">
-            <div className="font-bold text-foreground text-base">{item.title}</div>
-            <LinkedEntity
-              name={item.awarder}
-              url={item.url}
-              separateLinks={section.separateLinks}
-              className="text-primary"
-            />
-          </div>
-
-          <div className="shrink-0 text-right">
-            <div className="font-bold text-primary bg-accent px-3 py-1 rounded-full text-sm">
-              {item.date}
-            </div>
-          </div>
-        </div>
-      )}
-    </Section>
-  );
-};
-
-const Certifications = () => {
-  const section = useArtboardStore((state) => state.resume.sections.certifications);
-
-  return (
-    <Section<Certification> section={section} urlKey="url" summaryKey="summary">
-      {(item) => (
-        <div className="flex items-start justify-between gap-6">
-          <div className="flex-1">
-            <div className="font-bold text-foreground text-base">{item.name}</div>
-            <LinkedEntity 
-              name={item.issuer} 
-              url={item.url} 
-              separateLinks={section.separateLinks}
-              className="text-primary"
-            />
-          </div>
-
-          <div className="shrink-0 text-right">
-            <div className="font-bold text-primary bg-accent px-3 py-1 rounded-full text-sm">
-              {item.date}
-            </div>
-          </div>
-        </div>
-      )}
-    </Section>
-  );
-};
-
-const Skills = () => {
-  const section = useArtboardStore((state) => state.resume.sections.skills);
-
-  return (
-    <Section<Skill> section={section} levelKey="level" keywordsKey="keywords">
-      {(item) => (
-        <div className="space-y-2">
-          <div className="font-bold text-foreground text-lg">{item.name}</div>
-          {item.description && <div className="text-sm text-muted">{item.description}</div>}
-        </div>
-      )}
-    </Section>
-  );
-};
-
-const Interests = () => {
-  const section = useArtboardStore((state) => state.resume.sections.interests);
-
-  return (
-    <Section<Interest> section={section} keywordsKey="keywords">
-      {(item) => (
-        <div className="text-center p-3 bg-accent rounded-lg border border-border">
-          <div className="font-semibold text-foreground">{item.name}</div>
-        </div>
-      )}
-    </Section>
-  );
-};
-
-const Publications = () => {
-  const section = useArtboardStore((state) => state.resume.sections.publications);
-
-  return (
-    <Section<Publication> section={section} urlKey="url" summaryKey="summary">
-      {(item) => (
-        <div className="flex items-start justify-between gap-6">
-          <div className="flex-1">
-            <LinkedEntity
-              name={item.name}
-              url={item.url}
-              separateLinks={section.separateLinks}
-              className="text-primary text-base"
-            />
-            <div className="text-muted italic">{item.publisher}</div>
-          </div>
-
-          <div className="shrink-0 text-right">
-            <div className="font-bold text-primary bg-accent px-3 py-1 rounded-full text-sm">
-              {item.date}
-            </div>
-          </div>
-        </div>
-      )}
-    </Section>
-  );
-};
-
-const Volunteer = () => {
-  const section = useArtboardStore((state) => state.resume.sections.volunteer);
-
-  return (
-    <Section<VolunteerType> section={section} urlKey="url" summaryKey="summary">
-      {(item) => (
-        <div className="flex items-start justify-between gap-6">
-          <div className="flex-1">
-            <LinkedEntity
-              name={item.organization}
-              url={item.url}
-              separateLinks={section.separateLinks}
-              className="text-primary text-base"
-            />
-            <div className="text-foreground font-semibold">{item.position}</div>
-          </div>
-
-          <div className="shrink-0 text-right">
-            <div className="font-bold text-primary bg-accent px-3 py-1 rounded-full text-sm">
-              {item.date}
-            </div>
-            <div className="text-muted text-sm mt-1">{item.location}</div>
-          </div>
-        </div>
-      )}
-    </Section>
-  );
-};
-
-const Languages = () => {
-  const section = useArtboardStore((state) => state.resume.sections.languages);
-
-  return (
-    <Section<Language> section={section} levelKey="level">
-      {(item) => (
-        <div className="space-y-1">
-          <div className="font-bold text-foreground">{item.name}</div>
-          {item.description && <div className="text-sm text-muted">{item.description}</div>}
-        </div>
-      )}
-    </Section>
-  );
-};
-
-const isGitHubUrl = (url: string | URL | undefined): boolean => {
-  if (!url) return false;
-  const urlString = typeof url === 'string' ? url : url.href;
-  if (typeof urlString !== 'string') return false;
-  return urlString.toLowerCase().includes('github.com');
-};
-
-const isLiveUrl = (url: string | URL | undefined): boolean => {
-  if (!url) return false;
-  const urlString = typeof url === 'string' ? url : url.href;
-  if (typeof urlString !== 'string') return false;
-  return !isGitHubUrl(urlString) && (urlString.toLowerCase().includes('http://') || urlString.toLowerCase().includes('https://'));
-};
-
-const Projects = () => {
-  const section = useArtboardStore((state) => state.resume.sections.projects);
-
-  return (
-    <Section<Project> section={section} urlKey="url" summaryKey="summary" keywordsKey="keywords">
-      {(item) => (
-        <div className="flex items-start justify-between gap-6">
-          <div className="flex-1">
-            <div className="font-bold text-primary text-lg">{item.name}</div>
-            <div className="text-foreground">{item.description}</div>
-            {item.url && (
-              <div className="flex items-center gap-2 mt-2">
-                {isGitHubUrl(item.url) ? (
-                  <a
-                    href={item.url.href}
-                    target="_blank"
-                    rel="noreferrer noopener nofollow"
-                    className="flex items-center gap-2 text-primary hover:underline"
-                  >
-                    <BrandIcon slug="github" />
-                    <span>GitHub</span>
-                  </a>
-                ) : isLiveUrl(item.url) ? (
-                  <a
-                    href={item.url.href}
-                    target="_blank"
-                    rel="noreferrer noopener nofollow"
-                    className="flex items-center gap-2 text-primary hover:underline"
-                  >
-                    <i className="ph ph-bold ph-globe" />
-                    <span>Live</span>
-                  </a>
-                ) : null}
-              </div>
-            )}
-          </div>
-
-          <div className="shrink-0 text-right">
-            <div className="font-bold text-primary bg-accent px-3 py-1 rounded-full text-sm">
-              {item.date}
-            </div>
-          </div>
-        </div>
-      )}
-    </Section>
-  );
-};
-
-const References = () => {
-  const section = useArtboardStore((state) => state.resume.sections.references);
-
-  return (
-    <Section<Reference> section={section} urlKey="url" summaryKey="summary">
-      {(item) => (
-        <div className="p-4 bg-accent rounded-lg border border-border">
-          <LinkedEntity
-            name={item.name}
-            url={item.url}
-            separateLinks={section.separateLinks}
-            className="text-primary text-base"
-          />
-          <div className="text-muted text-sm mt-2">{item.description}</div>
-        </div>
-      )}
-    </Section>
-  );
-};
-
-const Custom = ({ id }: { id: string }) => {
-  const section = useArtboardStore((state) => state.resume.sections.custom[id]);
-
-  return (
-    <Section<CustomSection>
-      section={section}
-      urlKey="url"
-      summaryKey="summary"
-      keywordsKey="keywords"
-    >
-      {(item) => (
-        <div className="flex items-start justify-between gap-6">
-          <div className="flex-1">
-            <LinkedEntity
-              name={item.name}
-              url={item.url}
-              separateLinks={section.separateLinks}
-              className="text-primary text-base"
-            />
-            <div className="text-muted text-sm">{item.description}</div>
-          </div>
-
-          <div className="shrink-0 text-right text-sm">
-            <div className="font-bold text-primary bg-accent px-3 py-1 rounded-full">
-              {item.date}
-            </div>
-            <div className="text-muted mt-1">{item.location}</div>
-          </div>
-        </div>
-      )}
-    </Section>
-  );
-};
-
-const mapSectionToComponent = (section: SectionKey) => {
-  switch (section) {
-    case "profiles": {
-      return <Profiles />;
-    }
-    case "summary": {
-      return <Summary />;
-    }
-    case "experience": {
-      return <Experience />;
-    }
-    case "education": {
-      return <Education />;
-    }
-    case "awards": {
-      return <Awards />;
-    }
-    case "certifications": {
-      return <Certifications />;
-    }
-    case "skills": {
-      return <Skills />;
-    }
-    case "interests": {
-      return <Interests />;
-    }
-    case "publications": {
-      return <Publications />;
-    }
-    case "volunteer": {
-      return <Volunteer />;
-    }
-    case "languages": {
-      return <Languages />;
-    }
-    case "projects": {
-      return <Projects />;
-    }
-    case "references": {
-      return <References />;
-    }
-    default: {
-      if (section.startsWith("custom.")) return <Custom id={section.split(".")[1]} />;
-
-      return null;
-    }
-  }
-};
+const MAX_EXPERIENCE = 3;
+const MAX_PROJECTS = 2;
+const MAX_SKILL_GROUPS = 3;
+const MAX_KEYWORDS_PER_SKILL = 6;
+const MAX_EDUCATION = 2;
+const MAX_ACHIEVEMENTS_TOTAL = 4; // awards + certs combined
+const MAX_LANGUAGES = 3;
 
 export const Ditto = ({ columns, isFirstPage = false }: TemplateProps) => {
-  const [main] = columns;
+  const resume = useArtboardStore((s) => s.resume) || {};
+  const basics = resume?.basics || {};
+  const sections = resume?.sections || {};
 
-  // Ditto Theme: Creative Purple/Violet
-  const themeColors = {
-    primary: '#7c3aed', // Violet 600
-    primaryLight: '#8b5cf6', // Violet 500
-    primaryDark: '#6d28d9', // Violet 700
-    accent: '#f5f3ff', // Violet 50
-    border: '#e4d4fd', // Violet 200
-    muted: '#6b7280' // Gray 500
+  const profiles: Profile[] = sections?.profiles?.items?.filter((i: any) => i?.visible) ?? [];
+  const summaryHtml: string | undefined = sections?.summary?.content;
+
+  const experienceAll: Experience[] = sections?.experience?.items?.filter((i: any) => i?.visible) ?? [];
+  const projectsAll: Project[] = sections?.projects?.items?.filter((i: any) => i?.visible) ?? [];
+  const skillsAll: Skill[] = sections?.skills?.items?.filter((i: any) => i?.visible) ?? [];
+  const educationAll: Education[] = sections?.education?.items?.filter((i: any) => i?.visible) ?? [];
+  const awardsAll: Award[] = sections?.awards?.items?.filter((i: any) => i?.visible) ?? [];
+  const certsAll: Certification[] = sections?.certifications?.items?.filter((i: any) => i?.visible) ?? [];
+  const languagesAll: Language[] = sections?.languages?.items?.filter((i: any) => i?.visible) ?? [];
+
+  // Caps per section to keep one page
+  const { items: experienceItems, more: experienceMore } = capArray(experienceAll, MAX_EXPERIENCE);
+  const { items: projectItems, more: projectMore } = capArray(projectsAll, MAX_PROJECTS);
+  const { items: skillGroups, more: skillsMore } = capArray(skillsAll, MAX_SKILL_GROUPS);
+  const { items: educationItems, more: educationMore } = capArray(educationAll, MAX_EDUCATION);
+  const combinedAch = [
+    ...awardsAll.map((a) => ({ type: "award" as const, value: a })),
+    ...certsAll.map((c) => ({ type: "cert" as const, value: c })),
+  ];
+  const { items: achievementsItems, more: achievementsMore } = capArray(combinedAch, MAX_ACHIEVEMENTS_TOTAL);
+  const { items: languageItems, more: languageMore } = capArray(languagesAll, MAX_LANGUAGES);
+
+  const portfolioHref = getHref(basics?.url);
+  const linkedInProfile = profiles.find((p) => isLinkedInUrl(p?.url));
+  const githubProfile = profiles.find((p) => isGitHubUrl(p?.url));
+
+  const expAccentColors = ["#3b82f6", "#a855f7", "#10b981"]; // blue, purple, green
+
+  const SocialChip = ({
+    href,
+    icon,
+    label,
+  }: {
+    href?: string;
+    icon: React.ReactNode;
+    label: string;
+  }) => {
+    const hasHref = !!href;
+    const baseClass = "flex items-center gap-2 px-3 py-1.5 rounded-full transition-colors";
+    const enabledClass = "bg-white/20 hover:bg-white/30 print:hover:bg-white/20";
+    const disabledClass = "bg-white/10 opacity-60 cursor-default";
+    if (hasHref) {
+      return (
+        <a href={href} target="_blank" rel="noreferrer noopener" className={`${baseClass} ${enabledClass}`}>
+          {icon}
+          <span className="text-sm">{label}</span>
+        </a>
+      );
+    }
+    return (
+      <div className={`${baseClass} ${disabledClass}`}>
+        {icon}
+        <span className="text-sm">{label}</span>
+      </div>
+    );
   };
 
   return (
-    <div className="space-y-8">
-      <style>{`
-        .ditto-theme {
-          --template-primary: ${themeColors.primary};
-          --template-primary-light: ${themeColors.primaryLight};
-          --template-primary-dark: ${themeColors.primaryDark};
-          --template-accent: ${themeColors.accent};
-          --template-border: ${themeColors.border};
-          --template-muted: ${themeColors.muted};
-        }
-        
-        .ditto-theme .contact-icon {
-          color: white;
-        }
-        
-        .ditto-theme .link-container {
-          color: ${themeColors.primary};
-        }
-        
-        .ditto-theme .section-header-modern {
-          color: ${themeColors.primary};
-        }
-        
-        .ditto-theme .section-header-modern::after {
-          background: linear-gradient(90deg, ${themeColors.primary}, transparent);
-        }
-        
-        .ditto-theme .border-primary {
-          border-color: ${themeColors.primary};
-        }
-        
-        .ditto-theme .text-primary {
-          color: ${themeColors.primary};
-        }
-        
-        .ditto-theme .bg-accent {
-          background-color: ${themeColors.accent};
-        }
-        
-        .ditto-theme .border-border {
-          border-color: ${themeColors.border};
-        }
-        
-        .ditto-theme .bg-gradient-to-b {
-          background: linear-gradient(to bottom, ${themeColors.primary}, transparent);
-        }
-        
-        .section-header-modern {
-          position: relative;
-          display: inline-block;
-          font-size: 1.25rem;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-        }
-        
-        .section-header-modern::after {
-          content: '';
-          position: absolute;
-          left: 0;
-          bottom: -4px;
-          width: 60%;
-          height: 3px;
-          background: linear-gradient(90deg, ${themeColors.primary}, transparent);
-          border-radius: 2px;
-        }
-      `}</style>
-      
-      {isFirstPage && <Header />}
+    <div className="w-full h-full bg-white print:shadow-none print:w-full print:h-full">
+      {/* Header Section */}
+      <div className="relative bg-gradient-to-r from-blue-600 to-purple-700 text-white p-0">
+        <div className="flex flex-row flex-wrap items-start gap-4">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white/20 rounded-full flex items-center justify-center text-2xl sm:text-3xl font-serif font-bold backdrop-blur-sm">
+            {getInitials(basics?.name) || ""}
+          </div>
+          <div className="flex-1">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold mb-2">{basics?.name || ""}</h1>
+            <p className="text-base sm:text-lg lg:text-xl text-blue-100 mb-3">{basics?.headline || basics?.label || ""}</p>
+            <div className="flex flex-row items-center gap-4 text-sm flex-nowrap overflow-x-auto">
+              {basics?.email && (
+                <div className="flex items-center gap-2">
+                  <Mail className="w-4 h-4" />
+                  <a href={`mailto:${basics.email}`} className="text-white hover:underline" target="_blank" rel="noreferrer noopener">{basics.email}</a>
+                </div>
+              )}
+              {basics?.phone && (
+                <div className="flex items-center gap-2">
+                  <Phone className="w-4 h-4" />
+                  <a href={`tel:${basics.phone}`} className="text-white hover:underline" target="_blank" rel="noreferrer noopener">{basics.phone}</a>
+                </div>
+              )}
+              {basics?.location && (
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4" />
+                  <span>{basics.location}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
 
-      {main.map((section) => (
-        <Fragment key={section}>{mapSectionToComponent(section)}</Fragment>
-      ))}
+        {/* Social Links */}
+        <div className="flex flex-wrap gap-2 sm:gap-3 mt-4">
+          <SocialChip href={portfolioHref || undefined} icon={<Globe className="w-4 h-4" />} label="Portfolio" />
+          <SocialChip href={getHref(linkedInProfile?.url) || undefined} icon={<Linkedin className="w-4 h-4" />} label="LinkedIn" />
+          <SocialChip href={getHref(githubProfile?.url) || undefined} icon={<Github className="w-4 h-4" />} label="GitHub" />
+        </div>
+      </div>
+
+      <div className="flex flex-col lg:grid lg:grid-cols-3 gap-3 sm:gap-4 p-0 print:p-0 print:gap-3">
+        {/* Left Column */}
+        <div className="lg:col-span-2 space-y-3 sm:space-y-4 print:space-y-3">
+          {/* About Section */}
+          {hasContent(summaryHtml) && (
+            <section>
+              <h2 className="text-lg sm:text-xl font-serif font-bold text-gray-800 mb-3 flex items-center gap-3 print:text-lg print:mb-2">
+                <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full print:w-5 print:h-5"></div>
+                About Me
+              </h2>
+              <div
+                className="text-gray-600 leading-relaxed text-sm sm:text-base print:text-xs print:leading-normal wysiwyg"
+                dangerouslySetInnerHTML={{ __html: sanitize(summaryHtml!) }}
+              />
+            </section>
+          )}
+
+          {/* Experience Section */}
+          {experienceItems.length > 0 && (
+            <section>
+              <h2 className="text-lg sm:text-xl font-serif font-bold text-gray-800 mb-4 flex items-center gap-3 print:text-lg print:mb-3">
+                <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gradient-to-r from-green-500 to-teal-600 rounded-full print:w-5 print:h-5"></div>
+                Experience
+              </h2>
+              <div className="space-y-4 print:space-y-3">
+                {experienceItems.map((item, idx) => (
+                  <div key={item.id || idx} className="relative pl-4 sm:pl-5 border-l-2 border-blue-200 print:pl-4">
+                    <div
+                      className="absolute -left-1.5 sm:-left-2 top-0 w-3 h-3 sm:w-4 sm:h-4 rounded-full print:w-3 print:h-3 print:-left-1.5"
+                      style={{ backgroundColor: expAccentColors[idx % 3] }}
+                    />
+                    <div className="flex flex-col gap-1 sm:gap-2 mb-2 print:mb-1">
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-800 print:text-base">{item.position}</h3>
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                        <p className="font-medium text-sm print:text-xs" style={{ color: expAccentColors[idx % 3] }}>
+                          {[item.company, item.location].filter(Boolean).join(" • ")}
+                        </p>
+                        <span className="text-xs text-gray-500 flex items-center gap-1 print:text-xs">
+                          <Calendar className="w-3 h-3" />
+                          {item.date}
+                        </span>
+                      </div>
+                    </div>
+                    {item.summary && (
+                      <ul className="text-gray-600 space-y-1 text-sm print:text-xs print:space-y-0.5 list-disc pl-5">
+                        {extractBulletLines(item.summary).map((b, i) => (
+                          <li key={i}>{b}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                ))}
+                {experienceMore > 0 && <div className="text-xs text-gray-500">+{experienceMore} more</div>}
+              </div>
+            </section>
+          )}
+
+          {/* Projects Section */}
+          {projectItems.length > 0 && (
+            <section>
+              <h2 className="text-lg sm:text-xl font-serif font-bold text-gray-800 mb-4 flex items-center gap-3 print:text-lg print:mb-3">
+                <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gradient-to-r from-orange-500 to-red-600 rounded-full print:w-5 print:h-5"></div>
+                Featured Projects
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 print:gap-3">
+                {projectItems.map((proj, idx) => (
+                  <div
+                    key={proj.id || idx}
+                    className={`p-4 rounded-lg border print:p-3 ${idx % 2 === 0 ? "bg-gradient-to-br from-blue-50 to-purple-50 border-blue-100" : "bg-gradient-to-br from-green-50 to-teal-50 border-green-100"}`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <h3 className="text-base font-semibold text-gray-800 mb-2 print:text-sm print:mb-1">{proj.name}</h3>
+                      {getHref(proj.url) && (
+                        <a
+                          href={getHref(proj.url)}
+                          target="_blank"
+                          rel="noreferrer noopener"
+                          className="inline-flex items-center gap-1.5 text-xs text-blue-700 bg-blue-100 px-2 py-1 rounded-full"
+                        >
+                          {isGitHubUrl(proj.url) ? <Github className="w-3.5 h-3.5" /> : <Globe className="w-3.5 h-3.5" />}
+                          <span>{isGitHubUrl(proj.url) ? "GitHub" : "Live"}</span>
+                        </a>
+                      )}
+                    </div>
+                    {proj.summary && (
+                      <div className="text-gray-600 text-sm mb-3 print:text-xs print:mb-2 wysiwyg" dangerouslySetInnerHTML={{ __html: sanitize(proj.summary) }} />
+                    )}
+                    {!proj.summary && proj.description && (
+                      <p className="text-gray-600 text-sm mb-3 print:text-xs print:mb-2">{proj.description}</p>
+                    )}
+                    {Array.isArray(proj.keywords) && proj.keywords.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {proj.keywords.slice(0, MAX_KEYWORDS_PER_SKILL).map((k, i) => (
+                          <span key={i} className={`px-2 py-1 text-xs rounded-full ${idx % 2 === 0 ? "bg-blue-100 text-blue-700" : "bg-green-100 text-green-700"}`}>
+                            {k}
+                          </span>
+                        ))}
+                        {proj.keywords.length > MAX_KEYWORDS_PER_SKILL && (
+                          <span className={`px-2 py-1 text-xs rounded-full ${idx % 2 === 0 ? "bg-blue-100 text-blue-700" : "bg-green-100 text-green-700"}`}>+{proj.keywords.length - MAX_KEYWORDS_PER_SKILL} more</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+              {projectMore > 0 && <div className="text-xs text-gray-500 mt-2">+{projectMore} more</div>}
+            </section>
+          )}
+        </div>
+
+        {/* Right Column */}
+        <div className="space-y-4 sm:space-y-6 print:space-y-4">
+          {/* Skills Section */}
+          {skillGroups.length > 0 && (
+            <section>
+              <h2 className="text-base sm:text-lg font-serif font-bold text-gray-800 mb-3 flex items-center gap-2 print:text-base print:mb-2">
+                <AwardIcon className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500 print:w-4 print:h-4" />
+                Skills
+              </h2>
+              <div className="space-y-3 print:space-y-2">
+                {skillGroups.map((skill, idx) => (
+                  <div key={skill.id || idx}>
+                    <h3 className="font-semibold text-gray-700 mb-2 text-sm print:text-xs print:mb-1">{skill.name}</h3>
+                    {Array.isArray(skill.keywords) && skill.keywords.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {skill.keywords.slice(0, MAX_KEYWORDS_PER_SKILL).map((kw, i) => (
+                          <span key={i} className={`px-2 py-1 text-xs rounded-full ${idx % 2 === 0 ? "bg-blue-100 text-blue-700" : "bg-purple-100 text-purple-700"}`}>{kw}</span>
+                        ))}
+                        {skill.keywords.length > MAX_KEYWORDS_PER_SKILL && (
+                          <span className={`px-2 py-1 text-xs rounded-full ${idx % 2 === 0 ? "bg-blue-100 text-blue-700" : "bg-purple-100 text-purple-700"}`}>+{skill.keywords.length - MAX_KEYWORDS_PER_SKILL} more</span>
+                        )}
+                      </div>
+                    )}
+                    {skill.description && <p className="text-xs text-gray-600 mt-1">{skill.description}</p>}
+                  </div>
+                ))}
+                {skillsMore > 0 && <div className="text-xs text-gray-500">+{skillsMore} more</div>}
+              </div>
+            </section>
+          )}
+
+          {/* Education Section */}
+          {educationItems.length > 0 && (
+            <section>
+              <h2 className="text-base sm:text-lg font-serif font-bold text-gray-800 mb-3 flex items-center gap-2 print:text-base print:mb-2">
+                <Users className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 print:w-4 print:h-4" />
+                Education
+              </h2>
+              <div className="space-y-3 print:space-y-2">
+                {educationItems.map((ed, idx) => (
+                  <div key={ed.id || idx} className={`bg-gradient-to-r p-3 rounded-lg border print:p-2 ${idx % 2 === 0 ? "from-blue-50 to-purple-50 border-blue-100" : "from-green-50 to-teal-50 border-green-100"}`}>
+                    <h3 className="font-semibold text-gray-800 text-sm print:text-xs">{ed.area}</h3>
+                    <p className={`${idx % 2 === 0 ? "text-blue-600" : "text-green-600"} font-medium text-sm print:text-xs`}>{ed.institution}</p>
+                    <p className="text-gray-500 text-xs">{ed.date}</p>
+                  </div>
+                ))}
+              </div>
+              {educationMore > 0 && <div className="text-xs text-gray-500 mt-2">+{educationMore} more</div>}
+            </section>
+          )}
+
+          {/* Achievements Section */}
+          {achievementsItems.length > 0 && (
+            <section>
+              <h2 className="text-base sm:text-lg font-serif font-bold text-gray-800 mb-3 flex items-center gap-2 print:text-base print:mb-2">
+                <Briefcase className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 print:w-4 print:h-4" />
+                Achievements
+              </h2>
+              <div className="space-y-2 print:space-y-1">
+                {achievementsItems.map((entry, idx) => (
+                  <div key={(entry.value as any).id || idx} className="flex items-start gap-2">
+                    <div className={`w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 ${idx % 4 === 0 ? "bg-orange-500" : idx % 4 === 1 ? "bg-blue-500" : idx % 4 === 2 ? "bg-purple-500" : "bg-green-500"}`} />
+                    {entry.type === "award" ? (
+                      <p className="text-gray-600 text-xs">{[entry.value.title, entry.value.awarder, entry.value.date].filter(Boolean).join(" • ")}</p>
+                    ) : (
+                      <p className="text-gray-600 text-xs">{[entry.value.name, entry.value.issuer, entry.value.date].filter(Boolean).join(" • ")}</p>
+                    )}
+                  </div>
+                ))}
+                {achievementsMore > 0 && <div className="text-xs text-gray-500">+{achievementsMore} more</div>}
+              </div>
+            </section>
+          )}
+
+          {/* Languages Section */}
+          {languageItems.length > 0 && (
+            <section>
+              <h2 className="text-base sm:text-lg font-serif font-bold text-gray-800 mb-3 print:text-base print:mb-2">Languages</h2>
+              <div className="space-y-2 print:space-y-1">
+                {languageItems.map((lng, idx) => (
+                  <div key={lng.id || idx} className="flex justify-between items-center">
+                    <span className="text-gray-700 text-sm print:text-xs">{lng.name}</span>
+                    <span className="text-xs text-gray-500">{levelToLabel((lng as any).level, lng.description)}</span>
+                  </div>
+                ))}
+                {languageMore > 0 && <div className="text-xs text-gray-500">+{languageMore} more</div>}
+              </div>
+            </section>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

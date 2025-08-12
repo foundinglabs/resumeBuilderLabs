@@ -1,622 +1,258 @@
-import type {
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Globe,
+  GraduationCap,
+  Building,
+  Code,
+  Github,
+  Linkedin,
+  Twitter,
   Award,
-  Certification,
-  CustomSection,
-  CustomSectionGroup,
-  Interest,
-  Language,
-  Profile,
-  Project,
-  Publication,
-  Reference,
-  SectionKey,
-  SectionWithItem,
-  Skill,
-  URL,
-} from "../utils/reactive-resume-schema";
-import { Education as EducationType, Experience as ExperienceType, Volunteer as VolunteerType } from "../utils/reactive-resume-schema";
-import { cn, isEmptyString, isUrl, linearTransform, sanitize } from "../utils/reactive-resume-utils";
-import get from "lodash.get";
-import React, { Fragment, useEffect, useState } from "react";
+  BookOpen,
+  Heart,
+  Languages,
+} from "lucide-react"
+import type { Resume } from "@/types/resume"
+import { useArtboardStore } from "../store/artboard-store"
+import type { TemplateProps } from "../types/template"
 
-import { BrandIcon } from "../components/brand-icon";
-import { Picture } from "../components/picture";
-import { useArtboardStore } from "../store/artboard-store";
-import type { TemplateProps } from "../types/template";
+interface ResumeTemplateTwoProps {
+  resume: Resume
+}
 
-const Header = () => {
-  const basics = useArtboardStore((state) => state?.resume?.basics);
+export function ResumeTemplateTwo({ resume }: ResumeTemplateTwoProps) {
+  const basics = resume?.basics || {}
+  const sections = resume?.sections || {}
 
-  return (
-    <div className="flex flex-col items-center justify-center space-y-2 pb-2 text-center">
-      <Picture />
-
-      <div>
-        <div className="text-2xl font-bold">{basics.name}</div>
-        <div className="text-base">{basics.headline}</div>
+  const SkillBar = ({ skill, level }: { skill: string; level: number }) => (
+    <div className="mb-3">
+      <div className="flex justify-between items-center mb-1">
+        <span className="text-sm font-medium text-white">{skill}</span>
       </div>
-
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-sm">
-        {basics.location && (
-          <div className="flex items-center gap-x-1.5">
-            <i className="ph ph-bold ph-map-pin text-primary" />
-            <div>{basics.location}</div>
-          </div>
-        )}
-        {basics.phone && (
-          <div className="flex items-center gap-x-1.5">
-            <i className="ph ph-bold ph-phone text-primary" />
-            <a href={`tel:${basics.phone}`} target="_blank" rel="noreferrer">
-              {basics.phone}
-            </a>
-          </div>
-        )}
-        {basics.email && (
-          <div className="flex items-center gap-x-1.5">
-            <i className="ph ph-bold ph-at text-primary" />
-            <a href={`mailto:${basics.email}`} target="_blank" rel="noreferrer">
-              {basics.email}
-            </a>
-          </div>
-        )}
-        <Link url={basics.url} />
-        {basics?.customFields?.map((item: any) => (
-          <div key={item.id} className="flex items-center gap-x-1.5">
-            <i className={cn(`ph ph-bold ph-${item.icon}`, "text-primary")} />
-            {isUrl(item.value) ? (
-              <a href={item.value} target="_blank" rel="noreferrer noopener nofollow">
-                {item.name || item.value}
-              </a>
-            ) : (
-              <span>{[item.name, item.value].filter(Boolean).join(": ")}</span>
-            )}
-          </div>
+      <div className="flex gap-1">
+        {Array.from({ length: 5 }, (_, i) => (
+          <div key={i} className={`w-2 sm:w-3 h-2 sm:h-3 rounded-full ${i < level ? "bg-white" : "bg-teal-400"}`} />
         ))}
       </div>
     </div>
-  );
-};
+  )
 
-const Summary = () => {
-  const section = useArtboardStore((state) => state?.resume?.sections?.summary);
+  const getInterestIcon = (name: string) => {
+    // Use a simple text-based approach instead of importing many icons
+    const iconText: Record<string, string> = {
+      Photography: "📷",
+      "Music Production": "🎵",
+      "Open Source": "💻",
+      "Cloud Computing": "☁️",
+      "Machine Learning": "🤖",
+      Travel: "✈️",
+      Cinema: "🎬",
+      Books: "📚",
+      Theatre: "🎭",
+      Videogames: "🎮",
+    }
+    return iconText[name] || "📚"
+  }
 
-  if (!section?.visible || isEmptyString(section?.content)) return null;
-
-  return (
-    <section id={section.id}>
-      <div className="mb-2 hidden font-bold text-primary group-[.main]:block">
-        <h4>{section.name}</h4>
-      </div>
-
-      <div className="mb-2 hidden items-center gap-x-2 text-center font-bold text-primary group-[.sidebar]:flex">
-        <div className="size-1.5 rounded-full border border-primary" />
-        <h4>{section.name}</h4>
-        <div className="size-1.5 rounded-full border border-primary" />
-      </div>
-
-      <main className={cn("relative space-y-2", "border-l border-primary pl-4")}>
-        <div className="absolute left-[-4.5px] top-[8px] hidden size-[8px] rounded-full bg-primary group-[.main]:block" />
-
-        <div
-          dangerouslySetInnerHTML={{ __html: sanitize(section.content) }}
-          style={{ columns: section.columns }}
-          className="wysiwyg"
-        />
-      </main>
-    </section>
-  );
-};
-
-type RatingProps = { level: number };
-
-const Rating = ({ level }: RatingProps) => (
-  <div className="relative h-1 w-[128px] group-[.sidebar]:mx-auto">
-    <div className="absolute inset-0 h-1 w-[128px] rounded bg-primary opacity-25" />
-    <div
-      className="absolute inset-0 h-1 rounded bg-primary"
-      style={{ width: linearTransform(level, 0, 5, 0, 128) }}
-    />
-  </div>
-);
-
-type LinkProps = {
-  url: URL;
-  icon?: React.ReactNode;
-  iconOnRight?: boolean;
-  label?: string;
-  className?: string;
-};
-
-const Link = ({ url, icon, iconOnRight, label, className }: LinkProps) => {
-  if (!url || !isUrl(url.href)) return null;
-  // Only show the label or the URL once, as a hyperlink
-  const displayLabel = label ?? url.label ?? url.href;
-  return (
-    <div className="flex items-center gap-x-1.5">
-      {!iconOnRight && (icon ?? <i className="ph ph-bold ph-link text-primary" />)}
-      <a
-        href={url.href}
-        target="_blank"
-        rel="noreferrer noopener nofollow"
-        className={cn("inline-block", className)}
-      >
-        {displayLabel}
-      </a>
-      {iconOnRight && (icon ?? <i className="ph ph-bold ph-link text-primary" />)}
-    </div>
-  );
-};
-
-type LinkedEntityProps = {
-  name: string;
-  url: URL;
-  separateLinks: boolean;
-  className?: string;
-};
-
-const LinkedEntity = ({ name, url, separateLinks, className }: LinkedEntityProps) => {
-  return !separateLinks && isUrl(url.href) ? (
-    <Link
-      url={url}
-      label={name}
-      icon={<i className="ph ph-bold ph-globe text-primary" />}
-      iconOnRight={true}
-      className={className}
-    />
-  ) : (
-    <div className={className}>{name}</div>
-  );
-};
-
-type SectionProps<T> = {
-  section: SectionWithItem<T> | CustomSectionGroup;
-  children?: (item: T) => React.ReactNode;
-  className?: string;
-  urlKey?: keyof T;
-  levelKey?: keyof T;
-  summaryKey?: keyof T;
-  keywordsKey?: keyof T;
-};
-
-const Section = <T,>({
-  section,
-  children,
-  className,
-  urlKey,
-  levelKey,
-  summaryKey,
-  keywordsKey,
-}: SectionProps<T>) => {
-  if (!section?.visible || !('items' in section) || section.items.length === 0) return null;
+  const getHref = (url: string | { href?: string } | undefined): string => {
+    if (!url) return ""
+    if (typeof url === "string") return url
+    return url?.href ?? ""
+  }
 
   return (
-    <section id={'id' in section ? section.id : section.name} className="grid">
-      <div className="mb-2 hidden font-bold text-primary group-[.main]:block">
-        <h4>{section.name}</h4>
-      </div>
-
-      <div className="mx-auto mb-2 hidden items-center gap-x-2 text-center font-bold text-primary group-[.sidebar]:flex">
-        <div className="size-1.5 rounded-full border border-primary" />
-        <h4>{section.name}</h4>
-        <div className="size-1.5 rounded-full border border-primary" />
-      </div>
-
-      <div
-        className="grid gap-x-6 gap-y-3 group-[.sidebar]:mx-auto group-[.sidebar]:text-center"
-        style={{ gridTemplateColumns: `repeat(${'columns' in section ? section.columns : 1}, 1fr)` }}
-      >
-        {section.items
-          .filter((item) => item?.visible)
-          .map((item) => {
-            const url = (urlKey && get(item, urlKey)) as URL | undefined;
-            const level = (levelKey && get(item, levelKey, 0)) as number | undefined;
-            const summary = (summaryKey && get(item, summaryKey, "")) as string | undefined;
-            const keywords = (keywordsKey && get(item, keywordsKey, [])) as string[] | undefined;
-
-            return (
-              <div
-                key={item.id}
-                className={cn(
-                  "relative space-y-2",
-                  "border-primary group-[.main]:border-l group-[.main]:pl-4",
-                  className,
-                )}
-              >
-                <div>{children?.(item as T)}</div>
-
-                {summary !== undefined && !isEmptyString(summary) && (
-                  <div
-                    dangerouslySetInnerHTML={{ __html: sanitize(summary) }}
-                    className="wysiwyg"
-                  />
-                )}
-
-                {level !== undefined && level > 0 && <Rating level={level} />}
-
-                {Array.isArray(keywords) && keywords.length > 0 && (
-                  <p className="text-sm">{keywords.join(", ")}</p>
-                )}
-
-                {url !== undefined && section.separateLinks && <Link url={url} />}
-
-                <div className="absolute left-[-4.5px] top-px hidden size-[8px] rounded-full bg-primary group-[.main]:block" />
+    <div className="w-full max-w-[794px] min-h-screen lg:min-h-[1123px] mx-auto bg-white shadow-2xl print:shadow-none print:w-full print:min-h-0">
+      <div className="flex flex-col lg:flex-row min-h-full">
+        {/* Left Sidebar */}
+        <div className="bg-blue-900 text-white p-6 space-y-6 lg:w-1/3 flex-shrink-0">
+          {/* Profile Photo */}
+          {basics?.picture?.effects?.hidden !== true && (
+            <div className="flex justify-center mb-6">
+              <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 border-white">
+                <img
+                  src={basics?.picture?.url || "/placeholder.svg?height=128&width=128&query=professional%20headshot"}
+                  alt="Profile"
+                  className={`w-full h-full object-cover ${basics?.picture?.effects?.grayscale ? "grayscale" : ""}`}
+                />
               </div>
-            );
-          })}
-      </div>
-    </section>
-  );
-};
-
-const Profiles = () => {
-  const section = useArtboardStore((state) => state.resume.sections.profiles);
-
-  return (
-    <Section<Profile> section={section}>
-      {(item) => (
-        <div>
-          {isUrl(item.url?.href) ? (
-            <a 
-              href={item.url?.href || '#'} 
-              target="_blank" 
-              rel="noreferrer noopener nofollow"
-              className="flex items-center gap-2 hover:underline"
-            >
-              <BrandIcon slug={item.icon} />
-              <span>{item.username}</span>
-            </a>
-          ) : (
-            <div className="flex items-center gap-2">
-              <BrandIcon slug={item.icon} />
-              <span>{item.username}</span>
             </div>
           )}
-          {!item.icon && <p className="text-sm">{item.network}</p>}
-        </div>
-      )}
-    </Section>
-  );
-};
 
-const Experience = () => {
-  const section = useArtboardStore((state) => state?.resume?.sections?.experience);
-
-  return (
-    <Section<Experience> section={section} urlKey="url" summaryKey="summary">
-      {(item) => (
-        <div>
-          <LinkedEntity
-            name={item.company}
-            url={item.url}
-            separateLinks={section.separateLinks}
-            className="font-bold"
-          />
-          <div>{item.position}</div>
-          <div>{item.location}</div>
-          <div className="font-bold">{item.date}</div>
-        </div>
-      )}
-    </Section>
-  );
-};
-
-const Education = () => {
-  const section = useArtboardStore((state) => state?.resume?.sections?.education);
-
-  return (
-    <Section<Education> section={section} urlKey="url" summaryKey="summary">
-      {(item) => (
-        <div>
-          <LinkedEntity
-            name={item.institution}
-            url={item.url}
-            separateLinks={section.separateLinks}
-            className="font-bold"
-          />
-          <div>{item.area}</div>
-          <div>{item.score}</div>
-          <div>{item.studyType}</div>
-          <div className="font-bold">{item.date}</div>
-        </div>
-      )}
-    </Section>
-  );
-};
-
-const Awards = () => {
-  const section = useArtboardStore((state) => state?.resume?.sections?.awards);
-
-  return (
-    <Section<Award> section={section} urlKey="url" summaryKey="summary">
-      {(item) => (
-        <div>
-          <div className="font-bold">{item.title}</div>
-          <LinkedEntity name={item.awarder} url={item.url} separateLinks={section.separateLinks} />
-          <div className="font-bold">{item.date}</div>
-        </div>
-      )}
-    </Section>
-  );
-};
-
-const Certifications = () => {
-  const section = useArtboardStore((state) => state?.resume?.sections?.certifications);
-
-  return (
-    <Section<Certification> section={section} urlKey="url" summaryKey="summary">
-      {(item) => (
-        <div>
-          <div className="font-bold">{item.name}</div>
-          <LinkedEntity name={item.issuer} url={item.url} separateLinks={section.separateLinks} />
-          <div className="font-bold">{item.date}</div>
-        </div>
-      )}
-    </Section>
-  );
-};
-
-const Skills = () => {
-  const section = useArtboardStore((state) => state?.resume?.sections?.skills);
-
-  return (
-    <Section<Skill> section={section} levelKey="level" keywordsKey="keywords">
-      {(item) => (
-        <div>
-          <div className="font-bold">{item.name}</div>
-          <div>{item.description}</div>
-        </div>
-      )}
-    </Section>
-  );
-};
-
-const Interests = () => {
-  const section = useArtboardStore((state) => state?.resume?.sections?.interests);
-
-  return (
-    <Section<Interest> section={section} keywordsKey="keywords" className="space-y-0.5">
-      {(item) => <div className="font-bold">{item.name}</div>}
-    </Section>
-  );
-};
-
-const Publications = () => {
-  const section = useArtboardStore((state) => state?.resume?.sections?.publications);
-
-  return (
-    <Section<Publication> section={section} urlKey="url" summaryKey="summary">
-      {(item) => (
-        <div>
-          <LinkedEntity
-            name={item.name}
-            url={item.url}
-            separateLinks={section.separateLinks}
-            className="font-bold"
-          />
-          <div>{item.publisher}</div>
-          <div className="font-bold">{item.date}</div>
-        </div>
-      )}
-    </Section>
-  );
-};
-
-const Volunteer = () => {
-  const section = useArtboardStore((state) => state?.resume?.sections?.volunteer);
-
-  return (
-    <Section<Volunteer> section={section} urlKey="url" summaryKey="summary">
-      {(item) => (
-        <div>
-          <LinkedEntity
-            name={item.organization}
-            url={item.url}
-            separateLinks={section.separateLinks}
-            className="font-bold"
-          />
-          <div>{item.position}</div>
-          <div>{item.location}</div>
-          <div className="font-bold">{item.date}</div>
-        </div>
-      )}
-    </Section>
-  );
-};
-
-const Languages = () => {
-  const section = useArtboardStore((state) => state?.resume?.sections?.languages);
-
-  return (
-    <Section<Language> section={section} levelKey="level">
-      {(item) => (
-        <div>
-          <div className="font-bold">{item.name}</div>
-          <div>{item.description}</div>
-        </div>
-      )}
-    </Section>
-  );
-};
-
-const isGitHubUrl = (url: string | URL | undefined): boolean => {
-  if (!url) return false;
-  const urlString = typeof url === 'string' ? url : url.href;
-  if (typeof urlString !== 'string') return false;
-  return urlString.toLowerCase().includes('github.com');
-};
-
-const isLiveUrl = (url: string | URL | undefined): boolean => {
-  if (!url) return false;
-  const urlString = typeof url === 'string' ? url : url.href;
-  if (typeof urlString !== 'string') return false;
-  return !isGitHubUrl(urlString) && (urlString.toLowerCase().includes('http://') || urlString.toLowerCase().includes('https://'));
-};
-
-const Projects = () => {
-  const section = useArtboardStore((state) => state?.resume?.sections?.projects);
-
-  return (
-    <Section<Project> section={section} urlKey="url" summaryKey="summary" keywordsKey="keywords">
-      {(item) => (
-        <div>
+          {/* Contact Information */}
           <div>
-            <div className="font-bold">{item.name}</div>
-            <div>{item.description}</div>
-            {item.url && (
-              <div className="flex items-center gap-2 mt-2">
-                {isGitHubUrl(item.url) ? (
-                  <a
-                    href={item.url?.href || '#'}
-                    target="_blank"
-                    rel="noreferrer noopener nofollow"
-                    className="flex items-center gap-2 text-blue-600 hover:underline"
-                  >
-                    <BrandIcon slug="github" />
-                    <span>GitHub</span>
-                  </a>
-                ) : isLiveUrl(item.url) ? (
-                  <a
-                    href={item.url?.href || '#'}
-                    target="_blank"
-                    rel="noreferrer noopener nofollow"
-                    className="flex items-center gap-2 text-blue-600 hover:underline"
-                  >
-                    <i className="ph ph-bold ph-globe" />
-                    <span>Live</span>
-                  </a>
-                ) : null}
+            <h2 className="text-lg font-bold mb-4 border-b border-white/20 pb-2">CONTACT</h2>
+            <div className="space-y-3">
+              {basics.phone && (
+                <div className="flex items-center">
+                  <Phone className="w-4 h-4 mr-3 flex-shrink-0" />
+                  <span className="text-sm">{basics.phone}</span>
+                </div>
+              )}
+              {basics.email && (
+                <div className="flex items-center">
+                  <Mail className="w-4 h-4 mr-3 flex-shrink-0" />
+                  <span className="text-sm break-all">{basics.email}</span>
+                </div>
+              )}
+              {basics.location && (
+                <div className="flex items-center">
+                  <MapPin className="w-4 h-4 mr-3 flex-shrink-0" />
+                  <span className="text-sm">{basics.location}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Education */}
+          {sections?.education?.visible &&
+            (sections?.education?.items?.filter((i: any) => i?.visible) || []).length > 0 && (
+              <div>
+                <h2 className="text-lg font-bold mb-4 border-b border-white/20 pb-2">EDUCATION</h2>
+                <div className="space-y-4">
+                  {(sections.education.items as any[])
+                    .filter((item) => item?.visible)
+                    .map((edu) => (
+                      <div key={edu.id}>
+                        <p className="text-sm font-medium mb-1">{edu.date}</p>
+                        <p className="font-bold text-sm mb-1">{edu.institution}</p>
+                        <p className="text-sm uppercase">{edu.studyType} {edu.area}</p>
+                      </div>
+                    ))}
+                </div>
               </div>
             )}
-            {/* Do NOT render the raw URL below the anchor */}
-          </div>
+
+          {/* Skills */}
+          {sections?.skills?.visible && (sections?.skills?.items?.filter((i: any) => i?.visible) || []).length > 0 && (
+            <div>
+              <h2 className="text-lg font-bold mb-4 border-b border-white/20 pb-2">AREAS OF EXPERTISE</h2>
+              <ul className="space-y-1">
+                {(sections.skills.items as any[])
+                  .filter((item) => item?.visible)
+                  .map((skill) => (
+                    <li key={skill.id} className="text-sm flex items-center">
+                      <span className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></span>
+                      {skill.name}
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Additional Skills Section */}
+          {sections?.interests?.visible && (sections?.interests?.items?.filter((i: any) => i?.visible) || []).length > 0 && (
+            <div>
+              <h2 className="text-lg font-bold mb-4 border-b border-white/20 pb-2">SKILLS</h2>
+              <ul className="space-y-1">
+                {(sections.interests.items as any[])
+                  .filter((item) => item?.visible)
+                  .map((interest) => (
+                    <li key={interest.id} className="text-sm flex items-center">
+                      <span className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></span>
+                      {interest.name}
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Certifications */}
+          {sections?.certifications?.visible &&
+            (sections?.certifications?.items?.filter((i: any) => i?.visible) || []).length > 0 && (
+              <div>
+                <h2 className="text-lg font-bold mb-4 border-b border-white/20 pb-2">CERTIFICATION</h2>
+                <ul className="space-y-1">
+                  {(sections.certifications.items as any[])
+                    .filter((item) => item?.visible)
+                    .map((cert) => (
+                      <li key={cert.id} className="text-sm flex items-center">
+                        <span className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></span>
+                        {cert.name}
+                      </li>
+                    ))}
+                </ul>
+              </div>
+            )}
         </div>
-      )}
-    </Section>
-  );
-};
 
-const References = () => {
-  const section = useArtboardStore((state) => state?.resume?.sections?.references);
-
-  return (
-    <Section<Reference> section={section} urlKey="url" summaryKey="summary">
-      {(item) => (
-        <div>
-          <LinkedEntity
-            name={item.name}
-            url={item.url}
-            separateLinks={section.separateLinks}
-            className="font-bold"
-          />
-          <div>{item.description}</div>
-        </div>
-      )}
-    </Section>
-  );
-};
-
-const Custom = ({ id }: { id: string }) => {
-  const section = useArtboardStore((state) => state?.resume?.sections?.custom?.[id]);
-
-  return (
-    <Section<CustomSection>
-      section={section}
-      urlKey="url"
-      summaryKey="summary"
-      keywordsKey="keywords"
-    >
-      {(item) => (
-        <div>
-          <div>
-            <LinkedEntity
-              name={item.name}
-              url={item.url}
-              separateLinks={section.separateLinks}
-              className="font-bold"
-            />
-            <div>{item.description}</div>
-
-            <div className="font-bold">{item.date}</div>
-            <div>{item.location}</div>
-          </div>
-        </div>
-      )}
-    </Section>
-  );
-};
-
-const mapSectionToComponent = (section: SectionKey) => {
-  switch (section) {
-    case "profiles": {
-      return <Profiles />;
-    }
-    case "summary": {
-      return <Summary />;
-    }
-    case "experience": {
-      return <Experience />;
-    }
-    case "education": {
-      return <Education />;
-    }
-    case "awards": {
-      return <Awards />;
-    }
-    case "certifications": {
-      return <Certifications />;
-    }
-    case "skills": {
-      return <Skills />;
-    }
-    case "interests": {
-      return <Interests />;
-    }
-    case "publications": {
-      return <Publications />;
-    }
-    case "volunteer": {
-      return <Volunteer />;
-    }
-    case "languages": {
-      return <Languages />;
-    }
-    case "projects": {
-      return <Projects />;
-    }
-    case "references": {
-      return <References />;
-    }
-    default: {
-      if (section.startsWith("custom.")) return <Custom id={section.split(".")[1]} />;
-
-      return null;
-    }
-  }
-};
-export const Azurill = ({ columns, isFirstPage = false }: TemplateProps) => {
-  const [main, sidebar] = columns;
-  return (
-    <div className="flex justify-center items-start w-full min-h-screen">
-      <div className="max-w-3xl w-full p-custom space-y-3">
-        {isFirstPage && <Header />}
-
-        <div className="grid grid-cols-3 gap-x-4">
-          <div className="sidebar group space-y-4">
-            {sidebar.map((section) => (
-              <Fragment key={section}>{mapSectionToComponent(section)}</Fragment>
-            ))}
+        {/* Main Content */}
+        <div className="p-6 space-y-6 lg:w-2/3 flex-1">
+          {/* Header with Name and Title */}
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold text-gray-800 mb-2 tracking-wide uppercase">{basics.name}</h1>
+            <h2 className="text-xl text-gray-600 uppercase tracking-wider">{basics.headline}</h2>
           </div>
 
-          <div
-            className={cn("main group space-y-4", sidebar.length > 0 ? "col-span-2" : "col-span-3")}
-          >
-            {main.map((section) => (
-              <Fragment key={section}>{mapSectionToComponent(section)}</Fragment>
-            ))}
-          </div>
+          {/* Profile */}
+          {sections?.summary?.visible && sections?.summary?.content && (
+            <div>
+              <h2 className="text-xl font-bold text-gray-800 mb-4 border-b-2 border-gray-300 pb-2 uppercase tracking-wide">PROFILE</h2>
+              <div className="text-sm text-gray-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: sections.summary.content }} />
+            </div>
+          )}
+
+          {/* Work Experience */}
+          {sections?.experience?.visible &&
+            (sections?.experience?.items?.filter((i: any) => i?.visible) || []).length > 0 && (
+              <div>
+                <h2 className="text-xl font-bold text-gray-800 mb-4 border-b-2 border-gray-300 pb-2 uppercase tracking-wide">WORK EXPERIENCE</h2>
+                <div className="relative">
+                  <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gray-300"></div>
+                  <div className="space-y-6">
+                    {(sections.experience.items as any[])
+                      .filter((item) => item?.visible)
+                      .map((exp, index) => (
+                        <div key={exp.id} className="relative pl-12">
+                          <div className="absolute left-4 top-1 w-4 h-4 bg-blue-900 rounded-full border-2 border-white"></div>
+                          <div className="flex justify-between items-start mb-2">
+                            <div>
+                              <h3 className="font-bold text-gray-800 text-lg">{exp.position}</h3>
+                              <p className="text-gray-600 font-medium">{exp.company}</p>
+                            </div>
+                            <span className="text-sm text-gray-500 whitespace-nowrap ml-4">{exp.date}</span>
+                          </div>
+                          {exp.summary && (
+                            <div className="text-sm text-gray-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: exp.summary }} />
+                          )}
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+          {/* References */}
+          {sections?.references?.visible &&
+            (sections?.references?.items?.filter((i: any) => i?.visible) || []).length > 0 && (
+              <div>
+                <h2 className="text-xl font-bold text-gray-800 mb-4 border-b-2 border-gray-300 pb-2 uppercase tracking-wide">REFERENCE</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {(sections.references.items as any[])
+                    .filter((item) => item?.visible)
+                    .map((ref) => (
+                      <div key={ref.id} className="text-sm">
+                        <p className="font-bold text-gray-800 mb-1">{ref.name}</p>
+                        <p className="text-gray-600 mb-2">{ref.description}</p>
+                        {getHref(ref.url) && (
+                          <p className="text-gray-500">
+                            Phone: {ref.url?.label || getHref(ref.url)}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
+// Reactive-Resume expects a named export 'Azurill'. Wrap the above template and feed data from the store.
+export const Azurill = ({ columns }: TemplateProps) => {
+  const resume = useArtboardStore((s: any) => s.resume) || {} as unknown as Resume;
+  return <ResumeTemplateTwo resume={resume} />;
+};

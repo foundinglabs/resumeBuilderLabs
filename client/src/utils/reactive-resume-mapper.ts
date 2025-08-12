@@ -182,14 +182,14 @@ export const mapResumeGeniusToReactiveResume = (
   const mappedProjects = (Array.isArray(projects) ? projects : []).map(project => ({
     id: generateId(),
     visible: true,
-    name: project.title || "",
-    description: project.duration || "",
-    date: project.duration || "",
-    summary: `<p>${project.description || ""}</p>`,
-    keywords: Array.isArray(project.technologies) ? project.technologies : [],
+    name: (project as any).title || (project as any).name || "",
+    description: (project as any).role || (project as any).duration || "",
+    // Prefer detailed description as summary for rendering
+    summary: `<p>${((project as any).description || "").replace(/\n/g, '</p><p>')}</p>`,
+    keywords: Array.isArray((project as any).technologies) ? (project as any).technologies : [],
     url: {
       label: "",
-      href: project.link || "",
+      href: (project as any).link || (project as any).url || "",
     },
   }));
 
