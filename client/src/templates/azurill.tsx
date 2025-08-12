@@ -113,20 +113,61 @@ const Header = ({ resumeData }: { resumeData: any }) => {
   return (
     <div className="bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-700 text-white p-4">
       <div className="flex items-start gap-4">
-        {/* Profile Picture */}
-        <div className="w-20 h-20 rounded-full overflow-hidden border-3 border-white/30 shadow-lg flex-shrink-0">
-          {basics?.picture &&
-          (typeof basics.picture === "string" ? basics.picture.trim() !== "" : basics.picture.url?.trim() !== "") ? (
+        {/* Profile Picture - Show default photo by default, or user's photo if uploaded */}
+        <div 
+          className="overflow-hidden border-3 border-white/30 shadow-lg flex-shrink-0"
+          style={{
+            width: `${basics?.picture?.size || 80}px`,
+            height: `${basics?.picture?.size || 80}px`,
+            borderRadius: `${basics?.picture?.borderRadius || 50}%`,
+            border: basics?.picture?.effects?.border ? '2px solid rgba(255,255,255,0.5)' : 'none'
+          }}
+        >
+          {basics?.picture && 
+           !basics?.picture?.effects?.hidden &&
+           (typeof basics.picture === "string" ? basics.picture.trim() !== "" : basics.picture.url?.trim() !== "") ? (
             <img
               src={typeof basics.picture === "string" ? basics.picture : basics.picture.url}
               alt={basics?.name || "Profile"}
               className="w-full h-full object-cover"
+              style={{
+                filter: basics?.picture?.effects?.grayscale ? 'grayscale(100%)' : 'none'
+              }}
+              onError={(e) => {
+                // Fallback to initials if image fails to load
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                const fallback = target.parentElement?.querySelector('.fallback-initials');
+                if (fallback) {
+                  fallback.classList.remove('hidden');
+                }
+              }}
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-emerald-400/30 to-cyan-400/30 rounded-full flex items-center justify-center text-xl font-bold">
-              {getInitials(basics?.name) || ""}
-            </div>
+            <img
+              src="/templates/jpg/image.png"
+              alt="Default Profile"
+              className="w-full h-full object-cover"
+              style={{
+                filter: basics?.picture?.effects?.grayscale ? 'grayscale(100%)' : 'none'
+              }}
+              onError={(e) => {
+                // Fallback to initials if image fails to load
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                const fallback = target.parentElement?.querySelector('.fallback-initials');
+                if (fallback) {
+                  fallback.classList.remove('hidden');
+                }
+              }}
+            />
           )}
+          <div className="fallback-initials hidden absolute inset-0 w-full h-full bg-gradient-to-br from-emerald-400/30 to-cyan-400/30 flex items-center justify-center text-xl font-bold"
+               style={{
+                 borderRadius: `${basics?.picture?.borderRadius || 50}%`
+               }}>
+            {getInitials(basics?.name) || ""}
+          </div>
         </div>
 
         {/* Main Info - Name and Title */}

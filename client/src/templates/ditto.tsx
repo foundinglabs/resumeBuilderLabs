@@ -125,32 +125,61 @@ const Header = ({ resumeData }: { resumeData: any }) => {
       
       <div className="relative z-10">
                  <div className="flex flex-row flex-wrap items-start gap-3 md:gap-4">
-           <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden border border-white/20 shadow-lg backdrop-blur-sm relative">
-             {basics?.picture && (typeof basics.picture === 'string' ? basics.picture.trim() !== "" : basics.picture.url?.trim() !== "") ? (
-               <>
-                                   <img 
-                    src={typeof basics.picture === 'string' ? basics.picture : basics.picture.url} 
-                    alt={basics?.name || "Profile"} 
-                    className="w-full h-full object-cover"
-                   onError={(e) => {
-                     // Fallback to initials if image fails to load
-                     const target = e.target as HTMLImageElement;
-                     target.style.display = 'none';
-                     const fallback = target.parentElement?.querySelector('.fallback-initials');
-                     if (fallback) {
-                       fallback.classList.remove('hidden');
-                     }
-                   }}
-                 />
-                 <div className="fallback-initials hidden absolute inset-0 w-full h-full bg-gradient-to-br from-purple-400/30 to-indigo-400/30 rounded-full flex items-center justify-center text-xl md:text-2xl font-serif font-bold">
-                   {getInitials(basics?.name) || ""}
-                 </div>
-               </>
+           {/* Profile Picture - Show default photo by default, or user's photo if uploaded */}
+           <div 
+             className="overflow-hidden border border-white/20 shadow-lg backdrop-blur-sm relative"
+             style={{
+               width: `${basics?.picture?.size || 80}px`,
+               height: `${basics?.picture?.size || 80}px`,
+               borderRadius: `${basics?.picture?.borderRadius || 50}%`,
+               border: basics?.picture?.effects?.border ? '2px solid rgba(255,255,255,0.3)' : '1px solid rgba(255,255,255,0.2)'
+             }}
+           >
+             {basics?.picture && 
+              !basics?.picture?.effects?.hidden &&
+              (typeof basics.picture === 'string' ? basics.picture.trim() !== "" : basics.picture.url?.trim() !== "") ? (
+               <img 
+                 src={typeof basics.picture === 'string' ? basics.picture : basics.picture.url} 
+                 alt={basics?.name || "Profile"} 
+                 className="w-full h-full object-cover"
+                 style={{
+                   filter: basics?.picture?.effects?.grayscale ? 'grayscale(100%)' : 'none'
+                 }}
+                 onError={(e) => {
+                   // Fallback to initials if image fails to load
+                   const target = e.target as HTMLImageElement;
+                   target.style.display = 'none';
+                   const fallback = target.parentElement?.querySelector('.fallback-initials');
+                   if (fallback) {
+                     fallback.classList.remove('hidden');
+                   }
+                 }}
+               />
              ) : (
-               <div className="w-full h-full bg-gradient-to-br from-purple-400/30 to-indigo-400/30 rounded-full flex items-center justify-center text-xl md:text-2xl font-serif font-bold">
-            {getInitials(basics?.name) || ""}
-          </div>
+               <img
+                 src="/templates/jpg/image.png"
+                 alt="Default Profile"
+                 className="w-full h-full object-cover"
+                 style={{
+                   filter: basics?.picture?.effects?.grayscale ? 'grayscale(100%)' : 'none'
+                 }}
+                 onError={(e) => {
+                   // Fallback to initials if image fails to load
+                   const target = e.target as HTMLImageElement;
+                   target.style.display = 'none';
+                   const fallback = target.parentElement?.querySelector('.fallback-initials');
+                   if (fallback) {
+                     fallback.classList.remove('hidden');
+                   }
+                 }}
+               />
              )}
+             <div className="fallback-initials hidden absolute inset-0 w-full h-full bg-gradient-to-br from-purple-400/30 to-indigo-400/30 flex items-center justify-center text-xl md:text-2xl font-serif font-bold"
+                  style={{
+                    borderRadius: `${basics?.picture?.borderRadius || 50}%`
+                  }}>
+               {getInitials(basics?.name) || ""}
+             </div>
            </div>
           <div className="flex-1 min-w-0">
             <h1 className="text-xl md:text-2xl lg:text-3xl font-serif font-bold mb-1 md:mb-2 text-white drop-shadow-sm">{basics?.name || ""}</h1>
@@ -255,7 +284,7 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
       const { items: experienceItems, more: experienceMore } = capArray(sec.items.filter((item: any) => item?.visible !== false), MAX_EXPERIENCE);
       
       return (
-        <section key="experience" className="mb-4 md:mb-6 print:mb-3">
+        <section key="experience" className="mb-7 md:mb-6 print:mb-3">
           <SectionTitle>
             <div className="w-4 h-4 sm:w-5 sm:h-5 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full print:w-4 print:h-4"></div>
                 Experience
@@ -269,7 +298,7 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
                       className="absolute -left-1.5 sm:-left-2 top-0 w-3 h-3 sm:w-4 sm:h-4 rounded-full print:w-3 print:h-3 print:-left-1.5"
                       style={{ backgroundColor: expAccentColors[idx % 3] }}
                     />
-                                         <div className="flex items-center justify-between gap-2 mb-1 print:mb-0.5">
+                                         <div className="flex items-center justify-between gap-2 mb-5 print:mb-0.5">
                        <h3 className="text-sm sm:text-base font-semibold text-gray-800 print:text-sm flex-shrink-0">{item.position}</h3>
                        <p className="font-medium text-xs print:text-xs" style={{ color: expAccentColors[idx % 3] }}>
                          {item.company}
@@ -362,7 +391,7 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
           </SectionTitle>
           <div className="space-y-3 print:space-y-2">
             {educationItems.map((ed: any, idx: number) => (
-              <div key={ed.id || idx} className={`bg-gradient-to-r p-3 rounded-lg border print:p-2 ${idx % 2 === 0 ? "from-blue-50 to-purple-50 border-blue-100" : "from-green-50 to-teal-50 border-green-100"}`}>
+              <div key={ed.id || idx}>
                 <h3 className="font-semibold text-gray-800 text-sm print:text-xs">{ed.area || ed.studyType || ed.degree}</h3>
                 <p className={`${idx % 2 === 0 ? "text-blue-600" : "text-green-600"} font-medium text-sm print:text-xs`}>{ed.institution || ed.school}</p>
                 <p className="text-gray-500 text-xs">{ed.date || ed.graduationYear}</p>
@@ -521,25 +550,25 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
         </Section>
       );
     }
-    case "volunteer": {
-      return (
-        <Section<any> section={sec}>
-          {(item) => (
-            <div>
-              <div className="font-bold text-gray-800 text-sm">{item.position || item.role}</div>
-              <div className="text-blue-700 text-xs">{item.organization}</div>
-              <div className="text-xs text-blue-400">{item.date}</div>
-              {(item.summary || item.description) && (
-                <div
-                  className="text-xs text-gray-700 mt-0.5 wysiwyg"
-                  dangerouslySetInnerHTML={{ __html: sanitize(item.summary || item.description) }}
-                />
-              )}
-            </div>
-          )}
-        </Section>
-      );
-    }
+    // case "volunteer": {
+    //   return (
+    //     <Section<any> section={sec}>
+    //       {(item) => (
+    //         <div>
+    //           <div className="font-bold text-gray-800 text-sm">{item.position || item.role}</div>
+    //           <div className="text-blue-700 text-xs">{item.organization}</div>
+    //           <div className="text-xs text-blue-400">{item.date}</div>
+    //           {(item.summary || item.description) && (
+    //             <div
+    //               className="text-xs text-gray-700 mt-0.5 wysiwyg"
+    //               dangerouslySetInnerHTML={{ __html: sanitize(item.summary || item.description) }}
+    //             />
+    //           )}
+    //         </div>
+    //       )}
+    //     </Section>
+    //   );
+    // }
     case "references": {
       return (
         <Section<any> section={sec}>
@@ -564,21 +593,21 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
       return null;
     }
 
-    default: {
-      return (
-        <Section<any> section={sec}>
-          {(item) => (
-            <div className="text-sm text-gray-700">
-              {Object.entries(item).map(([key, value]) => (
-                <div key={key} className="mb-1">
-                  <strong className="text-gray-800">{key}:</strong> {String(value)}
-                  </div>
-                ))}
-              </div>
-          )}
-        </Section>
-      );
-    }
+    // default: {
+    //   return (
+    //     <Section<any> section={sec}>
+    //       {(item) => (
+    //         <div className="text-sm text-gray-700">
+    //           {Object.entries(item).map(([key, value]) => (
+    //             <div key={key} className="mb-1">
+    //               <strong className="text-gray-800">{key}:</strong> {String(value)}
+    //               </div>
+    //             ))}
+    //           </div>
+    //       )}
+    //     </Section>
+    //   );
+    // }
   }
 };
 
@@ -603,25 +632,10 @@ export const Ditto = ({ columns, isFirstPage = false, resumeData: resumeDataProp
           
           {/* Education Section - Right after Experience */}
           {mapSectionToComponent("education", resumeData)}
-          
-          <div className="grid gap-4 md:gap-6 print:gap-3 grid-cols-1 lg:grid-cols-3">
-          {/* Sidebar */}
-          <aside className="lg:col-span-1 space-y-4 md:space-y-6 print:space-y-3">
-            {(sidebar.length > 0 ? sidebar : sidebarSections).map((section: string) => (
-              <Fragment key={section}>
-                {mapSectionToComponent(section, resumeData)}
-              </Fragment>
-            ))}
-          </aside>
 
-          {/* Main Content */}
-          <main className="lg:col-span-2 space-y-4 md:space-y-6 print:space-y-3">
-            {(main.length > 0 ? main : mainSections).map((section: string) => (
-              <Fragment key={section}>
-                {mapSectionToComponent(section, resumeData)}
-              </Fragment>
-            ))}
-          </main>
+          {mapSectionToComponent("skills", resumeData)}
+          {mapSectionToComponent("projects", resumeData)}
+          <div className="grid gap-4 md:gap-6 print:gap-3 grid-cols-1 lg:grid-cols-3">
         </div>
       </div>
     </div>

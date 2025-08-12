@@ -21,6 +21,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { defaultResume } from '@/lib/default-resume';
 import { mapResumeGeniusToReactiveResume } from '@/utils/reactive-resume-mapper';
 import Footer from "@/components/Footer";
+import Split from "react-split"
 
 export interface ResumeData {
   personalInfo: {
@@ -595,9 +596,21 @@ export default function Builder() {
          </div>
 
         {/* Stacked layout: Form on top, Preview full width below */}
-        <div className="flex flex-col lg:flex-row gap-2 overflow-x-hidden">
+        <div className="flex flex-col lg:flex-row gap-2 overflow-x-hidden" >
                      {/* Form Panel */}
-           <div className="w-full lg:w-1/2 overflow-x-hidden mb-4 lg:mb-0">
+
+                     <Split
+        className="flex flex-row h-full"
+        sizes={[40, 60]} // initial percentage widths
+        minSize={300} // minimum px width for each panel
+        gutterSize={8} // width of the handle
+        gutterStyle={() => ({
+          backgroundColor: "white", // visible color for handle
+          cursor: "col-resize",
+          width: "8px",
+        })}
+      >
+           <div className="w-full lg:w-1/2 overflow-x-hidden mb-4 lg:mb-0 "style={{border:"1px solid gray"}} >
              <Card className="shadow-xl border-0 bg-background/80 backdrop-blur-sm dark:bg-slate-800/90 dark:border-slate-700">
                <CardContent className="p-4">
                  <div className="mb-6">
@@ -687,7 +700,7 @@ export default function Builder() {
           </div>
 
                                 {/* Live Preview Panel - Full Width */}
-           <div className="w-full lg:w-3/5 overflow-x-hidden">
+           <div className="w-full lg:w-3/5 overflow-x-hidden" style={{border: "1px solid gray"}}>
              <Card className="shadow-xl border-0 bg-background/80 backdrop-blur-sm dark:bg-slate-800/90 dark:border-slate-700 h-fit flex flex-col items-center">
                <CardContent className="p-4 md:p-6 w-full">
                  <div className="mb-4 flex items-center justify-between w-full max-w-3xl mx-auto">
@@ -768,6 +781,8 @@ export default function Builder() {
                </CardContent>
              </Card>
            </div>
+
+           </Split>
         </div>
       </div>
       

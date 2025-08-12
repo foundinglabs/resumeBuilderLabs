@@ -140,6 +140,10 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({ className, userName = 
         picture: {
           ...picture,
           url: '',
+          effects: {
+            ...picture.effects,
+            hidden: true, // Hide the photo completely
+          }
         }
       }
     };
@@ -203,39 +207,39 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({ className, userName = 
 
             {/* Action buttons */}
             <div className="flex items-center space-x-2">
-              {picture.url && (
-                <>
-                  <Button
-                    onClick={() => setIsExpanded(!isExpanded)}
-                    variant="ghost"
-                    size="sm"
-                    className="text-slate-600 hover:text-slate-800"
-                  >
-                    {isExpanded ? 'Less' : 'Edit'}
-                  </Button>
-                  <Button
-                    onClick={removePhoto}
-                    variant="ghost"
-                    size="sm"
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                </>
-              )}
+              {/* Remove button - always show (can remove default photo too) */}
+              <Button
+                onClick={removePhoto}
+                variant="ghost"
+                size="sm"
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <X className="h-3 w-3" />
+              </Button>
               
-              {!picture.url && (
+              {/* Edit button - only show if user has uploaded a photo */}
+              {picture.url && (
                 <Button
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isUploading}
-                  variant="outline"
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  variant="ghost"
                   size="sm"
-                  className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                  className="text-slate-600 hover:text-slate-800"
                 >
-                  <Camera className="h-3 w-3 mr-1" />
-                  {isUploading ? 'Uploading...' : 'Add Photo'}
+                  {isExpanded ? 'Less' : 'Edit'}
                 </Button>
               )}
+              
+              {/* Add Photo button - always show */}
+              <Button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
+                variant="outline"
+                size="sm"
+                className="text-blue-600 border-blue-200 hover:bg-blue-50"
+              >
+                <Camera className="h-3 w-3 mr-1" />
+                {isUploading ? 'Uploading...' : 'Add Photo'}
+              </Button>
             </div>
           </div>
 
