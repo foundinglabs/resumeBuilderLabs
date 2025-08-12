@@ -50,14 +50,14 @@ export const TEMPLATE_CONFIG: TemplateConfig[] = [
   {
     id: "glalie",
     name: "Glalie",
-    enabled: true,
+    enabled: false,
     category: 'reactive-resume',
     description: "Sophisticated layout with refined typography"
   },
   {
     id: "kakuna",
     name: "Kakuna",
-    enabled: true,
+    enabled: false,
     category: 'reactive-resume',
     description: "Tech-focused with modular project layout"
   },
@@ -78,7 +78,7 @@ export const TEMPLATE_CONFIG: TemplateConfig[] = [
   {
     id: "onyx",
     name: "Onyx",
-    enabled: true,
+    enabled: false,
     category: 'reactive-resume',
     description: "Formal & Executive minimalist design"
   },
@@ -102,7 +102,7 @@ export const TEMPLATE_CONFIG: TemplateConfig[] = [
     name: "Classic",
     enabled: true,
     category: 'custom',
-    description: "Traditional, clean, and ATS-friendly layout"
+    description: "Minimalistic, clean design with excellent readability and ATS compatibility"
   },
   {
     id: "modern",

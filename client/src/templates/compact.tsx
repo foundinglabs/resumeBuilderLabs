@@ -322,12 +322,11 @@ const mapSectionToComponent = (section: SectionKey, resumeData: any) => {
                 <div key={item.id} className="bg-white p-3 rounded-lg border border-gray-200">
                   <div className="flex justify-between items-center mb-2">
                     <span className="font-medium text-gray-800 text-sm">{item.name}</span>
-                    <span className="text-xs text-gray-500">Level {item.level || 3}</span>
+                    
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full  rounded-full ">
                     <div
-                      className="bg-gradient-to-r from-emerald-400 to-teal-500 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${((item.level || 3) / 5) * 100}%` }}
+                   
                     ></div>
                   </div>
                   {Array.isArray(item.keywords) && item.keywords.length > 0 && (
