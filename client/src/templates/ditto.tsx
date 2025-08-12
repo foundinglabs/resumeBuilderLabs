@@ -83,7 +83,7 @@ const Header = ({ resumeData }: { resumeData: any }) => {
   // Debug: Log the basics data to see if picture is present
   console.log('Header basics data:', basics);
   console.log('Picture URL:', basics?.picture);
-  
+
   const portfolioHref = getHref(basics?.url);
   const linkedInProfile = profiles.find((p: any) => isLinkedInUrl(p?.url));
   const githubProfile = profiles.find((p: any) => isGitHubUrl(p?.url));
@@ -148,8 +148,8 @@ const Header = ({ resumeData }: { resumeData: any }) => {
                </>
              ) : (
                <div className="w-full h-full bg-gradient-to-br from-purple-400/30 to-indigo-400/30 rounded-full flex items-center justify-center text-xl md:text-2xl font-serif font-bold">
-                 {getInitials(basics?.name) || ""}
-               </div>
+            {getInitials(basics?.name) || ""}
+          </div>
              )}
            </div>
           <div className="flex-1 min-w-0">
@@ -184,8 +184,8 @@ const Header = ({ resumeData }: { resumeData: any }) => {
           <SocialChip href={getHref(linkedInProfile?.url) || undefined} icon={<Linkedin className="w-3 h-3 md:w-4 md:h-4" />} label="LinkedIn" />
           <SocialChip href={getHref(githubProfile?.url) || undefined} icon={<Github className="w-3 h-3 md:w-4 md:h-4" />} label="GitHub" />
         </div>
+        </div>
       </div>
-    </div>
   );
 };
 
@@ -241,13 +241,13 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
         <section id={sec.id} className="mb-4 md:mb-6 print:mb-3">
           <SectionTitle>
             <div className="w-4 h-4 sm:w-5 sm:h-5 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-full print:w-4 print:h-4"></div>
-            About Me
+                About Me
           </SectionTitle>
-          <div 
-            className="text-gray-600 leading-relaxed text-sm sm:text-base print:text-xs print:leading-normal wysiwyg" 
+              <div
+                className="text-gray-600 leading-relaxed text-sm sm:text-base print:text-xs print:leading-normal wysiwyg"
             dangerouslySetInnerHTML={{ __html: sanitize(sec.content) }} 
-          />
-        </section>
+              />
+            </section>
       );
     }
     case "experience": {
@@ -258,42 +258,41 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
         <section key="experience" className="mb-4 md:mb-6 print:mb-3">
           <SectionTitle>
             <div className="w-4 h-4 sm:w-5 sm:h-5 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full print:w-4 print:h-4"></div>
-            Experience
+                Experience
           </SectionTitle>
-          <div className="space-y-4 print:space-y-3">
+                             <div className="space-y-2 print:space-y-1">
             {experienceItems.map((item: any, idx: number) => {
               const expAccentColors = ["#3b82f6", "#a855f7", "#10b981"];
               return (
-                <div key={item.id || idx} className="relative pl-4 sm:pl-5 border-l-2 border-blue-200 print:pl-4">
-                  <div
-                    className="absolute -left-1.5 sm:-left-2 top-0 w-3 h-3 sm:w-4 sm:h-4 rounded-full print:w-3 print:h-3 print:-left-1.5"
-                    style={{ backgroundColor: expAccentColors[idx % 3] }}
-                  />
-                  <div className="flex flex-col gap-1 sm:gap-2 mb-2 print:mb-1">
-                    <h3 className="text-base sm:text-lg font-semibold text-gray-800 print:text-base">{item.position}</h3>
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                      <p className="font-medium text-sm print:text-xs" style={{ color: expAccentColors[idx % 3] }}>
-                        {[item.company, item.location].filter(Boolean).join(" • ")}
-                      </p>
-                      <span className="text-xs text-gray-500 flex items-center gap-1 print:text-xs">
-                        <Calendar className="w-3 h-3" />
-                        {item.date}
-                      </span>
-                    </div>
+                  <div key={item.id || idx} className="relative pl-4 sm:pl-5 border-l-2 border-blue-200 print:pl-4">
+                    <div
+                      className="absolute -left-1.5 sm:-left-2 top-0 w-3 h-3 sm:w-4 sm:h-4 rounded-full print:w-3 print:h-3 print:-left-1.5"
+                      style={{ backgroundColor: expAccentColors[idx % 3] }}
+                    />
+                                         <div className="flex items-center justify-between gap-2 mb-1 print:mb-0.5">
+                       <h3 className="text-sm sm:text-base font-semibold text-gray-800 print:text-sm flex-shrink-0">{item.position}</h3>
+                       <p className="font-medium text-xs print:text-xs" style={{ color: expAccentColors[idx % 3] }}>
+                         {item.company}
+                         {item.location && ` • ${item.location}`}
+                       </p>
+                       <span className="text-xs text-gray-500 flex items-center gap-1 print:text-xs flex-shrink-0">
+                         <Calendar className="w-3 h-3" />
+                         {item.date}
+                       </span>
+                     </div>
+                                         {item.summary && (
+                       <ul className="text-gray-600 space-y-0.5 text-xs print:text-xs print:space-y-0 list-disc pl-4">
+                         {extractBulletLines(item.summary).map((b, i) => (
+                           <li key={i}>{b}</li>
+                         ))}
+                       </ul>
+                     )}
                   </div>
-                  {item.summary && (
-                    <ul className="text-gray-600 space-y-1 text-sm print:text-xs print:space-y-0.5 list-disc pl-5">
-                      {extractBulletLines(item.summary).map((b, i) => (
-                        <li key={i}>{b}</li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
               );
             })}
-            {experienceMore > 0 && <div className="text-xs text-gray-500">+{experienceMore} more</div>}
-          </div>
-        </section>
+                {experienceMore > 0 && <div className="text-xs text-gray-500">+{experienceMore} more</div>}
+              </div>
+            </section>
       );
     }
     case "projects": {
@@ -304,51 +303,51 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
         <section key="projects" className="mb-4 md:mb-6 print:mb-3">
           <SectionTitle>
             <div className="w-4 h-4 sm:w-5 sm:h-5 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full print:w-4 print:h-4"></div>
-            Featured Projects
+                Featured Projects
           </SectionTitle>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 print:gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 print:gap-3">
             {projectItems.map((proj: any, idx: number) => (
-              <div
-                key={proj.id || idx}
-                className={`p-4 rounded-lg border print:p-3 ${idx % 2 === 0 ? "bg-gradient-to-br from-blue-50 to-purple-50 border-blue-100" : "bg-gradient-to-br from-green-50 to-teal-50 border-green-100"}`}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <h3 className="text-base font-semibold text-gray-800 mb-2 print:text-sm print:mb-1">{proj.name}</h3>
-                  {getHref(proj.url) && (
-                    <a
-                      href={getHref(proj.url)}
-                      target="_blank"
-                      rel="noreferrer noopener"
-                      className="inline-flex items-center gap-1.5 text-xs text-blue-700 bg-blue-100 px-2 py-1 rounded-full"
-                    >
+                  <div
+                    key={proj.id || idx}
+                    className={`p-4 rounded-lg border print:p-3 ${idx % 2 === 0 ? "bg-gradient-to-br from-blue-50 to-purple-50 border-blue-100" : "bg-gradient-to-br from-green-50 to-teal-50 border-green-100"}`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <h3 className="text-base font-semibold text-gray-800 mb-2 print:text-sm print:mb-1">{proj.name}</h3>
+                      {getHref(proj.url) && (
+                        <a
+                          href={getHref(proj.url)}
+                          target="_blank"
+                          rel="noreferrer noopener"
+                          className="inline-flex items-center gap-1.5 text-xs text-blue-700 bg-blue-100 px-2 py-1 rounded-full"
+                        >
                       {isGitHubUrl(proj.url) ? <Github className="w-3.5 h-3.5" /> : <ExternalLink className="w-3.5 h-3.5" />}
-                      <span>{isGitHubUrl(proj.url) ? "GitHub" : "Live"}</span>
-                    </a>
-                  )}
-                </div>
-                {proj.summary && (
-                  <div className="text-gray-600 text-sm mb-3 print:text-xs print:mb-2 wysiwyg" dangerouslySetInnerHTML={{ __html: sanitize(proj.summary) }} />
-                )}
-                {!proj.summary && proj.description && (
-                  <p className="text-gray-600 text-sm mb-3 print:text-xs print:mb-2">{proj.description}</p>
-                )}
-                {Array.isArray(proj.keywords) && proj.keywords.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
+                          <span>{isGitHubUrl(proj.url) ? "GitHub" : "Live"}</span>
+                        </a>
+                      )}
+                    </div>
+                    {proj.summary && (
+                      <div className="text-gray-600 text-sm mb-3 print:text-xs print:mb-2 wysiwyg" dangerouslySetInnerHTML={{ __html: sanitize(proj.summary) }} />
+                    )}
+                    {!proj.summary && proj.description && (
+                      <p className="text-gray-600 text-sm mb-3 print:text-xs print:mb-2">{proj.description}</p>
+                    )}
+                    {Array.isArray(proj.keywords) && proj.keywords.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
                     {proj.keywords.slice(0, MAX_KEYWORDS_PER_SKILL).map((k: string, i: number) => (
-                      <span key={i} className={`px-2 py-1 text-xs rounded-full ${idx % 2 === 0 ? "bg-blue-100 text-blue-700" : "bg-green-100 text-green-700"}`}>
-                        {k}
-                      </span>
-                    ))}
-                    {proj.keywords.length > MAX_KEYWORDS_PER_SKILL && (
-                      <span className={`px-2 py-1 text-xs rounded-full ${idx % 2 === 0 ? "bg-blue-100 text-blue-700" : "bg-green-100 text-green-700"}`}>+{proj.keywords.length - MAX_KEYWORDS_PER_SKILL} more</span>
+                          <span key={i} className={`px-2 py-1 text-xs rounded-full ${idx % 2 === 0 ? "bg-blue-100 text-blue-700" : "bg-green-100 text-green-700"}`}>
+                            {k}
+                          </span>
+                        ))}
+                        {proj.keywords.length > MAX_KEYWORDS_PER_SKILL && (
+                          <span className={`px-2 py-1 text-xs rounded-full ${idx % 2 === 0 ? "bg-blue-100 text-blue-700" : "bg-green-100 text-green-700"}`}>+{proj.keywords.length - MAX_KEYWORDS_PER_SKILL} more</span>
+                        )}
+                      </div>
                     )}
                   </div>
-                )}
+                ))}
               </div>
-            ))}
-          </div>
-          {projectMore > 0 && <div className="text-xs text-gray-500 mt-2">+{projectMore} more</div>}
-        </section>
+              {projectMore > 0 && <div className="text-xs text-gray-500 mt-2">+{projectMore} more</div>}
+            </section>
       );
     }
     case "education": {
@@ -372,7 +371,7 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
                 {ed.honors && <p className="text-gray-600 text-xs">{ed.honors}</p>}
               </div>
             ))}
-          </div>
+        </div>
           {educationMore > 0 && <div className="text-xs text-gray-500 mt-2">+{educationMore} more</div>}
         </section>
       );
@@ -385,28 +384,28 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
         <section key="skills" className="mb-4 md:mb-6 print:mb-3">
           <SectionTitle>
             <AwardIcon className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500 print:w-4 print:h-4" />
-            Skills
+                Skills
           </SectionTitle>
-          <div className="space-y-3 print:space-y-2">
+              <div className="space-y-3 print:space-y-2">
             {skillGroups.map((skill: any, idx: number) => (
-              <div key={skill.id || idx}>
-                <h3 className="font-semibold text-gray-700 mb-2 text-sm print:text-xs print:mb-1">{skill.name}</h3>
-                {Array.isArray(skill.keywords) && skill.keywords.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5">
+                  <div key={skill.id || idx}>
+                    <h3 className="font-semibold text-gray-700 mb-2 text-sm print:text-xs print:mb-1">{skill.name}</h3>
+                    {Array.isArray(skill.keywords) && skill.keywords.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
                     {skill.keywords.slice(0, MAX_KEYWORDS_PER_SKILL).map((kw: string, i: number) => (
-                      <span key={i} className={`px-2 py-1 text-xs rounded-full ${idx % 2 === 0 ? "bg-blue-100 text-blue-700" : "bg-purple-100 text-purple-700"}`}>{kw}</span>
-                    ))}
-                    {skill.keywords.length > MAX_KEYWORDS_PER_SKILL && (
-                      <span className={`px-2 py-1 text-xs rounded-full ${idx % 2 === 0 ? "bg-blue-100 text-blue-700" : "bg-purple-100 text-purple-700"}`}>+{skill.keywords.length - MAX_KEYWORDS_PER_SKILL} more</span>
+                          <span key={i} className={`px-2 py-1 text-xs rounded-full ${idx % 2 === 0 ? "bg-blue-100 text-blue-700" : "bg-purple-100 text-purple-700"}`}>{kw}</span>
+                        ))}
+                        {skill.keywords.length > MAX_KEYWORDS_PER_SKILL && (
+                          <span className={`px-2 py-1 text-xs rounded-full ${idx % 2 === 0 ? "bg-blue-100 text-blue-700" : "bg-purple-100 text-purple-700"}`}>+{skill.keywords.length - MAX_KEYWORDS_PER_SKILL} more</span>
+                        )}
+                      </div>
                     )}
+                    {skill.description && <p className="text-xs text-gray-600 mt-1">{skill.description}</p>}
                   </div>
-                )}
-                {skill.description && <p className="text-xs text-gray-600 mt-1">{skill.description}</p>}
+                ))}
+                {skillsMore > 0 && <div className="text-xs text-gray-500">+{skillsMore} more</div>}
               </div>
-            ))}
-            {skillsMore > 0 && <div className="text-xs text-gray-500">+{skillsMore} more</div>}
-          </div>
-        </section>
+            </section>
       );
     }
     case "languages": {
@@ -421,11 +420,11 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
               <div key={lng.id || idx} className="flex justify-between items-center">
                 <span className="text-gray-700 text-sm print:text-xs">{lng.name}</span>
                 <span className="text-xs text-gray-500">{levelToLabel((lng as any).level, lng.description)}</span>
-              </div>
-            ))}
+                  </div>
+                ))}
             {languageMore > 0 && <div className="text-xs text-gray-500">+{languageMore} more</div>}
-          </div>
-        </section>
+              </div>
+            </section>
       );
     }
     case "interests": {
@@ -456,22 +455,22 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
         <section key="achievements" className="mb-4 md:mb-6 print:mb-3">
           <SectionTitle>
             <Briefcase className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500 print:w-4 print:h-4" />
-            Achievements
+                Achievements
           </SectionTitle>
-          <div className="space-y-2 print:space-y-1">
+              <div className="space-y-2 print:space-y-1">
             {achievementsItems.map((entry: any, idx: number) => (
-              <div key={(entry.value as any).id || idx} className="flex items-start gap-2">
-                <div className={`w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 ${idx % 4 === 0 ? "bg-orange-500" : idx % 4 === 1 ? "bg-blue-500" : idx % 4 === 2 ? "bg-purple-500" : "bg-green-500"}`} />
-                {entry.type === "award" ? (
-                  <p className="text-gray-600 text-xs">{[entry.value.title, entry.value.awarder, entry.value.date].filter(Boolean).join(" • ")}</p>
-                ) : (
-                  <p className="text-gray-600 text-xs">{[entry.value.name, entry.value.issuer, entry.value.date].filter(Boolean).join(" • ")}</p>
-                )}
+                  <div key={(entry.value as any).id || idx} className="flex items-start gap-2">
+                    <div className={`w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 ${idx % 4 === 0 ? "bg-orange-500" : idx % 4 === 1 ? "bg-blue-500" : idx % 4 === 2 ? "bg-purple-500" : "bg-green-500"}`} />
+                    {entry.type === "award" ? (
+                      <p className="text-gray-600 text-xs">{[entry.value.title, entry.value.awarder, entry.value.date].filter(Boolean).join(" • ")}</p>
+                    ) : (
+                      <p className="text-gray-600 text-xs">{[entry.value.name, entry.value.issuer, entry.value.date].filter(Boolean).join(" • ")}</p>
+                    )}
+                  </div>
+                ))}
+                {achievementsMore > 0 && <div className="text-xs text-gray-500">+{achievementsMore} more</div>}
               </div>
-            ))}
-            {achievementsMore > 0 && <div className="text-xs text-gray-500">+{achievementsMore} more</div>}
-          </div>
-        </section>
+            </section>
       );
     }
     case "certifications": {
@@ -573,9 +572,9 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
               {Object.entries(item).map(([key, value]) => (
                 <div key={key} className="mb-1">
                   <strong className="text-gray-800">{key}:</strong> {String(value)}
-                </div>
-              ))}
-            </div>
+                  </div>
+                ))}
+              </div>
           )}
         </Section>
       );
@@ -588,18 +587,24 @@ export const Ditto = ({ columns, isFirstPage = false, resumeData: resumeDataProp
   const resumeData = resumeDataProp ?? resumeDataFromStore;
   const [main = [], sidebar = []] = columns;
 
-  const mainSections = ["experience", "projects"];
-  const sidebarSections = ["education", "skills", "languages", "certifications", "interests"];
+  const mainSections = ["projects"];
+  const sidebarSections = ["skills", "languages", "certifications", "interests"];
 
   return (
     <div className="w-full max-w-6xl mx-auto bg-white shadow-xl print:shadow-none print:w-full print:max-w-none rounded-lg overflow-hidden min-h-screen">
       {isFirstPage && <Header resumeData={resumeData} />}
 
-      <div className="p-4 md:p-6 print:p-4">
-        {/* About Me Section - Right below header */}
-        {mapSectionToComponent("summary", resumeData)}
-        
-        <div className="grid gap-4 md:gap-6 print:gap-3 grid-cols-1 lg:grid-cols-3">
+             <div className="p-4 md:p-6 print:p-4">
+         {/* About Me Section - Right below header */}
+         {mapSectionToComponent("summary", resumeData)}
+         
+                   {/* Experience Section - Right after About Me */}
+          {mapSectionToComponent("experience", resumeData)}
+          
+          {/* Education Section - Right after Experience */}
+          {mapSectionToComponent("education", resumeData)}
+          
+          <div className="grid gap-4 md:gap-6 print:gap-3 grid-cols-1 lg:grid-cols-3">
           {/* Sidebar */}
           <aside className="lg:col-span-1 space-y-4 md:space-y-6 print:space-y-3">
             {(sidebar.length > 0 ? sidebar : sidebarSections).map((section: string) => (
