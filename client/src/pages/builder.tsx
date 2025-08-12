@@ -363,31 +363,59 @@ function mapTopLevelToSections(resumeData: any) {
 
 export default function Builder() {
   const { id } = useParams<{ id: string }>();
-  const [location] = useLocation();
+  const [templateParam, setTemplateParam]  = useState("");
+
+
+
+
+
+
+useEffect(()=>{
+  const fullUrl = window.location.href;
+console.log("Full URL:", fullUrl);
+
+// Get query params
+const params = new URLSearchParams(window.location.search);
+const templateParamdev = params.get("template");
+  setTemplateParam(templateParamdev)
+console.log("templateParam:", templateParam);
+},[window.location.href])
   
-  // Parse URL search parameters
-  const urlParams = new URLSearchParams(location.split('?')[1] || '');
-  const templateParam = urlParams.get('template');
-  const sourceParam = urlParams.get('source');
+  // Debug logging
   
   const [resumeData, setResumeData] = useState<ResumeData>(() => {
-    // Load from localStorage if available
+    // If URL has template parameter, it takes precedence
+    console.log(templateParam, "template")
+    if (templateParam) {
+      console.log('Template parameter found, using:', templateParam);
+      const saved = localStorage.getItem('resume_builder_data');
+      if (saved) {
+        try {
+          const parsedData = JSON.parse(saved);
+          return { ...parsedData, template: templateParam };
+        } catch {
+          console.log('Error parsing saved data, using initial data with template param');
+          return { ...initialResumeData, template: templateParam };
+        }
+      }
+      console.log('No saved data, using initial data with template param');
+      return { ...initialResumeData, template: templateParam };
+    }
+    
+    // Load from localStorage if available (no template parameter)
     const saved = localStorage.getItem('resume_builder_data');
-   
     if (saved) {
       try {
         const parsedData = JSON.parse(saved);
-                 // If URL has template parameter, use that template
-         if (templateParam) {
-           return { ...parsedData, template: templateParam };
-         }
-         // If no template, default to azurill
-         return { ...parsedData, template: parsedData.template || 'azurill' };
-       } catch {
-         return { ...initialResumeData, template: templateParam || 'azurill' };
-       }
-     }
-     return { ...initialResumeData, template: templateParam || 'azurill' };
+        console.log('Using existing template from localStorage:', parsedData.template || 'azurill');
+        return { ...parsedData, template: parsedData.template || 'azurill' };
+      } catch {
+        console.log('Error parsing saved data, using default template');
+        return { ...initialResumeData, template: 'azurill' };
+      }
+    }
+    console.log('No saved data, using default template');
+    return { ...initialResumeData, template: 'azurill' };
   });
   
   const [title, setTitle] = useState(() => {
@@ -412,14 +440,19 @@ export default function Builder() {
 
   // Load template data when template parameter changes
   useEffect(() => {
-    if (templateParam && sourceParam) {
+    console.log('Template effect triggered:', { templateParam });
+    if (templateParam ) {
       const selectedTemplate = getTemplateById(templateParam);
+      console.log('Selected template:', selectedTemplate);
       if (selectedTemplate) {
         // Show notification about template selection
         toast({
           title: "Template Selected",
-          description: `${selectedTemplate.name} template loaded successfully!`,
+          description: `${selectedTemplate.name} template loaded successfully! You can now start building your resume.`,
         });
+        
+        // Update the resume data to ensure template is set
+        setResumeData(prev => ({ ...prev, template: templateParam }));
         
         // If it's a reactive-resume template, try to load template data
         if (selectedTemplate.isReactiveResume) {
@@ -432,15 +465,23 @@ export default function Builder() {
             console.warn('Could not load template data:', error);
           });
         }
+      } else {
+        console.warn('Template not found:', templateParam);
+        toast({
+          title: "Template Not Found",
+          description: `Template "${templateParam}" not found. Using default template.`,
+          variant: "destructive",
+        });
       }
     }
-  }, [templateParam, sourceParam, toast]);
+  }, [templateParam, toast, setResumeData]);
 
   // Fetch existing resume if editing
   const { data: existingResume, isLoading } = useQuery<Resume>({
     queryKey: ["/api/resumes", id],
     enabled: !!id,
   });
+
 
   // Check for and restore pending resume data after login
   useEffect(() => {
@@ -707,6 +748,7 @@ export default function Builder() {
                    <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold text-foreground dark:text-white">Live Preview</h2>
                    <div className="flex items-center space-x-2">
                      <span className="text-xs sm:text-sm text-muted-foreground dark:text-slate-400">Template:</span>
+                    
                      <Select
                        value={resumeData.template}
                        onValueChange={(value) => {

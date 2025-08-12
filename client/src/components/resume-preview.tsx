@@ -20,6 +20,9 @@ interface ResumePreviewProps {
 export function ResumePreview({ resumeData }: ResumePreviewProps) {
   const { template } = resumeData;
   
+  // Debug logging
+  console.log('ResumePreview - Template:', template, 'ResumeData:', resumeData);
+  
   const artboardResume = useArtboardStore((state) => state.resume);
   const setArtboardResume = useArtboardStore((state) => state.setResume);
 
