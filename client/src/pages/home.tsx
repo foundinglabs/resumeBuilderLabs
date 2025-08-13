@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, FileText, Palette, Sparkles, Edit, Check, Target, Star, Moon, Sun } from "lucide-react";
+import { Eye, FileText, Palette, Sparkles, Edit, Check, Target, Star, Moon, Sun, Menu, X } from "lucide-react";
 import { allTemplates, getCustomTemplates, getReactiveResumeTemplates, getTemplatePreviewUrl } from "@/utils/template-integration";
 import { LoginSignupButton } from "@/components/LoginSignupButton";
 import AnimatedResume from "@/components/AnimatedResume";
@@ -191,6 +191,8 @@ function useScrollOverflowMask(scrollXProgress: MotionValue<number>) {
 
 
 export default function Home() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
   // Add styles for template preview normalization
   useEffect(() => {
     const style = document.createElement('style');
@@ -304,81 +306,88 @@ export default function Home() {
         ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900' 
         : 'bg-[#F8F9FA]'
     } text-foreground`}>
+      {/* Mobile Menu Overlay */}
+      {mobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/20 z-40 md:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
       {/* Navigation */}
-                    <motion.nav 
-          className={`fixed top-0 w-full z-50 border-b transition-all duration-300 backdrop-blur-md ${
-            isDarkMode 
-              ? 'bg-gradient-to-r from-[#0D1B2A] to-[#1B263B]/95 border-white/10' 
-              : 'bg-white/95 border-[#E5E7EB]'
-          } ${isScrolled ? 'shadow-lg' : ''}`}
-         initial={{ y: -50, opacity: 0 }}
-         animate={{ y: 0, opacity: 1 }}
-         transition={{ 
-           duration: 0.6, 
-           ease: "easeOut",
-           type: "spring",
-           stiffness: 120,
-           damping: 25
-         }}
-       >
+      <motion.nav 
+        className={`fixed top-0 w-full z-50 border-b transition-all duration-300 backdrop-blur-md ${
+          isDarkMode 
+            ? 'bg-gradient-to-r from-[#0D1B2A] to-[#1B263B]/95 border-white/10' 
+            : 'bg-white/95 border-[#E5E7EB]'
+        } ${isScrolled ? 'shadow-lg' : ''}`}
+        initial={{ y: -50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ 
+          duration: 0.6, 
+          ease: "easeOut",
+          type: "spring",
+          stiffness: 120,
+          damping: 25
+        }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo Section */}
-                         <motion.div 
-               className="flex items-center"
-               initial={{ x: -30, opacity: 0 }}
-               animate={{ x: 0, opacity: 1 }}
-               transition={{ 
-                 duration: 0.5, 
-                 delay: 0.1,
-                 ease: "easeOut"
-               }}
-             >
-               <motion.div
-                 initial={{ scale: 0, rotate: -90 }}
-                 animate={{ scale: 1, rotate: 0 }}
-                 transition={{ 
-                   duration: 0.4, 
-                   delay: 0.2,
-                   type: "spring",
-                   stiffness: 150
-                 }}
-               >
-                                  <FileText className={`h-8 w-8 mr-3 ${isDarkMode ? 'text-[#3B82F6]' : 'text-[#3B82F6]'}`} />
-               </motion.div>
-                                              <motion.span 
-                  className={`text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-[#1A1A1A]'}`}
-                 initial={{ opacity: 0 }}
-                 animate={{ opacity: 1 }}
-                 transition={{ 
-                   duration: 0.4, 
-                   delay: 0.3
-                 }}
-               >
-                 ResumeBuilder
-               </motion.span>
-             </motion.div>
+            <motion.div 
+              className="flex items-center"
+              initial={{ x: -30, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ 
+                duration: 0.5, 
+                delay: 0.1,
+                ease: "easeOut"
+              }}
+            >
+              <motion.div
+                initial={{ scale: 0, rotate: -90 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ 
+                  duration: 0.4, 
+                  delay: 0.2,
+                  type: "spring",
+                  stiffness: 150
+                }}
+              >
+                <FileText className={`h-8 w-8 mr-3 ${isDarkMode ? 'text-[#3B82F6]' : 'text-[#3B82F6]'}`} />
+              </motion.div>
+              <motion.span 
+                className={`text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-[#1A1A1A]'}`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ 
+                  duration: 0.4, 
+                  delay: 0.3
+                }}
+              >
+                ResumeBuilder
+              </motion.span>
+            </motion.div>
             
-            {/* Navigation Links */}
+            {/* Desktop Navigation - Hidden on mobile */}
             <div className="hidden md:flex items-center space-x-8">
               {/* Templates Link */}
-                             <motion.a 
-                 href="#templates" 
-                 className={`relative transition-colors duration-200 ${
-                   isActiveLink('templates') 
-                     ? isDarkMode ? 'text-white font-semibold' : 'text-[#1A1A1A] font-semibold'
-                     : isDarkMode ? 'text-[#CBD5E1] hover:text-[#60A5FA]' : 'text-[#4B5563] hover:text-[#3B82F6]'
-                 }`}
-                 initial={{ y: -15, opacity: 0 }}
-                 animate={{ y: 0, opacity: 1 }}
-                 transition={{ 
-                   duration: 0.4, 
-                   delay: 0.4,
-                   ease: "easeOut"
-                 }}
-                 whileHover={{ scale: 1.02 }}
-                 whileTap={{ scale: 0.98 }}
-               >
+              <motion.a 
+                href="#templates" 
+                className={`relative transition-colors duration-200 ${
+                  isActiveLink('templates') 
+                    ? isDarkMode ? 'text-white font-semibold' : 'text-[#1A1A1A] font-semibold'
+                    : isDarkMode ? 'text-[#CBD5E1] hover:text-[#60A5FA]' : 'text-[#4B5563] hover:text-[#3B82F6]'
+                }`}
+                initial={{ y: -15, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ 
+                  duration: 0.4, 
+                  delay: 0.4,
+                  ease: "easeOut"
+                }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
                 Templates
                 {isActiveLink('templates') && (
                   <motion.div
@@ -393,80 +402,180 @@ export default function Home() {
               
               {/* ATS Analysis Link */}
               <Link href="/ats-analysis">
-                                 <motion.a 
-                   className={`transition-colors ${isDarkMode ? 'text-[#CBD5E1] hover:text-[#60A5FA]' : 'text-[#4B5563] hover:text-[#3B82F6]'}`}
-                   initial={{ y: -15, opacity: 0 }}
-                   animate={{ y: 0, opacity: 1 }}
-                   transition={{ 
-                     duration: 0.4, 
-                     delay: 0.5,
-                     ease: "easeOut"
-                   }}
-                   whileHover={{ scale: 1.02 }}
-                   whileTap={{ scale: 0.98 }}
-                 >
-                ATS Analysis
+                <motion.a 
+                  className={`transition-colors ${isDarkMode ? 'text-[#CBD5E1] hover:text-[#60A5FA]' : 'text-[#4B5563] hover:text-[#3B82F6]'}`}
+                  initial={{ y: -15, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ 
+                    duration: 0.4, 
+                    delay: 0.5,
+                    ease: "easeOut"
+                  }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  ATS Analysis
                 </motion.a>
               </Link>
               
               {/* Theme Toggle */}
-                             <motion.div
-                 initial={{ scale: 0, rotate: -90 }}
-                 animate={{ scale: 1, rotate: 0 }}
-                 transition={{ 
-                   duration: 0.4, 
-                   delay: 0.6,
-                   type: "spring",
-                   stiffness: 150
-                 }}
-               >
-                 <ThemeToggle />
-                 </motion.div>
+              <motion.div
+                initial={{ scale: 0, rotate: -90 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ 
+                  duration: 0.4, 
+                  delay: 0.6,
+                  type: "spring",
+                  stiffness: 150
+                }}
+              >
+                <ThemeToggle />
+              </motion.div>
               
               {/* Login/Signup Button */}
-                             <motion.div
-                 initial={{ y: -15, opacity: 0 }}
-                 animate={{ y: 0, opacity: 1 }}
-                 transition={{ 
-                   duration: 0.4, 
-                   delay: 0.7,
-                   ease: "easeOut"
-                 }}
-               >
-               <LoginSignupButton />
-               </motion.div>
+              <motion.div
+                initial={{ y: -15, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ 
+                  duration: 0.4, 
+                  delay: 0.7,
+                  ease: "easeOut"
+                }}
+              >
+                <LoginSignupButton />
+              </motion.div>
               
               {/* Start Building Button */}
               <Link href="/builder">
-                                 <motion.div
-                   initial={{ y: -15, opacity: 0 }}
-                   animate={{ y: 0, opacity: 1 }}
-                   transition={{ 
-                     duration: 0.4, 
-                     delay: 0.8,
-                     ease: "easeOut"
-                   }}
-                   whileHover={{ 
-                     scale: 1.02,
-                     y: -1
-                   }}
-                   whileTap={{ scale: 0.98 }}
-                 >
-                                                                                                                                       <Button 
-                       className={`bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-lg hover:shadow-[0_4px_12px_rgba(0,0,0,0.15)] transition-all duration-300 border-0 rounded-[10px]`}
-                  onClick={() => {
-                    // Clear any URL hash before navigation
-                    if (window.location.hash) {
-                      window.history.replaceState(null, '', window.location.pathname);
-                    }
+                <motion.div
+                  initial={{ y: -15, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ 
+                    duration: 0.4, 
+                    delay: 0.8,
+                    ease: "easeOut"
                   }}
+                  whileHover={{ 
+                    scale: 1.02,
+                    y: -1
+                  }}
+                  whileTap={{ scale: 0.98 }}
                 >
-                  Start Building
-                </Button>
+                  <Button 
+                    className={`bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-lg hover:shadow-[0_4px_12px_rgba(0,0,0,0.15)] transition-all duration-300 border-0 rounded-[10px]`}
+                    onClick={() => {
+                      // Clear any URL hash before navigation
+                      if (window.location.hash) {
+                        window.history.replaceState(null, '', window.location.pathname);
+                      }
+                    }}
+                  >
+                    Start Building
+                  </Button>
                 </motion.div>
               </Link>
             </div>
+            
+            {/* Mobile Menu Button */}
+            <motion.div
+              className="md:hidden"
+              initial={{ scale: 0, rotate: 90 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ 
+                duration: 0.4, 
+                delay: 0.6,
+                type: "spring",
+                stiffness: 150
+              }}
+            >
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className={`p-2 ${isDarkMode ? 'text-white hover:bg-white/10' : 'text-[#1A1A1A] hover:bg-gray-100'}`}
+              >
+                {mobileMenuOpen ? (
+                  <X className="h-5 w-5" />
+                ) : (
+                  <Menu className="h-5 w-5" />
+                )}
+              </Button>
+            </motion.div>
           </div>
+          
+          {/* Mobile Menu Dropdown */}
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="md:hidden border-t border-[#E5E7EB] dark:border-white/10 bg-white/95 dark:bg-[#0D1B2A]/95 backdrop-blur-md"
+            >
+              <div className="py-4 px-4 space-y-4">
+                {/* Mobile Navigation Links */}
+                <div className="space-y-3">
+                  {/* Templates Link */}
+                  <motion.a 
+                    href="#templates" 
+                    className={`block py-3 px-4 rounded-lg transition-colors duration-200 ${
+                      isActiveLink('templates') 
+                        ? isDarkMode ? 'bg-white/10 text-white font-semibold' : 'bg-[#3B82F6]/10 text-[#3B82F6] font-semibold'
+                        : isDarkMode ? 'text-[#CBD5E1] hover:bg-white/10 hover:text-white' : 'text-[#4B5563] hover:bg-[#3B82F6]/10 hover:text-[#3B82F6]'
+                    }`}
+                    onClick={() => setMobileMenuOpen(false)}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Templates
+                  </motion.a>
+                  
+                  {/* ATS Analysis Link */}
+                  <Link href="/ats-analysis">
+                    <motion.a 
+                      className={`block py-3 px-4 rounded-lg transition-colors duration-200 ${
+                        isDarkMode ? 'text-[#CBD5E1] hover:bg-white/10 hover:text-white' : 'text-[#4B5563] hover:bg-[#3B82F6]/10 hover:text-[#3B82F6]'
+                      }`}
+                      onClick={() => setMobileMenuOpen(false)}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      ATS Analysis
+                    </motion.a>
+                  </Link>
+                </div>
+                
+                {/* Mobile Action Buttons */}
+                <div className="space-y-3 pt-4 border-t border-[#E5E7EB] dark:border-white/10">
+                  {/* Theme Toggle */}
+                  <div className="flex justify-center">
+                    <ThemeToggle />
+                  </div>
+                  
+                  {/* Login/Signup Button */}
+                  <div className="flex justify-center">
+                    <LoginSignupButton />
+                  </div>
+                  
+                  {/* Start Building Button */}
+                  <Link href="/builder" className="block">
+                    <Button 
+                      className="w-full bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-lg hover:shadow-[0_4px_12px_rgba(0,0,0,0.15)] transition-all duration-300 border-0 rounded-[10px]"
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        // Clear any URL hash before navigation
+                        if (window.location.hash) {
+                          window.history.replaceState(null, '', window.location.pathname);
+                        }
+                      }}
+                    >
+                      Start Building Resume
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </motion.div>
+          )}
         </div>
       </motion.nav>
 
