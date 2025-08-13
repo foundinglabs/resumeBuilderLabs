@@ -319,9 +319,9 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
                   </div>
               );
             })}
-                {experienceMore > 0 && <div className="text-xs text-gray-500">+{experienceMore} more</div>}
-              </div>
-            </section>
+          </div>
+          {experienceMore > 0 && <div className="text-xs text-gray-500"></div>}
+        </section>
       );
     }
     case "projects": {
@@ -363,19 +363,22 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
                     {Array.isArray(proj.keywords) && proj.keywords.length > 0 && (
                       <div className="flex flex-wrap gap-2">
                     {proj.keywords.slice(0, MAX_KEYWORDS_PER_SKILL).map((k: string, i: number) => (
-                          <span key={i} className={`px-2 py-1 text-xs rounded-full ${idx % 2 === 0 ? "bg-blue-100 text-blue-700" : "bg-green-100 text-green-700"}`}>
-                            {k}
-                          </span>
-                        ))}
-                        {proj.keywords.length > MAX_KEYWORDS_PER_SKILL && (
-                          <span className={`px-2 py-1 text-xs rounded-full ${idx % 2 === 0 ? "bg-blue-100 text-blue-700" : "bg-green-100 text-green-700"}`}>+{proj.keywords.length - MAX_KEYWORDS_PER_SKILL} more</span>
-                        )}
+                      <span
+                        key={i}
+                        className="px-1.5 py-0.5 text-xs bg-blue-100 text-blue-700 rounded"
+                      >
+                        {k}
+                      </span>
+                    ))}
+                    {proj.keywords.length > MAX_KEYWORDS_PER_SKILL && (
+                      <span className={`px-1.5 py-0.5 text-xs rounded ${proj.keywords.length > MAX_KEYWORDS_PER_SKILL ? "bg-green-100 text-green-700" : "bg-green-100 text-green-700"}`}></span>
+                    )}
                       </div>
                     )}
                   </div>
                 ))}
               </div>
-              {projectMore > 0 && <div className="text-xs text-gray-500 mt-2">+{projectMore} more</div>}
+              {projectMore > 0 && <div className="text-xs text-gray-500 mt-2"></div>}
             </section>
       );
     }
@@ -401,7 +404,7 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
               </div>
             ))}
         </div>
-          {educationMore > 0 && <div className="text-xs text-gray-500 mt-2">+{educationMore} more</div>}
+          {educationMore > 0 && <div className="text-xs text-gray-500 mt-2"></div>}
         </section>
       );
     }
@@ -425,14 +428,14 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
                           <span key={i} className={`px-2 py-1 text-xs rounded-full ${idx % 2 === 0 ? "bg-blue-100 text-blue-700" : "bg-purple-100 text-purple-700"}`}>{kw}</span>
                         ))}
                         {skill.keywords.length > MAX_KEYWORDS_PER_SKILL && (
-                          <span className={`px-2 py-1 text-xs rounded-full ${idx % 2 === 0 ? "bg-blue-100 text-blue-700" : "bg-purple-100 text-purple-700"}`}>+{skill.keywords.length - MAX_KEYWORDS_PER_SKILL} more</span>
+                          <span className={`px-2 py-1 text-xs rounded-full ${idx % 2 === 0 ? "bg-blue-100 text-blue-700" : "bg-purple-100 text-purple-700"}`}></span>
                         )}
                       </div>
                     )}
                     {skill.description && <p className="text-xs text-gray-600 mt-1">{skill.description}</p>}
                   </div>
                 ))}
-                {skillsMore > 0 && <div className="text-xs text-gray-500">+{skillsMore} more</div>}
+                {skillsMore > 0 && <div className="text-xs text-gray-500"></div>}
               </div>
             </section>
       );
@@ -451,7 +454,7 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
                 <span className="text-xs text-gray-500">{levelToLabel((lng as any).level, lng.description)}</span>
                   </div>
                 ))}
-            {languageMore > 0 && <div className="text-xs text-gray-500">+{languageMore} more</div>}
+            {languageMore > 0 && <div className="text-xs text-gray-500"></div>}
               </div>
             </section>
       );
@@ -497,7 +500,7 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
                     )}
                   </div>
                 ))}
-                {achievementsMore > 0 && <div className="text-xs text-gray-500">+{achievementsMore} more</div>}
+                {achievementsMore > 0 && <div className="text-xs text-gray-500"></div>}
               </div>
             </section>
       );

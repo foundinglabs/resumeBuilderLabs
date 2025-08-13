@@ -569,6 +569,16 @@ console.log("templateParam:", templateParam);
       experience: parsedData.experience?.length ? parsedData.experience : prev.experience,
       education: parsedData.education?.length ? parsedData.education : prev.education,
       skills: parsedData.skills?.length ? parsedData.skills : prev.skills,
+      // Merge projects array properly
+      projects: parsedData.projects?.length ? parsedData.projects : prev.projects,
+      // Merge other arrays properly
+      awards: parsedData.awards?.length ? parsedData.awards : prev.awards,
+      certifications: parsedData.certifications?.length ? parsedData.certifications : prev.certifications,
+      languages: parsedData.languages?.length ? parsedData.languages : prev.languages,
+      volunteerWork: parsedData.volunteerWork?.length ? parsedData.volunteerWork : prev.volunteerWork,
+      internships: parsedData.internships?.length ? parsedData.internships : prev.internships,
+      freelanceWork: parsedData.freelanceWork?.length ? parsedData.freelanceWork : prev.freelanceWork,
+      courses: parsedData.courses?.length ? parsedData.courses : prev.courses,
     }));
     setShowUpload(false);
     toast({

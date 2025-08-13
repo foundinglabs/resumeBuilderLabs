@@ -333,7 +333,7 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
               </div>
             ))}
           </div>
-          {educationMore > 0 && <div className="text-xs text-gray-500 mt-1">+{educationMore} more</div>}
+          {educationMore > 0 && <div className="text-xs text-gray-500 mt-1"></div>}
         </section>
       )
     }
@@ -373,7 +373,7 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
               </div>
             ))}
           </div>
-          {experienceMore > 0 && <div className="text-xs text-gray-500 mt-1">+{experienceMore} more</div>}
+          {experienceMore > 0 && <div className="text-xs text-gray-500 mt-1"></div>}
         </section>
       )
     }
@@ -434,7 +434,7 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
               </div>
             ))}
           </div>
-          {projectMore > 0 && <div className="text-xs text-gray-500 mt-1">+{projectMore} more</div>}
+          {projectMore > 0 && <div className="text-xs text-gray-500 mt-1"></div>}
         </section>
       )
     }
@@ -478,7 +478,7 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
                   {skill.description && <p className="text-xs text-gray-600 mt-1">{skill.description}</p>}
                 </div>
               ))}
-              {skillsMore > 0 && <div className="text-xs text-gray-500">+{skillsMore} more</div>}
+              {skillsMore > 0 && <div className="text-xs text-gray-500"></div>}
             </div>
 
             {/* Languages */}
@@ -560,7 +560,7 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
               </div>
             ))}
           </div>
-          {achievementsMore > 0 && <div className="text-xs text-gray-500 mt-1">+{achievementsMore} more</div>}
+          {achievementsMore > 0 && <div className="text-xs text-gray-500 mt-1"></div>}
         </section>
       )
     }

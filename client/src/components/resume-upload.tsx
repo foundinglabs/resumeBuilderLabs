@@ -205,6 +205,7 @@ export function ResumeUpload({ onParseComplete, onError }: ResumeUploadProps) {
         experience: extractedData.experience,
         education: extractedData.education,
         skills: extractedData.skills,
+        projects: extractedData.projects || [], // Include projects from basic parsing
         template: 'azurill' // Default template
       };
     }

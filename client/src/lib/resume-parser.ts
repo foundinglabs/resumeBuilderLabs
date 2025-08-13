@@ -26,6 +26,13 @@ export interface ParsedResumeData {
     gpa?: string;
   }>;
   skills: string[];
+  projects?: Array<{
+    title: string;
+    description: string;
+    technologies?: string[];
+    link?: string;
+    duration?: string;
+  }>;
   rawText?: string; // Original extracted text for AI processing
 }
 
@@ -404,6 +411,97 @@ function extractSkills(text: string): string[] {
   return skills.slice(0, 15);
 }
 
+// Extract projects
+function extractProjects(text: string): Array<{
+  title: string;
+  description: string;
+  technologies?: string[];
+  link?: string;
+  duration?: string;
+}> {
+  const projectsKeywords = ['projects', 'portfolio', 'achievements', 'personal projects'];
+  const lines = text.split('\n');
+  let projectsStartIndex = -1;
+  
+  // Find the start of projects section
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].toLowerCase().trim();
+    if (projectsKeywords.some(keyword => line.includes(keyword))) {
+      projectsStartIndex = i;
+      break;
+    }
+  }
+  
+  if (projectsStartIndex === -1) return [];
+  
+  const projectsLines = lines.slice(projectsStartIndex + 1);
+  const projects: Array<{
+    title: string;
+    description: string;
+    technologies?: string[];
+    link?: string;
+    duration?: string;
+  }> = [];
+  
+  let currentProject: any = null;
+  
+  for (const line of projectsLines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    
+    // Stop if we hit another section
+    const sectionKeywords = ['skills', 'certifications', 'awards', 'references', 'education', 'experience'];
+    if (sectionKeywords.some(keyword => trimmed.toLowerCase().includes(keyword))) {
+      break;
+    }
+    
+    // Look for project title patterns (usually starts with capital letters and ends with colon or dash)
+    const titleMatch = trimmed.match(/^([A-Z][A-Za-z\s]+?)[:|\-]/);
+    if (titleMatch) {
+      // Save previous project if exists
+      if (currentProject && currentProject.title) {
+        projects.push(currentProject);
+      }
+      
+      // Start new project
+      currentProject = {
+        title: titleMatch[1].trim(),
+        description: '',
+        technologies: [],
+        link: '',
+        duration: ''
+      };
+    } else if (currentProject) {
+      // Add to current project description
+      if (currentProject.description) {
+        currentProject.description += ' ' + trimmed;
+      } else {
+        currentProject.description = trimmed;
+      }
+      
+      // Look for technologies in the line
+      const techKeywords = ['javascript', 'python', 'react', 'node', 'html', 'css', 'java', 'c++', 'sql', 'mongodb', 'aws', 'docker'];
+      const foundTechs = techKeywords.filter(tech => trimmed.toLowerCase().includes(tech));
+      if (foundTechs.length > 0) {
+        currentProject.technologies = [...(currentProject.technologies || []), ...foundTechs];
+      }
+      
+      // Look for links
+      const linkMatch = trimmed.match(/(https?:\/\/[^\s]+)/);
+      if (linkMatch && !currentProject.link) {
+        currentProject.link = linkMatch[1];
+      }
+    }
+  }
+  
+  // Add the last project if exists
+  if (currentProject && currentProject.title) {
+    projects.push(currentProject);
+  }
+  
+  return projects.slice(0, 5); // Limit to 5 projects
+}
+
 // Main parsing function
 export async function parseResumeFile(file: File): Promise<ParsedResumeData> {
   let text = '';
@@ -428,6 +526,7 @@ export async function parseResumeFile(file: File): Promise<ParsedResumeData> {
   const experience = extractExperience(text);
   const education = extractEducation(text);
   const skills = extractSkills(text);
+  const projects = extractProjects(text);
   
   return {
     personalInfo: {
@@ -440,6 +539,7 @@ export async function parseResumeFile(file: File): Promise<ParsedResumeData> {
     experience,
     education,
     skills,
+    projects,
     rawText: text // Include raw text for AI processing
   };
 }
