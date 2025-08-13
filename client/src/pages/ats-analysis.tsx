@@ -14,6 +14,7 @@ import { LoginSignupButton } from '@/components/LoginSignupButton';
 import { processFile, validateFile, type FileProcessingResult } from '@/lib/file-processing';
 import { refineResumeWithGemini, type RefinedResumeData } from '@/lib/gemini-api';
 import Footer from "@/components/Footer";
+import { useTheme } from '@/hooks/useTheme';
 
 interface ATSScore {
   overall: number;
@@ -227,6 +228,8 @@ const calculateJobMatchScore = (analysis: JobMatchAnalysis): number => {
 };
 
 export default function ATSAnalysis() {
+  const { resolvedTheme } = useTheme();
+  const isDarkMode = resolvedTheme === 'dark';
   const [isDragging, setIsDragging] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -909,26 +912,50 @@ export default function ATSAnalysis() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30 dark:from-background dark:via-background dark:to-muted/20">
+    <div className={`min-h-screen ${
+      isDarkMode 
+        ? 'bg-gradient-to-br from-[#0D1B2A] via-[#1B263B] to-[#0D1B2A]' 
+        : 'bg-gradient-to-br from-white via-gray-50 to-white'
+    }`}>
       <div className="container mx-auto px-4 py-8">
         {/* Navigation */}
-        <nav className="fixed top-0 w-full bg-background/95 backdrop-blur-md z-50 border-b border-border dark:bg-background/90">
+        <nav className={`fixed top-0 w-full backdrop-blur-md z-50 border-b ${
+          isDarkMode 
+            ? 'bg-[#0D1B2A]/95 border-white/10' 
+            : 'bg-white/95 border-gray-200'
+        }`}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               <div className="flex items-center">
                 <Link href="/">
-                  <Button variant="ghost" className="flex items-center text-muted-foreground hover:text-primary text-base font-medium dark:text-muted-foreground/90 dark:hover:text-primary/90">
+                  <Button variant="ghost" className={`flex items-center text-base font-medium ${
+                    isDarkMode 
+                      ? 'text-[#CBD5E1] hover:text-[#60A5FA]' 
+                      : 'text-[#334155] hover:text-[#2DD4BF]'
+                  }`}>
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Back to Home
                   </Button>
                 </Link>
               </div>
               <div className="hidden md:flex items-center space-x-8">
-                <Link href="/builder" className="text-muted-foreground hover:text-primary transition-colors dark:text-muted-foreground/90 dark:hover:text-primary/90">Resume Builder</Link>
-                <Link href="/ats-analysis" className="text-muted-foreground hover:text-primary transition-colors dark:text-muted-foreground/90 dark:hover:text-primary/90">ATS Analysis</Link>
+                <Link href="/builder" className={`transition-colors ${
+                  isDarkMode 
+                    ? 'text-[#CBD5E1] hover:text-[#60A5FA]' 
+                    : 'text-[#334155] hover:text-[#2DD4BF]'
+                }`}>Resume Builder</Link>
+                <Link href="/ats-analysis" className={`transition-colors ${
+                  isDarkMode 
+                    ? 'text-white font-semibold' 
+                    : 'text-[#0F172A] font-semibold'
+                }`}>ATS Analysis</Link>
 
                 <LoginSignupButton />
-                <span className="text-muted-foreground hover:text-primary transition-colors cursor-pointer dark:text-muted-foreground/90 dark:hover:text-primary/90">Help</span>
+                <span className={`transition-colors cursor-pointer ${
+                  isDarkMode 
+                    ? 'text-[#CBD5E1] hover:text-[#60A5FA]' 
+                    : 'text-[#334155] hover:text-[#2DD4BF]'
+                }`}>Help</span>
               </div>
             </div>
           </div>
@@ -937,10 +964,16 @@ export default function ATSAnalysis() {
 
         {/* Title Section */}
         <div className="text-center mb-8 animate-fadeInUp">
-          <h1 className="text-4xl font-bold text-foreground mb-4 dark:text-foreground/95 animate-typewriter">
+          <h1 className={`text-4xl font-bold mb-4 animate-typewriter ${
+            isDarkMode 
+              ? 'bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent' 
+              : 'text-[#1E293B]'
+          }`}>
             ATS Resume Analysis
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto dark:text-muted-foreground/90 animate-fadeInUp animation-delay-2000">
+          <p className={`text-lg max-w-2xl mx-auto animate-fadeInUp animation-delay-2000 ${
+            isDarkMode ? 'text-[#CBD5E1]' : 'text-gray-600'
+          }`}>
             Get detailed insights on how well your resume performs with Applicant Tracking Systems (ATS).
             Upload your resume for comprehensive scoring and actionable recommendations.
           </p>
@@ -948,30 +981,44 @@ export default function ATSAnalysis() {
 
         {/* Job Description Input Section */}
         {!analysis && (
-          <Card className="max-w-4xl mx-auto mb-8 border-primary/30 bg-primary/10 dark:border-primary/40 dark:bg-primary/20 animate-fadeInUp">
+          <Card className={`max-w-4xl mx-auto mb-8 animate-fadeInUp ${
+            isDarkMode 
+              ? 'bg-[#1E293B] border-[#3B82F6]/30' 
+              : 'bg-white border-[#14B8A6]/30'
+          }`}>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <Briefcase className="h-5 w-5 text-primary dark:text-primary/90 animate-pulse-slow" />
-                <span className="dark:text-foreground/95">Job Description (Optional but Recommended)</span>
+                <Briefcase className={`h-5 w-5 animate-pulse-slow ${
+                  isDarkMode ? 'text-[#3B82F6]' : 'text-[#14B8A6]'
+                }`} />
+                <span className={isDarkMode ? 'text-white' : 'text-[#1E293B]'}>Job Description (Optional but Recommended)</span>
               </CardTitle>
-              <p className="text-sm text-muted-foreground dark:text-muted-foreground/90">
+              <p className={`text-sm ${
+                isDarkMode ? 'text-[#CBD5E1]' : 'text-gray-600'
+              }`}>
                 Paste the job description you're targeting for personalized ATS analysis and job match scoring.
               </p>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <Label htmlFor="job-description" className="dark:text-foreground/95">Job Description</Label>
+                <Label htmlFor="job-description" className={isDarkMode ? 'text-white' : 'text-[#1E293B]'}>Job Description</Label>
                 <Textarea
                   id="job-description"
                   placeholder="Paste the complete job description here. Include required skills, experience requirements, and responsibilities to get the most accurate job match analysis..."
-                  className="min-h-[120px] resize-none dark:bg-background dark:border-border dark:text-foreground/95"
+                  className={`min-h-[120px] resize-none ${
+                    isDarkMode 
+                      ? 'bg-[#0D1B2A] border-white/20 text-white' 
+                      : 'bg-white border-gray-300 text-[#1E293B]'
+                  }`}
                   value={jobDescription}
                   onChange={(e) => setJobDescription(e.target.value)}
                 />
-                <div className="flex items-center justify-between text-xs text-muted-foreground dark:text-muted-foreground/80">
+                <div className={`flex items-center justify-between text-xs ${
+                  isDarkMode ? 'text-[#94A3B8]' : 'text-gray-500'
+                }`}>
                   <span>{jobDescription.length} characters</span>
                   {jobDescription && (
-                    <span className="text-primary dark:text-primary/90">✓ Job description will be analyzed for keyword matching</span>
+                    <span className={isDarkMode ? 'text-[#3B82F6]' : 'text-[#14B8A6]'}>✓ Job description will be analyzed for keyword matching</span>
                   )}
                 </div>
               </div>
@@ -980,7 +1027,11 @@ export default function ATSAnalysis() {
                   <Button 
                     onClick={handleReanalyze} 
                     disabled={isAnalyzing}
-                    className="w-full dark:bg-primary dark:hover:bg-primary/90"
+                    className={`w-full ${
+                      isDarkMode 
+                        ? 'bg-gradient-to-r from-[#3B82F6] to-[#2563EB] hover:from-[#60A5FA] hover:to-[#3B82F6] text-white' 
+                        : 'bg-gradient-to-r from-[#14B8A6] to-[#0D9488] hover:from-[#2DD4BF] hover:to-[#14B8A6] text-white'
+                    }`}
                   >
                     {isAnalyzing ? (
                       <>
@@ -1002,13 +1053,19 @@ export default function ATSAnalysis() {
 
         {/* Upload Section */}
         {!analysis && (
-          <Card className="max-w-2xl mx-auto mb-6 sm:mb-8 dark:bg-card/50 animate-slideInUp">
+          <Card className={`max-w-2xl mx-auto mb-6 sm:mb-8 animate-slideInUp ${
+            isDarkMode ? 'bg-[#1E293B]' : 'bg-white'
+          }`}>
             <CardContent className="p-4 sm:p-6 lg:p-8">
               <div
                 className={`border-2 border-dashed rounded-lg p-4 sm:p-6 lg:p-8 text-center transition-colors ${
                   isDragging
-                    ? 'border-primary bg-primary/20 dark:bg-primary/30'
-                    : 'border-border hover:border-primary/60 dark:hover:border-primary/50'
+                    ? isDarkMode 
+                      ? 'border-[#3B82F6] bg-[#3B82F6]/20' 
+                      : 'border-[#14B8A6] bg-[#14B8A6]/20'
+                    : isDarkMode 
+                      ? 'border-white/20 hover:border-[#3B82F6]/60' 
+                      : 'border-gray-300 hover:border-[#14B8A6]/60'
                 } ${isAnalyzing ? 'opacity-50 pointer-events-none' : ''}`}
                 onDrop={handleDrop}
                 onDragOver={(e) => e.preventDefault()}
@@ -1016,33 +1073,53 @@ export default function ATSAnalysis() {
                 onDragLeave={() => setIsDragging(false)}
               >
                 <div className="flex flex-col items-center space-y-3 sm:space-y-4">
-                  <div className="p-3 sm:p-4 bg-primary/20 dark:bg-primary/30 rounded-full animate-float">
-                    <Target className="h-6 w-6 sm:h-8 sm:w-8 text-primary dark:text-primary/90" />
+                  <div className={`p-3 sm:p-4 rounded-full animate-float ${
+                    isDarkMode ? 'bg-[#3B82F6]/20' : 'bg-[#14B8A6]/20'
+                  }`}>
+                    <Target className={`h-6 w-6 sm:h-8 sm:w-8 ${
+                      isDarkMode ? 'text-[#3B82F6]' : 'text-[#14B8A6]'
+                    }`} />
                   </div>
                   
                   {isAnalyzing ? (
                     <div className="space-y-2 sm:space-y-3">
-                      <div className="animate-spin w-6 h-6 sm:w-8 sm:h-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
-                      <p className="text-muted-foreground text-sm sm:text-base dark:text-muted-foreground/90">Analyzing your resume...</p>
-                      <p className="text-xs sm:text-sm text-muted-foreground/70 dark:text-muted-foreground/80">This may take a few moments</p>
+                      <div className={`animate-spin w-6 h-6 sm:w-8 sm:h-8 border-4 border-t-transparent rounded-full mx-auto ${
+                        isDarkMode ? 'border-[#3B82F6]' : 'border-[#14B8A6]'
+                      }`}></div>
+                      <p className={`text-sm sm:text-base ${
+                        isDarkMode ? 'text-[#CBD5E1]' : 'text-gray-600'
+                      }`}>Analyzing your resume...</p>
+                      <p className={`text-xs sm:text-sm ${
+                        isDarkMode ? 'text-[#94A3B8]' : 'text-gray-500'
+                      }`}>This may take a few moments</p>
                     </div>
                   ) : (
                     <>
                       <div className="space-y-2">
-                        <h3 className="text-base sm:text-lg font-semibold text-foreground dark:text-foreground/95">
+                        <h3 className={`text-base sm:text-lg font-semibold ${
+                          isDarkMode ? 'text-white' : 'text-[#1E293B]'
+                        }`}>
                           Upload Your Resume
                         </h3>
-                        <p className="text-muted-foreground text-sm sm:text-base dark:text-muted-foreground/90">
+                        <p className={`text-sm sm:text-base ${
+                          isDarkMode ? 'text-[#CBD5E1]' : 'text-gray-600'
+                        }`}>
                           Drag and drop your resume file here, or click to browse
                         </p>
-                        <p className="text-xs text-muted-foreground/60 dark:text-muted-foreground/70">
+                        <p className={`text-xs ${
+                          isDarkMode ? 'text-[#94A3B8]' : 'text-gray-500'
+                        }`}>
                           Supports PDF and DOCX files up to 10MB
                         </p>
                       </div>
 
                       <Button
                         onClick={() => document.getElementById('file-input')?.click()}
-                        className="bg-primary hover:bg-primary/90 text-sm sm:text-base dark:bg-primary dark:hover:bg-primary/90"
+                        className={`text-sm sm:text-base ${
+                          isDarkMode 
+                            ? 'bg-gradient-to-r from-[#3B82F6] to-[#2563EB] hover:from-[#60A5FA] hover:to-[#3B82F6] text-white' 
+                            : 'bg-gradient-to-r from-[#14B8A6] to-[#0D9488] hover:from-[#2DD4BF] hover:to-[#14B8A6] text-white'
+                        }`}
                       >
                         <Upload className="mr-2 h-4 w-4" />
                         Choose File
@@ -1061,19 +1138,33 @@ export default function ATSAnalysis() {
               </div>
 
               {error && (
-                <Alert className="mt-4 border-destructive/30 bg-destructive/20 dark:border-destructive/40 dark:bg-destructive/30">
-                  <AlertCircle className="h-4 w-4 text-destructive dark:text-destructive/90" />
-                  <AlertDescription className="text-destructive text-sm sm:text-base dark:text-destructive/90">
+                <Alert className={`mt-4 ${
+                  isDarkMode 
+                    ? 'border-red-400/30 bg-red-400/20' 
+                    : 'border-red-600/30 bg-red-600/20'
+                }`}>
+                  <AlertCircle className={`h-4 w-4 ${
+                    isDarkMode ? 'text-red-400' : 'text-red-600'
+                  }`} />
+                  <AlertDescription className={`text-sm sm:text-base ${
+                    isDarkMode ? 'text-red-400' : 'text-red-600'
+                  }`}>
                     {error}
                   </AlertDescription>
                 </Alert>
               )}
 
               {uploadedFile && !error && (
-                <div className="mt-4 flex items-center justify-between p-3 bg-muted/60 dark:bg-muted/40 rounded-lg">
+                <div className={`mt-4 flex items-center justify-between p-3 rounded-lg ${
+                  isDarkMode ? 'bg-[#334155]/60' : 'bg-gray-100/60'
+                }`}>
                   <div className="flex items-center space-x-2 sm:space-x-3">
-                    <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground dark:text-muted-foreground/90" />
-                    <span className="text-xs sm:text-sm font-medium text-foreground dark:text-foreground/95 truncate">
+                    <FileText className={`h-4 w-4 sm:h-5 sm:w-5 ${
+                      isDarkMode ? 'text-[#CBD5E1]' : 'text-gray-600'
+                    }`} />
+                    <span className={`text-xs sm:text-sm font-medium truncate ${
+                      isDarkMode ? 'text-white' : 'text-[#1E293B]'
+                    }`}>
                       {uploadedFile.name}
                     </span>
                   </div>
@@ -1081,7 +1172,11 @@ export default function ATSAnalysis() {
                     variant="ghost"
                     size="sm"
                     onClick={handleReset}
-                    className="text-muted-foreground hover:text-foreground text-xs sm:text-sm dark:text-muted-foreground/90 dark:hover:text-foreground/95"
+                    className={`text-xs sm:text-sm ${
+                      isDarkMode 
+                        ? 'text-[#CBD5E1] hover:text-white hover:bg-white/10' 
+                        : 'text-gray-600 hover:text-[#1E293B] hover:bg-gray-50'
+                    }`}
                   >
                     Remove
                   </Button>
@@ -1095,12 +1190,18 @@ export default function ATSAnalysis() {
         {analysis && (
           <div className="max-w-6xl mx-auto space-y-6">
             {/* Overall Score */}
-            <Card className="text-center dark:bg-card/60 animate-fadeInUp">
+            <Card className={`text-center animate-fadeInUp ${
+              isDarkMode ? 'bg-[#1E293B]' : 'bg-white'
+            }`}>
               <CardContent className="p-8">
                 <div className="flex flex-col items-center space-y-4">
                   <div className="flex items-center space-x-4">
-                    <Award className="h-8 w-8 text-primary dark:text-primary/90 animate-bounce-gentle" />
-                    <h2 className="text-2xl font-bold text-foreground dark:text-foreground/95">ATS Compatibility Score</h2>
+                    <Award className={`h-8 w-8 animate-bounce-gentle ${
+                      isDarkMode ? 'text-[#3B82F6]' : 'text-[#14B8A6]'
+                    }`} />
+                    <h2 className={`text-2xl font-bold ${
+                      isDarkMode ? 'text-white' : 'text-[#1E293B]'
+                    }`}>ATS Compatibility Score</h2>
                   </div>
                   
                   <div className="flex items-center space-x-6">
@@ -1109,7 +1210,7 @@ export default function ATSAnalysis() {
                         score={analysis.score.overall} 
                         className={`text-5xl font-bold ${getScoreColor(analysis.score.overall)}`}
                       />
-                      <div className="text-muted-foreground dark:text-muted-foreground/90">Overall Score</div>
+                      <div className={isDarkMode ? 'text-[#CBD5E1]' : 'text-gray-600'}>Overall Score</div>
                     </div>
                     <div className="flex flex-col space-y-2">
                       <AnimatedProgress value={analysis.score.overall} className="w-48" />
@@ -1125,29 +1226,39 @@ export default function ATSAnalysis() {
 
             {/* Detailed Scores */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card className="dark:bg-card/60 animate-fadeInUp animation-delay-2000">
+              <Card className={`animate-fadeInUp animation-delay-2000 ${
+                isDarkMode ? 'bg-[#1E293B]' : 'bg-white'
+              }`}>
                 <CardContent className="p-6 text-center">
                   <AnimatedScore 
                     score={analysis.score.keyword_density} 
                     className={`text-2xl font-bold ${getScoreColor(analysis.score.keyword_density)}`}
                   />
-                  <div className="text-sm text-muted-foreground dark:text-muted-foreground/90">Keyword Density</div>
+                  <div className={`text-sm ${
+                    isDarkMode ? 'text-[#CBD5E1]' : 'text-gray-600'
+                  }`}>Keyword Density</div>
                   <AnimatedProgress value={analysis.score.keyword_density} className="mt-2" />
                 </CardContent>
               </Card>
 
-              <Card className="dark:bg-card/60 animate-fadeInUp animation-delay-4000">
+              <Card className={`animate-fadeInUp animation-delay-4000 ${
+                isDarkMode ? 'bg-[#1E293B]' : 'bg-white'
+              }`}>
                 <CardContent className="p-6 text-center">
                   <AnimatedScore 
                     score={analysis.score.format_score} 
                     className={`text-2xl font-bold ${getScoreColor(analysis.score.format_score)}`}
                   />
-                  <div className="text-sm text-muted-foreground dark:text-muted-foreground/90">Format Quality</div>
+                  <div className={`text-sm ${
+                    isDarkMode ? 'text-[#CBD5E1]' : 'text-gray-600'
+                  }`}>Format Quality</div>
                   <AnimatedProgress value={analysis.score.format_score} className="mt-2" />
                 </CardContent>
               </Card>
 
-              <Card className="dark:bg-card/60 animate-fadeInUp animation-delay-2000">
+              <Card className={`animate-fadeInUp animation-delay-2000 ${
+                isDarkMode ? 'bg-[#1E293B]' : 'bg-white'
+              }`}>
                 <CardContent className="p-6 text-center">
                   <AnimatedScore 
                     score={analysis.score.section_score} 

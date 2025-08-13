@@ -84,47 +84,39 @@ const TemplateSlider = () => {
           ref={ref}
           style={{ 
             maskImage,
-            scrollbarWidth: 'thin',
-            scrollbarColor: 'var(--primary) transparent'
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none'
           }}
-          className="flex gap-4 md:gap-6 lg:gap-8 overflow-x-auto pb-4 px-4 w-full max-w-full"
+          className="flex gap-4 md:gap-6 lg:gap-8 overflow-x-auto pb-4 px-4 w-full max-w-full [&::-webkit-scrollbar]:hidden"
         >
           {templates.map((template, index) => (
-            <motion.div
-              key={template.id}
-                             className="flex-shrink-0 w-72 md:w-80 lg:w-96 bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ 
-                opacity: 1, 
-                x: 0,
-                transition: {
-                  delay: index * 0.1,
-                  type: "spring",
-                  stiffness: 120,
-                  damping: 15,
-                  duration: 0.6
-                }
-              }}
-              whileHover={{ 
-                scale: 1.05,
-                y: -8,
-                transition: { 
-                  type: "spring",
-                  stiffness: 300,
-                  damping: 20,
-                  duration: 0.3 
-                }
-              }}
-              whileTap={{ 
-                scale: 0.98,
-                transition: { duration: 0.1 }
-              }}
+                         <motion.div
+               key={template.id}
+                              className="flex-shrink-0 w-64 md:w-72 lg:w-80 bg-slate-800/80 backdrop-blur-sm border border-white/10 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer group"
+               initial={{ opacity: 0, x: 30, y: 20 }}
+               animate={{ 
+                 opacity: 1, 
+                 x: 0,
+                 y: 0,
+                 transition: {
+                   delay: index * 0.08,
+                   type: "spring",
+                   stiffness: 100,
+                   damping: 20,
+                   duration: 0.8
+                 }
+               }}
+
+               whileTap={{ 
+                 scale: 0.98,
+                 transition: { duration: 0.1 }
+               }}
               onClick={() => {
                 window.location.href = `/builder?template=${template.id}&source=${template.isReactiveResume ? 'reactive-resume' : 'custom'}`;
               }}
             >
                              {/* Template Preview */}
-               <div className="relative h-64 md:h-72 lg:h-80 overflow-hidden rounded-t-lg">
+                               <div className="relative h-64 md:h-72 lg:h-80 overflow-hidden rounded-t-lg">
                 {template.previewImage ? (
                   <img 
                     src={template.previewImage} 
@@ -161,11 +153,11 @@ const TemplateSlider = () => {
               
               {/* Template Info */}
               <div className="p-4">
-                <h4 className="text-sm font-semibold text-slate-800 mb-1 line-clamp-1">{template.name}</h4>
-                <p className="text-xs text-slate-600 mb-3 line-clamp-2">{template.description}</p>
-                <Button className={`w-full ${template.color} ${template.hoverColor} text-xs group-hover:scale-105 transition-transform py-2`}>
-                  Use Template
-                </Button>
+                                 <h4 className="text-sm font-semibold text-gray-200 mb-1 line-clamp-1">{template.name}</h4>
+                 <p className="text-xs text-gray-400 mb-3 line-clamp-2">{template.description}</p>
+                 <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-xs group-hover:scale-105 transition-transform py-2 border-0 rounded-lg">
+                   Use Template
+                 </Button>
               </div>
             </motion.div>
           ))}
@@ -221,63 +213,38 @@ const AnimatedTemplatesSection = () => {
     offset: ["start end", "end start"]
   });
 
-  // Create smooth spring animations
-  const scale = useSpring(useTransform(scrollYProgress, [0, 0.5, 1], [0.8, 1, 0.8]), {
-    stiffness: 100,
-    damping: 20
+  // Create smoother spring animations with better easing
+  const scale = useSpring(useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0.9, 1, 1, 0.9]), {
+    stiffness: 80,
+    damping: 30
   });
 
-  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
+  const opacity = useTransform(scrollYProgress, [0, 0.1, 0.9, 1], [0, 1, 1, 0]);
   
-  const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
-  const backgroundScale = useTransform(scrollYProgress, [0, 0.5, 1], [1.2, 1, 1.2]);
-  
-  const titleY = useTransform(scrollYProgress, [0, 0.5, 1], ["50%", "0%", "50%"]);
-  const titleOpacity = useTransform(scrollYProgress, [0, 0.1, 0.9, 1], [0, 1, 1, 0]);
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ["-10%", "10%"]);
+  const backgroundScale = useTransform(scrollYProgress, [0, 0.5, 1], [1.1, 1, 1.1]);
 
   return (
-    <div ref={targetRef} className="relative h-screen overflow-hidden bg-background">
+    <div ref={targetRef} className="relative h-16 overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       {/* Background Image with Parallax */}
       <motion.div
         style={{
           backgroundImage: `url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYwMCIgaGVpZ2h0PSIxMjAwIiB2aWV3Qm94PSIwIDAgMTYwMCAxMjAwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMTYwMCIgaGVpZ2h0PSIxMjAwIiBmaWxsPSJ1cmwoI2dyYWRpZW50KSIvPgo8ZGVmcz4KPGxpbmVhckdyYWRpZW50IGlkPSJncmFkaWVudCIgeDE9IjAiIHkxPSIwIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgo8c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojNjE3ZGI3O3N0b3Atb3BhY2l0eToxIiAvPgo8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiM0YzFkOTU7c3RvcC1vcGFjaXR5OjEiIC8+CjwvbGluZWFyR3JhZGllbnQ+CjwvZGVmcz4KPC9zdmc+')`,
           backgroundSize: "cover",
           backgroundPosition: "center",
-          height: "150%",
+          height: "120%",
           width: "100%",
           y: backgroundY,
           scale: backgroundScale,
           position: "absolute",
           top: 0,
           left: 0,
-          filter: "brightness(0.7)",
+          filter: "brightness(0.3) blur(1px)",
         }}
       />
 
       {/* Overlay Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background"></div>
-
-      {/* Content Container */}
-      <div className="relative z-10 flex h-full items-center justify-center">
-        <motion.div
-          style={{
-            scale: scale,
-            opacity: opacity,
-            y: titleY
-          }}
-          className="text-center max-w-4xl px-8"
-        >
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
-            Professional Templates
-          </h1>
-          <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed">
-            Explore the templates available in Resume Builder Pro and view the resumes crafted with them. 
-            They could also serve as examples to help guide the creation of your next resume.
-          </p>
-        </motion.div>
-      </div>
-
-
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-900/50 to-slate-900"></div>
     </div>
   );
 };
@@ -311,7 +278,7 @@ export default function Home() {
       const scrollTop = window.scrollY;
       setIsScrolled(scrollTop > 10);
 
-      // Determine active section based on scroll position
+      // Determine active section based on scroll position with smoother detection
       const sections = ['home', 'templates'];
       const sectionElements = sections.map(id => document.getElementById(id));
       
@@ -319,7 +286,8 @@ export default function Home() {
       sectionElements.forEach((element, index) => {
         if (element) {
           const rect = element.getBoundingClientRect();
-          if (rect.top <= 100 && rect.bottom >= 100) {
+          const threshold = window.innerHeight * 0.3; // 30% of viewport height
+          if (rect.top <= threshold && rect.bottom >= threshold) {
             currentSection = sections[index];
           }
         }
@@ -328,90 +296,106 @@ export default function Home() {
       setActiveSection(currentSection);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    // Throttle scroll events for better performance
+    let ticking = false;
+    const throttledHandleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          handleScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', throttledHandleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', throttledHandleScroll);
   }, []);
 
   const isActiveLink = (section: string) => activeSection === section;
   const isDarkMode = resolvedTheme === 'dark';
 
   return (
-    <div className="min-h-screen overflow-x-hidden relative transition-colors duration-300 bg-background text-foreground">
+    <div className="min-h-screen overflow-x-hidden relative transition-colors duration-300 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-foreground">
       {/* Navigation */}
-      <motion.nav 
-        className={`fixed top-0 w-full z-50 border-b transition-all duration-300 bg-background border-border ${isScrolled ? 'shadow-md' : ''}`}
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ 
-          duration: 0.8, 
-          ease: "easeOut",
-          type: "spring",
-          stiffness: 100,
-          damping: 20
-        }}
-      >
+                    <motion.nav 
+          className={`fixed top-0 w-full z-50 border-b transition-all duration-300 backdrop-blur-md ${
+            isDarkMode 
+              ? 'bg-gradient-to-r from-[#0D1B2A] to-[#1B263B]/95 border-white/10' 
+              : 'bg-white/95 border-gray-200/50'
+          } ${isScrolled ? 'shadow-lg' : ''}`}
+         initial={{ y: -50, opacity: 0 }}
+         animate={{ y: 0, opacity: 1 }}
+         transition={{ 
+           duration: 0.6, 
+           ease: "easeOut",
+           type: "spring",
+           stiffness: 120,
+           damping: 25
+         }}
+       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo Section */}
-            <motion.div 
-              className="flex items-center"
-              initial={{ x: -50, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ 
-                duration: 0.6, 
-                delay: 0.2,
-                ease: "easeOut"
-              }}
-            >
-              <motion.div
-                initial={{ scale: 0, rotate: -180 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ 
-                  duration: 0.5, 
-                  delay: 0.3,
-                  type: "spring",
-                  stiffness: 200
-                }}
-              >
-                <FileText className="h-8 w-8 mr-3 text-primary" />
-              </motion.div>
-              <motion.span 
-                className="text-xl font-bold text-foreground"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ 
-                  duration: 0.5, 
-                  delay: 0.5
-                }}
-              >
-                ResumeBuilder Pro
-              </motion.span>
-            </motion.div>
+                         <motion.div 
+               className="flex items-center"
+               initial={{ x: -30, opacity: 0 }}
+               animate={{ x: 0, opacity: 1 }}
+               transition={{ 
+                 duration: 0.5, 
+                 delay: 0.1,
+                 ease: "easeOut"
+               }}
+             >
+               <motion.div
+                 initial={{ scale: 0, rotate: -90 }}
+                 animate={{ scale: 1, rotate: 0 }}
+                 transition={{ 
+                   duration: 0.4, 
+                   delay: 0.2,
+                   type: "spring",
+                   stiffness: 150
+                 }}
+               >
+                                  <FileText className={`h-8 w-8 mr-3 ${isDarkMode ? 'text-[#3B82F6]' : 'text-[#14B8A6]'}`} />
+               </motion.div>
+                                              <motion.span 
+                  className={`text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-[#1E293B]'}`}
+                 initial={{ opacity: 0 }}
+                 animate={{ opacity: 1 }}
+                 transition={{ 
+                   duration: 0.4, 
+                   delay: 0.3
+                 }}
+               >
+                 ResumeBuilder
+               </motion.span>
+             </motion.div>
             
             {/* Navigation Links */}
             <div className="hidden md:flex items-center space-x-8">
               {/* Templates Link */}
-              <motion.a 
-                href="#templates" 
-                className={`relative transition-colors duration-200 ${
-                  isActiveLink('templates') 
-                    ? 'text-primary font-semibold'
-                    : 'text-muted-foreground hover:text-primary'
-                }`}
-                initial={{ y: -20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ 
-                  duration: 0.5, 
-                  delay: 0.7,
-                  ease: "easeOut"
-                }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
+                             <motion.a 
+                 href="#templates" 
+                 className={`relative transition-colors duration-200 ${
+                   isActiveLink('templates') 
+                     ? isDarkMode ? 'text-white font-semibold' : 'text-[#0F172A] font-semibold'
+                     : isDarkMode ? 'text-[#CBD5E1] hover:text-[#60A5FA]' : 'text-[#334155] hover:text-[#2DD4BF]'
+                 }`}
+                 initial={{ y: -15, opacity: 0 }}
+                 animate={{ y: 0, opacity: 1 }}
+                 transition={{ 
+                   duration: 0.4, 
+                   delay: 0.4,
+                   ease: "easeOut"
+                 }}
+                 whileHover={{ scale: 1.02 }}
+                 whileTap={{ scale: 0.98 }}
+               >
                 Templates
                 {isActiveLink('templates') && (
                   <motion.div
-                    className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary"
+                    className={`absolute -bottom-1 left-0 right-0 h-0.5 ${isDarkMode ? 'bg-white' : 'bg-[#0F172A]'}`}
                     layoutId="activeTab"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -422,68 +406,67 @@ export default function Home() {
               
               {/* ATS Analysis Link */}
               <Link href="/ats-analysis">
-                <motion.a 
-                  className="transition-colors text-muted-foreground hover:text-primary"
-                  initial={{ y: -20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ 
-                    duration: 0.5, 
-                    delay: 0.8,
-                    ease: "easeOut"
-                  }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
+                                 <motion.a 
+                   className={`transition-colors ${isDarkMode ? 'text-[#CBD5E1] hover:text-[#60A5FA]' : 'text-[#334155] hover:text-[#2DD4BF]'}`}
+                   initial={{ y: -15, opacity: 0 }}
+                   animate={{ y: 0, opacity: 1 }}
+                   transition={{ 
+                     duration: 0.4, 
+                     delay: 0.5,
+                     ease: "easeOut"
+                   }}
+                   whileHover={{ scale: 1.02 }}
+                   whileTap={{ scale: 0.98 }}
+                 >
                 ATS Analysis
                 </motion.a>
               </Link>
               
               {/* Theme Toggle */}
-              <motion.div
-                initial={{ scale: 0, rotate: -180 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ 
-                  duration: 0.6, 
-                  delay: 1.0,
-                  type: "spring",
-                  stiffness: 200
-                }}
-              >
-                <ThemeToggle />
-                </motion.div>
+                             <motion.div
+                 initial={{ scale: 0, rotate: -90 }}
+                 animate={{ scale: 1, rotate: 0 }}
+                 transition={{ 
+                   duration: 0.4, 
+                   delay: 0.6,
+                   type: "spring",
+                   stiffness: 150
+                 }}
+               >
+                 <ThemeToggle />
+                 </motion.div>
               
               {/* Login/Signup Button */}
-              <motion.div
-                initial={{ y: -20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ 
-                  duration: 0.5, 
-                  delay: 1.1,
-                  ease: "easeOut"
-                }}
-              >
-              <LoginSignupButton />
-              </motion.div>
+                             <motion.div
+                 initial={{ y: -15, opacity: 0 }}
+                 animate={{ y: 0, opacity: 1 }}
+                 transition={{ 
+                   duration: 0.4, 
+                   delay: 0.7,
+                   ease: "easeOut"
+                 }}
+               >
+               <LoginSignupButton />
+               </motion.div>
               
               {/* Start Building Button */}
               <Link href="/builder">
-                <motion.div
-                  initial={{ y: -20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ 
-                    duration: 0.5, 
-                    delay: 1.2,
-                    ease: "easeOut"
-                  }}
-                  whileHover={{ 
-                    scale: 1.05,
-                    y: -1,
-                    boxShadow: "0 10px 15px -3px rgba(59, 130, 246, 0.3), 0 4px 6px -2px rgba(59, 130, 246, 0.2)"
-                  }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                <Button 
-                    className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-md hover:shadow-lg transition-all duration-300 border-0"
+                                 <motion.div
+                   initial={{ y: -15, opacity: 0 }}
+                   animate={{ y: 0, opacity: 1 }}
+                   transition={{ 
+                     duration: 0.4, 
+                     delay: 0.8,
+                     ease: "easeOut"
+                   }}
+                   whileHover={{ 
+                     scale: 1.02,
+                     y: -1
+                   }}
+                   whileTap={{ scale: 0.98 }}
+                 >
+                                 <Button 
+                     className={`bg-gradient-to-r ${isDarkMode ? 'from-[#3B82F6] to-[#2563EB] hover:from-[#60A5FA] hover:to-[#3B82F6]' : 'from-[#14B8A6] to-[#0D9488] hover:from-[#2DD4BF] hover:to-[#14B8A6]'} text-white shadow-lg hover:shadow-xl transition-all duration-300 border-0`}
                   onClick={() => {
                     // Clear any URL hash before navigation
                     if (window.location.hash) {
@@ -500,27 +483,27 @@ export default function Home() {
         </div>
       </motion.nav>
 
-      {/* Hero Section */}
-      <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
-        {/* Animated Tile Background - Only in Hero Section */}
-        <AnimatedTileBackground showInDarkMode={resolvedTheme !== 'dark'} />
-        
+            {/* Hero Section */}
+      <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+        {/* Subtle background pattern */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.02),transparent_50%)]"></div>
+         
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Left Column - Text Content */}
             <div className="animate-fadeInUp text-center lg:text-left">
                               <motion.h1 
-                                  className="text-4xl md:text-6xl font-bold mb-6 text-foreground"
+                                  className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent"
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: 0.2 }}
                 >
-                  <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 dark:from-blue-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
+                  <span>
                     {typedText}
               </span>
                 </motion.h1>
               <motion.p 
-                className="text-xl md:text-2xl mb-8 max-w-2xl text-muted-foreground"
+                className="text-xl md:text-2xl mb-8 max-w-2xl text-gray-300 leading-relaxed"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.4 }}
@@ -528,46 +511,46 @@ export default function Home() {
               Build professional resumes in minutes with our AI-powered tools, live preview, and stunning templates.
               </motion.p>
               
-              {/* Quick Value Props */}
-              <motion.div 
-                className="flex flex-wrap gap-3 mb-8 justify-center lg:justify-start"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.6 }}
-              >
-                <motion.div
-                  className="flex items-center px-3 py-1.5 rounded-full text-sm font-medium border bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/50 dark:text-blue-300 dark:border-blue-700"
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ type: "spring", stiffness: 400 }}
-                >
-                  <Check className="w-4 h-4 mr-1.5" />
-                  ATS-Friendly
-                </motion.div>
-                <motion.div
-                  className="flex items-center px-3 py-1.5 rounded-full text-sm font-medium border bg-green-50 text-green-700 border-green-200 dark:bg-green-900/50 dark:text-green-300 dark:border-green-700"
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ type: "spring", stiffness: 400 }}
-                >
-                  <Eye className="w-4 h-4 mr-1.5" />
-                  Live Preview
-                </motion.div>
-                <motion.div
-                  className="flex items-center px-3 py-1.5 rounded-full text-sm font-medium border bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/50 dark:text-purple-300 dark:border-purple-700"
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ type: "spring", stiffness: 400 }}
-                >
-                  <Sparkles className="w-4 h-4 mr-1.5" />
-                  AI-Powered
-                </motion.div>
-                <motion.div
-                  className="flex items-center px-3 py-1.5 rounded-full text-sm font-medium border bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/50 dark:text-orange-300 dark:border-orange-700"
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ type: "spring", stiffness: 400 }}
-                >
-                  <FileText className="w-4 h-4 mr-1.5" />
-                  PDF Export
-                </motion.div>
-              </motion.div>
+                             {/* Quick Value Props */}
+               <motion.div 
+                 className="flex flex-wrap gap-3 mb-8 justify-center lg:justify-start"
+                 initial={{ opacity: 0, y: 20 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 transition={{ duration: 0.8, delay: 0.6 }}
+               >
+                 <motion.div
+                   className="flex items-center px-4 py-2 rounded-lg text-sm font-medium bg-white/10 backdrop-blur-sm border border-white/20 text-gray-200 hover:bg-white/15 transition-colors"
+                   whileHover={{ scale: 1.02 }}
+                   transition={{ type: "spring", stiffness: 400 }}
+                 >
+                   <Check className="w-4 h-4 mr-2 text-emerald-400" />
+                   ATS-Friendly
+                 </motion.div>
+                 <motion.div
+                   className="flex items-center px-4 py-2 rounded-lg text-sm font-medium bg-white/10 backdrop-blur-sm border border-white/20 text-gray-200 hover:bg-white/15 transition-colors"
+                   whileHover={{ scale: 1.02 }}
+                   transition={{ type: "spring", stiffness: 400 }}
+                 >
+                   <Eye className="w-4 h-4 mr-2 text-blue-400" />
+                   Live Preview
+                 </motion.div>
+                 <motion.div
+                   className="flex items-center px-4 py-2 rounded-lg text-sm font-medium bg-white/10 backdrop-blur-sm border border-white/20 text-gray-200 hover:bg-white/15 transition-colors"
+                   whileHover={{ scale: 1.02 }}
+                   transition={{ type: "spring", stiffness: 400 }}
+                 >
+                   <Sparkles className="w-4 h-4 mr-2 text-purple-400" />
+                   AI-Powered
+                 </motion.div>
+                 <motion.div
+                   className="flex items-center px-4 py-2 rounded-lg text-sm font-medium bg-white/10 backdrop-blur-sm border border-white/20 text-gray-200 hover:bg-white/15 transition-colors"
+                   whileHover={{ scale: 1.02 }}
+                   transition={{ type: "spring", stiffness: 400 }}
+                 >
+                   <FileText className="w-4 h-4 mr-2 text-cyan-400" />
+                   PDF Export
+                 </motion.div>
+               </motion.div>
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start items-center">
               <Link href="/builder" className="w-full sm:w-auto">
                   <motion.div
@@ -584,8 +567,8 @@ export default function Home() {
                       damping: 25 
                     }}
                   >
-                <Button 
-                      className="w-full sm:w-auto bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 hover:from-blue-700 hover:via-purple-700 hover:to-blue-800 text-white px-4 sm:px-6 md:px-8 py-3 sm:py-4 md:py-6 text-base sm:text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 border-0"
+                                 <Button 
+                       className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-0"
                   onClick={() => {
                     // Clear any URL hash before navigation
                     if (window.location.hash) {
@@ -614,10 +597,10 @@ export default function Home() {
                       damping: 25 
                     }}
                   >
-                    <Button 
-                      variant="outline" 
-                      className="w-full sm:w-auto border-2 border-slate-300 hover:border-slate-400 text-slate-700 hover:text-slate-800 bg-white hover:bg-slate-50 px-4 sm:px-6 md:px-8 py-3 sm:py-4 md:py-6 text-base sm:text-lg font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300"
-                    >
+                                         <Button 
+                       variant="outline" 
+                       className="w-full sm:w-auto border border-white/20 hover:border-white/40 text-gray-200 hover:text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm px-6 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                     >
                   <Target className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                   <span className="hidden sm:inline">ATS Checker</span>
                   <span className="sm:hidden">ATS Check</span>
@@ -635,159 +618,181 @@ export default function Home() {
         </div>
       </section>
 
-        {/* Animated Templates Section */}
-        <AnimatedTemplatesSection />
+      {/* Animated Templates Section */}
+      <AnimatedTemplatesSection />
 
-      {/* Templates Preview Section */}
-        <section id="templates" className="w-full h-screen bg-muted/30">
-          <div className="w-full h-full flex flex-col">
-            {/* Animated Template Slider */}
-            <div className="flex-1 w-full">
-              <TemplateSlider />
-          </div>
-        </div>
-      </section>
+        {/* Templates Preview Section */}
+        <section id="templates" className="w-full h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+           <div className="w-full h-full flex flex-col">
+             {/* Fixed Header */}
+             <div className="sticky top-16 z-10 bg-slate-900/95 backdrop-blur-md border-b border-white/10 py-6">
+               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                 <motion.h2 
+                   className="text-3xl md:text-4xl lg:text-5xl font-bold text-center bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent mb-3"
+                   initial={{ opacity: 0, y: 20 }}
+                   whileInView={{ opacity: 1, y: 0 }}
+                   transition={{ duration: 0.6, ease: "easeOut" }}
+                   viewport={{ once: true }}
+                 >
+                   Professional Templates
+                 </motion.h2>
+                 <motion.p 
+                   className="text-lg md:text-xl text-gray-300 text-center max-w-3xl mx-auto leading-relaxed"
+                   initial={{ opacity: 0, y: 20 }}
+                   whileInView={{ opacity: 1, y: 0 }}
+                   transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+                   viewport={{ once: true }}
+                 >
+                   Explore our collection of professional templates designed to help you create standout resumes.
+                 </motion.p>
+               </div>
+             </div>
+             
+             {/* Animated Template Slider */}
+             <div className="flex-1 w-full pt-4">
+               <TemplateSlider />
+           </div>
+         </div>
+       </section>
 
 
 
-      {/* Tools Section */}
-      <section className="py-20 bg-gradient-to-br from-background via-background to-muted/20 dark:from-background dark:via-background dark:to-muted/10">
+             {/* Tools Section */}
+       <section className="py-20 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 mb-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-primary to-primary/80 rounded-2xl mb-6 shadow-lg">
-              <svg className="w-8 h-8 md:w-10 md:h-10 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            </div>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-foreground via-foreground to-foreground/80 bg-clip-text text-transparent mb-4">
-              Complete Resume Toolkit
-            </h2>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Everything you need to create, extract, and optimize your resume content with professional-grade tools.
-            </p>
-            <div className="flex justify-center mt-6 space-x-2">
-              <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
-              <div className="w-2 h-2 bg-primary/60 rounded-full animate-pulse animation-delay-2000"></div>
-              <div className="w-2 h-2 bg-primary/40 rounded-full animate-pulse animation-delay-4000"></div>
-            </div>
+                         <div className="inline-flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl mb-6 shadow-lg">
+               <svg className="w-8 h-8 md:w-10 md:h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+               </svg>
+             </div>
+             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent mb-4">
+               Complete Resume Toolkit
+             </h2>
+             <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
+               Everything you need to create, extract, and optimize your resume content with professional-grade tools.
+             </p>
+             <div className="flex justify-center mt-6 space-x-2">
+               <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+               <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse animation-delay-2000"></div>
+               <div className="w-2 h-2 bg-blue-300 rounded-full animate-pulse animation-delay-4000"></div>
+             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-            {/* Resume Builder */}
-            <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-blue-50/50 via-blue-50/30 to-blue-100/50 dark:from-blue-900/20 dark:via-blue-800/10 dark:to-blue-900/30 hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] h-full backdrop-blur-sm">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                         {/* Resume Builder */}
+             <Card className="group relative overflow-hidden border border-white/10 bg-slate-800/80 backdrop-blur-sm hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] h-full">
+               <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardContent className="relative p-6 md:p-8 flex flex-col h-full">
-                <div className="flex items-center mb-6">
-                  <div className="relative">
-                    <div className="bg-gradient-to-br from-blue-600 to-blue-700 w-12 h-12 md:w-16 md:h-16 rounded-2xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                      <Edit className="text-white h-6 w-6 md:h-8 md:w-8" />
-                    </div>
-                    <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 to-purple-400 rounded-2xl blur opacity-0 group-hover:opacity-75 transition-opacity duration-300 -z-10"></div>
-                  </div>
-                  <div>
-                    <h3 className="text-xl md:text-2xl font-bold text-foreground mb-1 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">
-                      Resume Builder
-                    </h3>
-                    <p className="text-blue-600 dark:text-blue-400 font-medium text-sm md:text-base">Interactive Editor</p>
-                  </div>
-                </div>
+                                                     <div className="flex items-center mb-6">
+                     <div className="relative">
+                       <div className="bg-gradient-to-br from-blue-600 to-blue-700 w-12 h-12 md:w-16 md:h-16 rounded-2xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                         <Edit className="text-white h-6 w-6 md:h-8 md:w-8" />
+                       </div>
+                     </div>
+                     <div>
+                       <h3 className="text-xl md:text-2xl font-bold text-gray-200 mb-1 transition-colors">
+                         Resume Builder
+                       </h3>
+                       <p className="text-blue-400 font-medium text-sm md:text-base">Interactive Editor</p>
+                     </div>
+                   </div>
                 
-                <p className="text-muted-foreground mb-6 text-base md:text-lg flex-grow leading-relaxed">
-                  Create professional resumes with live preview, 18+ templates, and instant PDF export. Perfect for crafting your perfect resume from scratch with real-time collaboration.
-                </p>
+                                 <p className="text-gray-300 mb-6 text-base md:text-lg flex-grow leading-relaxed">
+                   Create professional resumes with live preview, 18+ templates, and instant PDF export. Perfect for crafting your perfect resume from scratch with real-time collaboration.
+                 </p>
                 
-                <div className="space-y-3 mb-8">
-                  <div className="flex items-center text-foreground group/item">
-                    <div className="bg-green-100 dark:bg-green-900/30 p-1 rounded-full mr-3 group-hover/item:scale-110 transition-transform">
-                      <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
-                    </div>
-                    <span className="group-hover/item:text-foreground/80 transition-colors">18+ Professional Templates</span>
-                  </div>
-                  <div className="flex items-center text-foreground group/item">
-                    <div className="bg-green-100 dark:bg-green-900/30 p-1 rounded-full mr-3 group-hover/item:scale-110 transition-transform">
-                      <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
-                    </div>
-                    <span className="group-hover/item:text-foreground/80 transition-colors">Live Preview & Real-time Editing</span>
-                  </div>
-                  <div className="flex items-center text-foreground group/item">
-                    <div className="bg-green-100 dark:bg-green-900/30 p-1 rounded-full mr-3 group-hover/item:scale-110 transition-transform">
-                      <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
-                    </div>
-                    <span className="group-hover/item:text-foreground/80 transition-colors">High-Quality PDF Export</span>
-                  </div>
-                  <div className="flex items-center text-foreground group/item">
-                    <div className="bg-green-100 dark:bg-green-900/30 p-1 rounded-full mr-3 group-hover/item:scale-110 transition-transform">
-                      <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
-                    </div>
-                    <span className="group-hover/item:text-foreground/80 transition-colors">Resume Upload & Auto-fill</span>
-                  </div>
-                </div>
+                                 <div className="space-y-3 mb-8">
+                   <div className="flex items-center text-gray-200 group/item">
+                     <div className="bg-emerald-500/20 p-1 rounded-full mr-3 group-hover/item:scale-105 transition-transform">
+                       <Check className="w-4 h-4 text-emerald-400" />
+                     </div>
+                     <span className="group-hover/item:text-gray-100 transition-colors">18+ Professional Templates</span>
+                   </div>
+                   <div className="flex items-center text-gray-200 group/item">
+                     <div className="bg-blue-500/20 p-1 rounded-full mr-3 group-hover/item:scale-105 transition-transform">
+                       <Check className="w-4 h-4 text-blue-400" />
+                     </div>
+                     <span className="group-hover/item:text-gray-100 transition-colors">Live Preview & Real-time Editing</span>
+                   </div>
+                   <div className="flex items-center text-gray-200 group/item">
+                     <div className="bg-purple-500/20 p-1 rounded-full mr-3 group-hover/item:scale-105 transition-transform">
+                       <Check className="w-4 h-4 text-purple-400" />
+                     </div>
+                     <span className="group-hover/item:text-gray-100 transition-colors">High-Quality PDF Export</span>
+                   </div>
+                   <div className="flex items-center text-gray-200 group/item">
+                     <div className="bg-cyan-500/20 p-1 rounded-full mr-3 group-hover/item:scale-105 transition-transform">
+                       <Check className="w-4 h-4 text-cyan-400" />
+                     </div>
+                     <span className="group-hover/item:text-gray-100 transition-colors">Resume Upload & Auto-fill</span>
+                   </div>
+                 </div>
 
-                <Link href="/builder">
-                  <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-lg py-6 shadow-lg hover:shadow-xl transition-all duration-300 group/btn">
-                    <Edit className="mr-2 h-5 w-5 group-hover/btn:scale-110 transition-transform" />
-                    Start Building Resume
-                  </Button>
-                </Link>
+                                 <Link href="/builder">
+                   <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-lg py-6 shadow-lg hover:shadow-xl transition-all duration-300 group/btn border-0 rounded-xl">
+                     <Edit className="mr-2 h-5 w-5 group-hover/btn:scale-110 transition-transform" />
+                     Start Building Resume
+                   </Button>
+                 </Link>
               </CardContent>
             </Card>
 
-            {/* ATS Analysis */}
-            <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-purple-50/50 via-purple-50/30 to-purple-100/50 dark:from-purple-900/20 dark:via-purple-800/10 dark:to-purple-900/30 hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] h-full backdrop-blur-sm">
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-600/5 to-pink-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                         {/* ATS Analysis */}
+             <Card className="group relative overflow-hidden border border-white/10 bg-slate-800/80 backdrop-blur-sm hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] h-full">
+               <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-pink-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardContent className="relative p-6 md:p-8 flex flex-col h-full">
-                <div className="flex items-center mb-6">
-                  <div className="relative">
-                    <div className="bg-gradient-to-br from-purple-600 to-purple-700 w-12 h-12 md:w-16 md:h-16 rounded-2xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                      <Target className="text-white h-6 w-6 md:h-8 md:w-8" />
-                    </div>
-                    <div className="absolute -inset-1 bg-gradient-to-r from-purple-400 to-pink-400 rounded-2xl blur opacity-0 group-hover:opacity-75 transition-opacity duration-300 -z-10"></div>
-                  </div>
-                  <div>
-                    <h3 className="text-xl md:text-2xl font-bold text-foreground mb-1 group-hover:text-purple-700 dark:group-hover:text-purple-400 transition-colors">
-                      ATS Analysis
-                    </h3>
-                    <p className="text-purple-600 dark:text-purple-400 font-medium text-sm md:text-base">Compatibility Scoring</p>
-                  </div>
-                </div>
+                                 <div className="flex items-center mb-6">
+                   <div className="relative">
+                     <div className="bg-gradient-to-br from-purple-600 to-purple-700 w-12 h-12 md:w-16 md:h-16 rounded-2xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                       <Target className="text-white h-6 w-6 md:h-8 md:w-8" />
+                     </div>
+                   </div>
+                   <div>
+                     <h3 className="text-xl md:text-2xl font-bold text-gray-200 mb-1 transition-colors">
+                       ATS Analysis
+                     </h3>
+                     <p className="text-purple-400 font-medium text-sm md:text-base">Compatibility Scoring</p>
+                   </div>
+                 </div>
                 
-                <p className="text-muted-foreground mb-6 text-base md:text-lg flex-grow leading-relaxed">
-                  Get detailed ATS compatibility scoring and recommendations. Analyze your resume's performance with applicant tracking systems and optimize for maximum visibility.
-                </p>
+                                 <p className="text-gray-300 mb-6 text-base md:text-lg flex-grow leading-relaxed">
+                   Get detailed ATS compatibility scoring and recommendations. Analyze your resume's performance with applicant tracking systems and optimize for maximum visibility.
+                 </p>
                 
-                <div className="space-y-3 mb-8">
-                  <div className="flex items-center text-foreground group/item">
-                    <div className="bg-green-100 dark:bg-green-900/30 p-1 rounded-full mr-3 group-hover/item:scale-110 transition-transform">
-                      <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
-                    </div>
-                    <span className="group-hover/item:text-foreground/80 transition-colors">ATS Compatibility Score</span>
-                  </div>
-                  <div className="flex items-center text-foreground group/item">
-                    <div className="bg-green-100 dark:bg-green-900/30 p-1 rounded-full mr-3 group-hover/item:scale-110 transition-transform">
-                      <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
-                    </div>
-                    <span className="group-hover/item:text-foreground/80 transition-colors">Keyword Analysis</span>
-                  </div>
-                  <div className="flex items-center text-foreground group/item">
-                    <div className="bg-green-100 dark:bg-green-900/30 p-1 rounded-full mr-3 group-hover/item:scale-110 transition-transform">
-                      <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
-                    </div>
-                    <span className="group-hover/item:text-foreground/80 transition-colors">Improvement Recommendations</span>
-                  </div>
-                  <div className="flex items-center text-foreground group/item">
-                    <div className="bg-green-100 dark:bg-green-900/30 p-1 rounded-full mr-3 group-hover/item:scale-110 transition-transform">
-                      <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
-                    </div>
-                    <span className="group-hover/item:text-foreground/80 transition-colors">Format & Structure Analysis</span>
-                  </div>
-                </div>
+                                 <div className="space-y-3 mb-8">
+                   <div className="flex items-center text-gray-200 group/item">
+                     <div className="bg-emerald-500/20 p-1 rounded-full mr-3 group-hover/item:scale-105 transition-transform">
+                       <Check className="w-4 h-4 text-emerald-400" />
+                     </div>
+                     <span className="group-hover/item:text-gray-100 transition-colors">ATS Compatibility Score</span>
+                   </div>
+                   <div className="flex items-center text-gray-200 group/item">
+                     <div className="bg-blue-500/20 p-1 rounded-full mr-3 group-hover/item:scale-105 transition-transform">
+                       <Check className="w-4 h-4 text-blue-400" />
+                     </div>
+                     <span className="group-hover/item:text-gray-100 transition-colors">Keyword Analysis</span>
+                   </div>
+                   <div className="flex items-center text-gray-200 group/item">
+                     <div className="bg-purple-500/20 p-1 rounded-full mr-3 group-hover/item:scale-105 transition-transform">
+                       <Check className="w-4 h-4 text-purple-400" />
+                     </div>
+                     <span className="group-hover/item:text-gray-100 transition-colors">Improvement Recommendations</span>
+                   </div>
+                   <div className="flex items-center text-gray-200 group/item">
+                     <div className="bg-cyan-500/20 p-1 rounded-full mr-3 group-hover/item:scale-105 transition-transform">
+                       <Check className="w-4 h-4 text-cyan-400" />
+                     </div>
+                     <span className="group-hover/item:text-gray-100 transition-colors">Format & Structure Analysis</span>
+                   </div>
+                 </div>
 
-                <Link href="/ats-analysis">
-                  <Button className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-lg py-6 shadow-lg hover:shadow-xl transition-all duration-300 group/btn">
-                    <Target className="mr-2 h-5 w-5 group-hover/btn:scale-110 transition-transform" />
-                    Analyze Resume
-                  </Button>
-                </Link>
+                                 <Link href="/ats-analysis">
+                   <Button className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white text-lg py-6 shadow-lg hover:shadow-xl transition-all duration-300 group/btn border-0 rounded-xl">
+                     <Target className="mr-2 h-5 w-5 group-hover/btn:scale-110 transition-transform" />
+                     Analyze Resume
+                   </Button>
+                 </Link>
               </CardContent>
             </Card>
           </div>

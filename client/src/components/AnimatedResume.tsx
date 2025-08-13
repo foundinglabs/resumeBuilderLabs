@@ -174,14 +174,14 @@ const AnimatedResume: React.FC = () => {
           }
         }}
       >
-        {/* Default Glow Effect (always visible) */}
+        {/* Subtle Glow Effect */}
         <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-blue-400/10 via-purple-400/10 to-pink-400/10 rounded-2xl"
+          className="absolute inset-0 bg-blue-50/30 rounded-2xl"
           style={{
             transform: "translateZ(-10px)",
           }}
           whileHover={{
-            opacity: 0.8,
+            opacity: 0.5,
             transition: {
               duration: 0.3,
               ease: [0.25, 0.46, 0.45, 0.94]
@@ -208,19 +208,17 @@ const AnimatedResume: React.FC = () => {
             animate="animate"
           >
             <motion.h1
-              className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent"
-              animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2 text-gray-800"
             >
               {typedName}
               <motion.span
                 variants={cursorVariants}
                 animate="blink"
-                className="inline-block w-1 h-5 sm:h-6 bg-gradient-to-b from-blue-500 to-purple-500 ml-1 rounded-full"
+                className="inline-block w-1 h-5 sm:h-6 bg-blue-500 ml-1 rounded-full"
               />
             </motion.h1>
             <motion.div
-              className="h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full"
+              className="h-1 bg-blue-500 rounded-full"
               initial={{ width: 0 }}
               animate={{ width: "100%" }}
               transition={{ duration: 1, delay: 0.5 }}
@@ -237,7 +235,7 @@ const AnimatedResume: React.FC = () => {
           >
             <p className="font-medium text-gray-700">Software Engineer • San Francisco, CA</p>
             <p className="text-blue-600">john.doe@email.com • (555) 123-4567</p>
-            <p className="text-purple-600">linkedin.com/in/johndoe • github.com/johndoe</p>
+            <p className="text-gray-600">linkedin.com/in/johndoe • github.com/johndoe</p>
           </motion.div>
 
           {/* Summary */}
@@ -248,11 +246,11 @@ const AnimatedResume: React.FC = () => {
             animate="animate"
             transition={{ delay: 0.4 }}
           >
-            <h2 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-800 mb-2">
               PROFESSIONAL SUMMARY
             </h2>
             <motion.div
-              className="text-xs sm:text-sm text-gray-700 leading-relaxed bg-gradient-to-r from-gray-50 to-blue-50 p-2 sm:p-3 rounded-lg border-l-4 border-blue-500"
+              className="text-xs sm:text-sm text-gray-700 leading-relaxed bg-gray-50 p-2 sm:p-3 rounded-lg border-l-4 border-blue-500"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6 }}
@@ -261,7 +259,7 @@ const AnimatedResume: React.FC = () => {
               <motion.span
                 variants={cursorVariants}
                 animate="blink"
-                className="inline-block w-1 h-3 sm:h-4 bg-gradient-to-b from-blue-500 to-purple-500 ml-1 rounded-full"
+                className="inline-block w-1 h-3 sm:h-4 bg-blue-500 ml-1 rounded-full"
               />
             </motion.div>
           </motion.div>
@@ -274,11 +272,11 @@ const AnimatedResume: React.FC = () => {
             animate="animate"
             transition={{ delay: 0.5 }}
           >
-            <h2 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-800 mb-2">
               EXPERIENCE
             </h2>
             <div className="space-y-2 sm:space-y-3">
-              <div className="bg-gradient-to-r from-green-50 to-blue-50 p-2 sm:p-3 rounded-lg border-l-4 border-green-500">
+              <div className="bg-gray-50 p-2 sm:p-3 rounded-lg border-l-4 border-blue-500">
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1 sm:gap-2">
                   <h3 className="text-xs sm:text-sm font-semibold text-gray-800">Senior Software Engineer</h3>
                   <span className="text-xs text-gray-600 bg-blue-100 px-2 py-1 rounded-full w-fit shadow-sm transition-all duration-200">2020 - 2023</span>
@@ -301,14 +299,14 @@ const AnimatedResume: React.FC = () => {
             animate="animate"
             transition={{ delay: 0.6 }}
           >
-            <h2 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-800 mb-2">
               SKILLS
             </h2>
-            <div className="bg-gradient-to-r from-orange-50 to-red-50 p-2 sm:p-3 rounded-lg border-l-4 border-orange-500">
+            <div className="bg-gray-50 p-2 sm:p-3 rounded-lg border-l-4 border-blue-500">
               <div className="text-xs text-gray-700 space-y-1 sm:space-y-2">
-                <p><strong className="text-orange-700">Programming:</strong> JavaScript, React, Node.js, Python, TypeScript</p>
-                <p><strong className="text-orange-700">Tools:</strong> Git, Docker, AWS, Jenkins, MongoDB, PostgreSQL</p>
-                <p><strong className="text-orange-700">Methodologies:</strong> Agile, Scrum, TDD, CI/CD, Microservices</p>
+                <p><strong className="text-gray-800">Programming:</strong> JavaScript, React, Node.js, Python, TypeScript</p>
+                <p><strong className="text-gray-800">Tools:</strong> Git, Docker, AWS, Jenkins, MongoDB, PostgreSQL</p>
+                <p><strong className="text-gray-800">Methodologies:</strong> Agile, Scrum, TDD, CI/CD, Microservices</p>
               </div>
             </div>
           </motion.div>
@@ -321,20 +319,20 @@ const AnimatedResume: React.FC = () => {
             animate="animate"
             transition={{ delay: 0.7 }}
           >
-            <h2 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-800 mb-2">
               EDUCATION
             </h2>
-            <div className="bg-gradient-to-r from-teal-50 to-cyan-50 p-2 sm:p-3 rounded-lg border-l-4 border-teal-500">
+            <div className="bg-gray-50 p-2 sm:p-3 rounded-lg border-l-4 border-blue-500">
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1 sm:gap-2">
                 <h3 className="text-xs sm:text-sm font-semibold text-gray-800">B.S. Computer Science</h3>
-                <span className="text-xs text-gray-600 bg-teal-100 px-2 py-1 rounded-full w-fit shadow-sm transition-all duration-200">2018</span>
+                <span className="text-xs text-gray-600 bg-blue-100 px-2 py-1 rounded-full w-fit shadow-sm transition-all duration-200">2018</span>
               </div>
               <p className="text-xs text-gray-600">Stanford University, Stanford, CA</p>
             </div>
           </motion.div>
         </motion.div>
         
-        {/* Default overlay (always visible) */}
+        {/* Subtle overlay */}
         <motion.div
           className="absolute inset-0 rounded-2xl bg-white/5"
           style={{

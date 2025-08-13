@@ -4,10 +4,13 @@ import { User, ChevronDown, LogOut, Loader2, LogIn, UserPlus, Mail } from 'lucid
 import { useLocation } from 'wouter';
 import { useAuth } from '../hooks/useAuth';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTheme } from '@/hooks/useTheme';
 
 export const LoginSignupButton: React.FC = () => {
   const [, setLocation] = useLocation();
   const { user, userProfile, loading, signIn, signOut } = useAuth();
+  const { resolvedTheme } = useTheme();
+  const isDarkMode = resolvedTheme === 'dark';
   const [showDropdown, setShowDropdown] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
@@ -69,7 +72,11 @@ export const LoginSignupButton: React.FC = () => {
           disabled 
           variant="outline" 
           size="sm"
-          className="bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-medium shadow-sm hover:shadow-md transition-all duration-200"
+          className={`${
+            isDarkMode 
+              ? 'bg-[#1E293B] border-white/20 text-white' 
+              : 'bg-white border-gray-300 text-[#1E293B]'
+          } font-medium shadow-sm hover:shadow-md transition-all duration-200`}
         >
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           Loading...
@@ -93,18 +100,26 @@ export const LoginSignupButton: React.FC = () => {
             variant="outline"
             size="sm"
             onClick={() => setShowDropdown(!showDropdown)}
-            className="bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500 text-slate-700 dark:text-slate-200 hover:text-slate-800 dark:hover:text-white flex items-center gap-2 shadow-sm hover:shadow-md transition-all duration-200"
+            className={`${
+              isDarkMode 
+                ? 'bg-[#1E293B] hover:bg-[#334155] border-white/20 hover:border-white/30 text-white hover:text-white' 
+                : 'bg-white hover:bg-[#F1F5F9] border-gray-300 hover:border-gray-400 text-[#1E293B] hover:text-[#0F172A]'
+            } flex items-center gap-2 shadow-sm hover:shadow-md transition-all duration-200`}
           >
             {shouldShowImage ? (
               <img
                 src={userProfile.avatar}
                 alt={userProfile.display_name || user.displayName || 'User'}
-                className="h-6 w-6 rounded-full object-cover ring-2 ring-slate-200 dark:ring-slate-600"
+                className={`h-6 w-6 rounded-full object-cover ring-2 ${
+                  isDarkMode ? 'ring-white/20' : 'ring-gray-300'
+                }`}
                 onError={() => setImageError(true)}
                 onLoad={() => setImageError(false)}
               />
             ) : (
-              <div className="h-6 w-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center ring-2 ring-slate-200 dark:ring-slate-600">
+              <div className={`h-6 w-6 rounded-full bg-gradient-to-br from-[#3B82F6] to-[#2563EB] flex items-center justify-center ring-2 ${
+                isDarkMode ? 'ring-white/20' : 'ring-gray-300'
+              }`}>
                 <User className="h-3 w-3 text-white" />
               </div>
             )}
@@ -128,41 +143,61 @@ export const LoginSignupButton: React.FC = () => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden"
+              className={`absolute right-0 mt-2 w-64 rounded-lg shadow-xl border z-50 overflow-hidden ${
+                isDarkMode 
+                  ? 'bg-[#1E293B] border-white/10' 
+                  : 'bg-white border-gray-200'
+              }`}
             >
               <div className="py-1">
-                <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700 bg-gradient-to-r from-slate-50 to-white dark:from-slate-700 dark:to-slate-800">
+                <div className={`px-4 py-3 border-b ${
+                  isDarkMode 
+                    ? 'border-white/10 bg-gradient-to-r from-[#1E293B] to-[#334155]' 
+                    : 'border-gray-100 bg-gradient-to-r from-gray-50 to-white'
+                }`}>
                   <div className="flex items-center space-x-3">
                     {shouldShowImage ? (
                       <img
                         src={userProfile.avatar}
                         alt={userProfile.display_name || user.displayName || 'User'}
-                        className="h-10 w-10 rounded-full object-cover ring-2 ring-slate-200 dark:ring-slate-600"
+                        className={`h-10 w-10 rounded-full object-cover ring-2 ${
+                          isDarkMode ? 'ring-white/20' : 'ring-gray-300'
+                        }`}
                         onError={() => setImageError(true)}
                       />
                     ) : (
-                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center ring-2 ring-slate-200 dark:ring-slate-600">
+                      <div className={`h-10 w-10 rounded-full bg-gradient-to-br from-[#3B82F6] to-[#2563EB] flex items-center justify-center ring-2 ${
+                        isDarkMode ? 'ring-white/20' : 'ring-gray-300'
+                      }`}>
                         <User className="h-5 w-5 text-white" />
                       </div>
                     )}
                     <div className="min-w-0 flex-1">
-                      <div className="text-sm font-semibold text-slate-900 dark:text-white truncate">
+                      <div className={`text-sm font-semibold truncate ${
+                        isDarkMode ? 'text-white' : 'text-[#1E293B]'
+                      }`}>
                         {userProfile?.display_name || user.displayName || 'User'}
                       </div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                      <div className={`text-xs truncate ${
+                        isDarkMode ? 'text-[#CBD5E1]' : 'text-gray-500'
+                      }`}>
                         {user.email}
                       </div>
                     </div>
                   </div>
                 </div>
                 <motion.button
-                  whileHover={{ backgroundColor: "#f1f5f9" }}
+                  whileHover={{ backgroundColor: isDarkMode ? "#334155" : "#F1F5F9" }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => {
                     setShowDropdown(false);
                     signOut();
                   }}
-                  className="block w-full text-left px-4 py-3 text-sm text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors duration-200"
+                  className={`block w-full text-left px-4 py-3 text-sm transition-colors duration-200 ${
+                    isDarkMode 
+                      ? 'text-[#CBD5E1] hover:text-white' 
+                      : 'text-[#334155] hover:text-[#0F172A]'
+                  }`}
                 >
                   <LogOut className="inline mr-2 h-4 w-4" />
                   Sign Out
@@ -187,7 +222,11 @@ export const LoginSignupButton: React.FC = () => {
           variant="outline"
           size="sm"
           onClick={() => setShowDropdown(!showDropdown)}
-          className="bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500 text-slate-700 dark:text-slate-200 hover:text-slate-800 dark:hover:text-white flex items-center gap-2 shadow-sm hover:shadow-md transition-all duration-200"
+          className={`${
+            isDarkMode 
+              ? 'bg-[#1E293B] hover:bg-[#334155] border-white/20 hover:border-white/30 text-white hover:text-white' 
+              : 'bg-white hover:bg-[#F1F5F9] border-gray-300 hover:border-gray-400 text-[#1E293B] hover:text-[#0F172A]'
+          } flex items-center gap-2 shadow-sm hover:shadow-md transition-all duration-200`}
           disabled={isSigningIn}
         >
           {isSigningIn ? (
@@ -213,16 +252,24 @@ export const LoginSignupButton: React.FC = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden"
+            className={`absolute right-0 mt-2 w-56 rounded-lg shadow-xl border z-50 overflow-hidden ${
+              isDarkMode 
+                ? 'bg-[#1E293B] border-white/10' 
+                : 'bg-white border-gray-200'
+            }`}
           >
             <div className="py-1">
               {/* Quick Google Sign In */}
               <motion.button
-                whileHover={{ backgroundColor: "#f1f5f9" }}
+                whileHover={{ backgroundColor: isDarkMode ? "#334155" : "#F1F5F9" }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleGoogleSignIn}
                 disabled={isSigningIn}
-                className="block w-full text-left px-4 py-3 text-sm text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed border-b border-slate-100 dark:border-slate-700"
+                className={`block w-full text-left px-4 py-3 text-sm transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed border-b ${
+                  isDarkMode 
+                    ? 'text-[#CBD5E1] hover:text-white border-white/10' 
+                    : 'text-[#334155] hover:text-[#0F172A] border-gray-100'
+                }`}
               >
                 {isSigningIn ? (
                   <>
@@ -258,20 +305,30 @@ export const LoginSignupButton: React.FC = () => {
               <div className="px-4 py-2">
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-slate-200 dark:border-slate-700" />
+                    <span className={`w-full border-t ${
+                      isDarkMode ? 'border-white/10' : 'border-gray-200'
+                    }`} />
                   </div>
                   <div className="relative flex justify-center text-xs">
-                    <span className="bg-white dark:bg-slate-800 px-2 text-slate-500 dark:text-slate-400">or</span>
+                    <span className={`px-2 ${
+                      isDarkMode 
+                        ? 'bg-[#1E293B] text-[#CBD5E1]' 
+                        : 'bg-white text-gray-500'
+                    }`}>or</span>
                   </div>
                 </div>
               </div>
 
               {/* Login Option */}
               <motion.button
-                whileHover={{ backgroundColor: "#f1f5f9" }}
+                whileHover={{ backgroundColor: isDarkMode ? "#334155" : "#F1F5F9" }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleNavigateToLogin}
-                className="block w-full text-left px-4 py-3 text-sm text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors duration-200"
+                className={`block w-full text-left px-4 py-3 text-sm transition-colors duration-200 ${
+                  isDarkMode 
+                    ? 'text-[#CBD5E1] hover:text-white' 
+                    : 'text-[#334155] hover:text-[#0F172A]'
+                }`}
               >
                 <LogIn className="inline mr-2 h-4 w-4" />
                 Sign In
@@ -279,10 +336,14 @@ export const LoginSignupButton: React.FC = () => {
 
               {/* Signup Option */}
               <motion.button
-                whileHover={{ backgroundColor: "#f1f5f9" }}
+                whileHover={{ backgroundColor: isDarkMode ? "#334155" : "#F1F5F9" }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleNavigateToSignup}
-                className="block w-full text-left px-4 py-3 text-sm text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors duration-200"
+                className={`block w-full text-left px-4 py-3 text-sm transition-colors duration-200 ${
+                  isDarkMode 
+                    ? 'text-[#CBD5E1] hover:text-white' 
+                    : 'text-[#334155] hover:text-[#0F172A]'
+                }`}
               >
                 <UserPlus className="inline mr-2 h-4 w-4" />
                 Create Account
