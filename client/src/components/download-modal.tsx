@@ -138,22 +138,22 @@ export function DownloadModal({ resumeData, className, children }: DownloadModal
     <>
       {/* Auth Prompt Dialog */}
       <Dialog open={showAuthPrompt} onOpenChange={setShowAuthPrompt}>
-        <DialogContent className="sm:max-w-md p-0 border-0 overflow-hidden">
+        <DialogContent className="sm:max-w-md p-0 border-0 overflow-hidden dark:bg-slate-900 dark:border-slate-700">
           <div className="relative">
             <Button 
               variant="ghost" 
               size="icon" 
               onClick={() => setShowAuthPrompt(false)}
-              className="absolute right-2 top-2 h-8 w-8 p-0 rounded-full"
+              className="absolute right-2 top-2 h-8 w-8 p-0 rounded-full dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800"
             >
               <X className="h-4 w-4" />
               <span className="sr-only">Close</span>
             </Button>
           </div>
-          <div className="p-6 pt-10">
+          <div className="p-6 pt-10 dark:bg-slate-900">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-bold text-center mb-2">Sign In to Download</DialogTitle>
-              <DialogDescription className="text-center text-sm text-muted-foreground">
+              <DialogTitle className="text-2xl font-bold text-center mb-2 dark:text-white">Sign In to Download</DialogTitle>
+              <DialogDescription className="text-center text-sm text-muted-foreground dark:text-slate-400">
                 Create an account or sign in to download your resume and save your progress.
               </DialogDescription>
             </DialogHeader>
@@ -161,7 +161,7 @@ export function DownloadModal({ resumeData, className, children }: DownloadModal
               <Button 
                 onClick={() => handleAuthAction('google')}
                 variant="outline"
-                className="w-full justify-center space-x-2 border border-gray-300 hover:bg-gray-50"
+                className="w-full justify-center space-x-2 border border-gray-300 hover:bg-gray-50 dark:border-slate-600 dark:hover:bg-slate-800 dark:text-slate-300 dark:bg-transparent"
               >
                 <FcGoogle className="h-5 w-5" />
                 <span>Continue with Google</span>
@@ -169,10 +169,10 @@ export function DownloadModal({ resumeData, className, children }: DownloadModal
               
               <div className="relative my-4">
                 <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
+                  <span className="w-full border-t dark:border-slate-700" />
                 </div>
                 <div className="relative flex justify-center text-xs">
-                  <span className="bg-background px-2 text-muted-foreground">
+                  <span className="bg-background dark:bg-slate-900 px-2 text-muted-foreground dark:text-slate-400">
                     or continue with email
                   </span>
                 </div>
@@ -181,25 +181,25 @@ export function DownloadModal({ resumeData, className, children }: DownloadModal
               <Button 
                 onClick={() => handleAuthAction('login')}
                 variant="outline"
-                className="w-full justify-center space-x-2"
+                className="w-full justify-center space-x-2 dark:border-slate-600 dark:hover:bg-slate-800 dark:text-slate-300 dark:bg-transparent"
               >
                 <Mail className="h-4 w-4" />
                 <span>Sign in with Email</span>
               </Button>
               
-              <div className="text-center text-sm text-muted-foreground mt-4">
+              <div className="text-center text-sm text-muted-foreground dark:text-slate-400 mt-4">
                 <span>Don't have an account? </span>
                 <button 
                   onClick={() => handleAuthAction('signup')}
-                  className="text-blue-600 hover:underline font-medium"
+                  className="text-blue-600 hover:underline font-medium dark:text-blue-400 dark:hover:text-blue-300"
                 >
                   Sign up
                 </button>
               </div>
             </div>
           </div>
-          <div className="bg-gray-50 px-6 py-4 border-t">
-            <p className="text-xs text-muted-foreground text-center">
+          <div className="bg-gray-50 dark:bg-slate-800 px-6 py-4 border-t dark:border-slate-700">
+            <p className="text-xs text-muted-foreground dark:text-slate-400 text-center">
               By continuing, you agree to our Terms of Service and Privacy Policy
             </p>
           </div>
@@ -226,14 +226,14 @@ export function DownloadModal({ resumeData, className, children }: DownloadModal
         )}
       </DialogTrigger>
       
-      <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden">
-        <div className="bg-gradient-to-br from-slate-50 to-blue-50/30 p-6">
+      <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden dark:bg-slate-900 dark:border-slate-700">
+        <div className="bg-gradient-to-br from-slate-50 to-blue-50/30 dark:from-slate-800 dark:to-slate-900/30 p-6">
           <DialogHeader className="space-y-3">
-            <DialogTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-              <Download className="w-5 h-5 text-blue-600" />
+            <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+              <Download className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               Download Resume
             </DialogTitle>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-300">
               Choose your preferred format to download your resume
             </p>
           </DialogHeader>
@@ -250,8 +250,8 @@ export function DownloadModal({ resumeData, className, children }: DownloadModal
                   className={cn(
                     "p-4 cursor-pointer transition-all duration-200 border-2",
                     isSelected 
-                      ? "border-blue-500 bg-blue-50/50" 
-                      : "border-gray-200 hover:border-gray-300 bg-white"
+                      ? "border-blue-500 bg-blue-50/50 dark:bg-blue-900/20 dark:border-blue-400" 
+                      : "border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600 bg-white dark:bg-slate-800"
                   )}
                   gradientSize={150}
                   gradientColor={isSelected ? "#3b82f6" : "#e5e7eb"}
@@ -262,20 +262,20 @@ export function DownloadModal({ resumeData, className, children }: DownloadModal
                     <div className="flex items-center gap-3">
                       <div className={cn(
                         "p-2 rounded-lg transition-colors",
-                        isSelected ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-600"
+                        isSelected ? "bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400" : "bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400"
                       )}>
                         {format.icon}
                       </div>
                       <div>
                         <h3 className={cn(
                           "font-medium transition-colors",
-                          isSelected ? "text-blue-900" : "text-gray-900"
+                          isSelected ? "text-blue-900 dark:text-blue-100" : "text-gray-900 dark:text-white"
                         )}>
                           {format.name}
                         </h3>
                         <p className={cn(
                           "text-sm transition-colors",
-                          isSelected ? "text-blue-600" : "text-gray-500"
+                          isSelected ? "text-blue-600 dark:text-blue-300" : "text-gray-500 dark:text-gray-400"
                         )}>
                           {format.description}
                         </p>
@@ -283,11 +283,11 @@ export function DownloadModal({ resumeData, className, children }: DownloadModal
                     </div>
                     
                     <div className="flex items-center gap-2">
-                      <Badge variant="secondary" className="text-xs">
+                      <Badge variant="secondary" className="text-xs dark:bg-slate-700 dark:text-slate-300">
                         {format.extension}
                       </Badge>
                       {isSelected && (
-                        <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse" />
+                        <div className="w-3 h-3 bg-blue-500 dark:bg-blue-400 rounded-full animate-pulse" />
                       )}
                     </div>
                   </div>
@@ -300,7 +300,7 @@ export function DownloadModal({ resumeData, className, children }: DownloadModal
             <Button
               onClick={() => setIsOpen(false)}
               variant="outline"
-              className="flex-1"
+              className="flex-1 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800 dark:bg-transparent"
               disabled={isDownloading}
             >
               Cancel
@@ -309,7 +309,7 @@ export function DownloadModal({ resumeData, className, children }: DownloadModal
             <Button
               onClick={() => handleDownload(selectedFormat)}
               disabled={isDownloading}
-              className="flex-1 bg-blue-600 hover:bg-blue-700"
+              className="flex-1 bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white dark:text-white"
             >
               {isDownloading ? (
                 <>
@@ -318,7 +318,7 @@ export function DownloadModal({ resumeData, className, children }: DownloadModal
                 </>
               ) : downloadSuccess === selectedFormat ? (
                 <>
-                  <CheckCircle2 className="w-4 h-4 mr-2 text-green-500" />
+                  <CheckCircle2 className="w-4 h-4 mr-2 text-green-500 dark:text-green-400" />
                   Downloaded!
                 </>
               ) : (

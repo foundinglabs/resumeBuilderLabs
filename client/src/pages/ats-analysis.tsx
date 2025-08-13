@@ -96,25 +96,115 @@ interface ATSAnalysis {
   contextual_advice: string[];
 }
 
-// Production-level analysis helper functions
+// Enhanced Industry-Specific Keyword Analysis
+const getIndustryKeywords = (jobDesc?: string, resumeText?: string): { technical: string[], soft: string[], industry: string[] } => {
+  const text = (jobDesc || resumeText || '').toLowerCase();
+  
+  const industryPatterns = {
+    'software_development': ['software', 'developer', 'programming', 'coding', 'full-stack', 'frontend', 'backend'],
+    'data_science': ['data', 'analytics', 'machine learning', 'ai', 'statistics', 'python', 'r', 'sql'],
+    'cybersecurity': ['security', 'cyber', 'penetration', 'vulnerability', 'compliance', 'gdpr', 'iso'],
+    'devops': ['devops', 'ci/cd', 'kubernetes', 'docker', 'terraform', 'aws', 'azure', 'gcp'],
+    'product_management': ['product', 'agile', 'scrum', 'roadmap', 'stakeholder', 'user experience', 'ux'],
+    'marketing': ['marketing', 'campaign', 'seo', 'sem', 'social media', 'brand', 'analytics'],
+    'finance': ['finance', 'accounting', 'budget', 'forecasting', 'risk', 'compliance', 'audit'],
+    'healthcare': ['healthcare', 'medical', 'patient', 'clinical', 'fda', 'hipaa', 'pharmaceutical'],
+    'education': ['education', 'teaching', 'curriculum', 'student', 'academic', 'pedagogy'],
+    'sales': ['sales', 'revenue', 'customer', 'account', 'b2b', 'b2c', 'negotiation']
+  };
+
+  let detectedIndustry = 'general';
+  let maxMatches = 0;
+
+  for (const [industry, patterns] of Object.entries(industryPatterns)) {
+    const matches = patterns.filter(pattern => text.includes(pattern));
+    if (matches.length > maxMatches) {
+      maxMatches = matches.length;
+      detectedIndustry = industry;
+    }
+  }
+
+  const industryKeywords = {
+    'software_development': {
+      technical: ['javascript', 'python', 'java', 'react', 'angular', 'vue', 'node.js', 'express', 'mongodb', 'postgresql', 'mysql', 'redis', 'docker', 'kubernetes', 'aws', 'azure', 'git', 'github', 'jenkins', 'jira', 'agile', 'scrum', 'tdd', 'bdd', 'microservices', 'rest api', 'graphql', 'websocket', 'oauth', 'jwt', 'typescript', 'es6', 'webpack', 'babel', 'jest', 'cypress', 'selenium'],
+      soft: ['problem solving', 'critical thinking', 'team collaboration', 'code review', 'mentoring', 'technical leadership', 'architecture design', 'system design', 'performance optimization', 'debugging', 'documentation', 'version control', 'continuous integration', 'test-driven development'],
+      industry: ['software development lifecycle', 'agile methodology', 'scrum framework', 'code quality', 'technical debt', 'refactoring', 'design patterns', 'clean code', 'software architecture', 'api design', 'database design', 'cloud computing', 'serverless', 'containerization', 'orchestration', 'ci/cd pipelines', 'devops practices', 'monitoring', 'logging', 'observability']
+    },
+    'data_science': {
+      technical: ['python', 'r', 'sql', 'pandas', 'numpy', 'scikit-learn', 'tensorflow', 'pytorch', 'keras', 'matplotlib', 'seaborn', 'plotly', 'jupyter', 'spark', 'hadoop', 'hive', 'pig', 'kafka', 'elasticsearch', 'tableau', 'power bi', 'looker', 'airflow', 'mlflow', 'kubeflow', 'docker', 'kubernetes', 'aws sagemaker', 'google ai platform', 'azure ml'],
+      soft: ['statistical analysis', 'data visualization', 'hypothesis testing', 'experimental design', 'a/b testing', 'business intelligence', 'data storytelling', 'stakeholder communication', 'project management', 'research methodology', 'critical thinking', 'problem solving', 'attention to detail'],
+      industry: ['machine learning', 'deep learning', 'artificial intelligence', 'predictive modeling', 'statistical modeling', 'data mining', 'data engineering', 'etl processes', 'data warehousing', 'business analytics', 'quantitative analysis', 'regression analysis', 'classification', 'clustering', 'natural language processing', 'computer vision', 'recommendation systems', 'time series analysis', 'anomaly detection', 'feature engineering']
+    },
+    'cybersecurity': {
+      technical: ['penetration testing', 'vulnerability assessment', 'siem', 'ids/ips', 'firewall', 'vpn', 'encryption', 'ssl/tls', 'oauth', 'saml', 'ldap', 'active directory', 'kali linux', 'metasploit', 'wireshark', 'nmap', 'burp suite', 'nessus', 'qualys', 'crowdstrike', 'splunk', 'qradar', 'elasticsearch', 'python', 'bash', 'powershell', 'docker', 'kubernetes'],
+      soft: ['risk assessment', 'incident response', 'threat hunting', 'security awareness', 'compliance', 'audit', 'forensics', 'investigation', 'documentation', 'stakeholder communication', 'team leadership', 'project management', 'attention to detail', 'analytical thinking'],
+      industry: ['information security', 'cyber defense', 'threat intelligence', 'security operations', 'compliance frameworks', 'gdpr', 'hipaa', 'sox', 'pci dss', 'iso 27001', 'nist framework', 'zero trust', 'defense in depth', 'security architecture', 'identity and access management', 'data protection', 'privacy', 'security governance', 'business continuity', 'disaster recovery']
+    },
+    'devops': {
+      technical: ['docker', 'kubernetes', 'terraform', 'ansible', 'jenkins', 'gitlab ci', 'github actions', 'aws', 'azure', 'gcp', 'prometheus', 'grafana', 'elk stack', 'splunk', 'new relic', 'datadog', 'vault', 'consul', 'etcd', 'helm', 'istio', 'linkerd', 'nginx', 'haproxy', 'redis', 'rabbitmq', 'kafka', 'postgresql', 'mysql', 'mongodb', 'bash', 'python', 'go', 'ruby'],
+      soft: ['automation', 'infrastructure as code', 'continuous integration', 'continuous deployment', 'site reliability engineering', 'incident management', 'capacity planning', 'performance optimization', 'monitoring', 'alerting', 'documentation', 'collaboration', 'problem solving', 'system administration'],
+      industry: ['devops culture', 'agile methodology', 'lean practices', 'infrastructure automation', 'configuration management', 'container orchestration', 'microservices architecture', 'service mesh', 'observability', 'distributed systems', 'cloud native', 'serverless', 'edge computing', 'gitops', 'chaos engineering', 'disaster recovery', 'backup strategies', 'security automation', 'compliance automation']
+    },
+    'general': {
+      technical: ['microsoft office', 'excel', 'powerpoint', 'word', 'outlook', 'google workspace', 'slack', 'teams', 'zoom', 'trello', 'asana', 'jira', 'confluence', 'salesforce', 'hubspot', 'quickbooks', 'adobe creative suite', 'photoshop', 'illustrator', 'indesign'],
+      soft: ['communication', 'leadership', 'teamwork', 'problem solving', 'time management', 'organization', 'attention to detail', 'customer service', 'project management', 'analytical thinking', 'creativity', 'adaptability', 'collaboration', 'initiative', 'reliability'],
+      industry: ['business operations', 'process improvement', 'quality assurance', 'compliance', 'documentation', 'training', 'mentoring', 'cross-functional collaboration', 'stakeholder management', 'strategic planning', 'performance management', 'change management']
+    }
+  };
+
+  return industryKeywords[detectedIndustry as keyof typeof industryKeywords] || industryKeywords.general;
+};
+
+// Enhanced Experience Calculation
+const calculateAccurateExperience = (resumeData: RefinedResumeData): { totalYears: number, detailedBreakdown: any[] } => {
+  const experiences = resumeData.employment_history.full_time || [];
+  let totalMonths = 0;
+  const breakdown = [];
+
+  for (const exp of experiences) {
+    try {
+      const startDate = new Date(exp.startDate);
+      const endDate = exp.endDate.toLowerCase() === 'present' ? new Date() : new Date(exp.endDate);
+      
+      if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
+        const monthsDiff = (endDate.getFullYear() - startDate.getFullYear()) * 12 + 
+                          (endDate.getMonth() - startDate.getMonth());
+        totalMonths += Math.max(0, monthsDiff);
+        
+        breakdown.push({
+          title: exp.jobTitle,
+          company: exp.company,
+          duration: `${Math.floor(monthsDiff / 12)}y ${monthsDiff % 12}m`,
+          months: monthsDiff
+        });
+      }
+    } catch (error) {
+      console.warn('Error parsing date for experience:', exp);
+    }
+  }
+
+  return {
+    totalYears: Math.round((totalMonths / 12) * 10) / 10,
+    detailedBreakdown: breakdown
+  };
+};
+
+// Enhanced Job Match Analysis
 const analyzeJobMatch = (resumeData: RefinedResumeData, jobDesc: string): JobMatchAnalysis => {
-  const jobWords = jobDesc.toLowerCase().split(/\s+/);
+  const industryKeywords = getIndustryKeywords(jobDesc, resumeData.raw_data.original_text);
   const resumeSkills = [...resumeData.skills.technical, ...resumeData.skills.soft_skills].map(s => s.toLowerCase());
   
-  // Extract common required skills from job description
-  const commonSkills = ['javascript', 'python', 'react', 'node', 'sql', 'aws', 'docker', 'git', 'leadership', 'communication'];
-  const requiredSkills = commonSkills.filter(skill => jobDesc.toLowerCase().includes(skill));
-  const bonusSkills = ['kubernetes', 'microservices', 'agile', 'ci/cd', 'terraform', 'mongodb'];
+  const requiredSkills = industryKeywords.technical.filter(skill => jobDesc.toLowerCase().includes(skill));
+  const bonusSkills = industryKeywords.industry.filter(skill => jobDesc.toLowerCase().includes(skill));
   
   const required_skills_found = requiredSkills.filter(skill => resumeSkills.some(rs => rs.includes(skill)));
   const required_skills_missing = requiredSkills.filter(skill => !resumeSkills.some(rs => rs.includes(skill)));
   const bonus_skills_found = bonusSkills.filter(skill => resumeSkills.some(rs => rs.includes(skill)));
   const bonus_skills_missing = bonusSkills.filter(skill => !resumeSkills.some(rs => rs.includes(skill)));
   
-  // Analyze experience requirements
+  const { totalYears } = calculateAccurateExperience(resumeData);
   const experienceMatch = /(\d+)\+?\s*years?/i.exec(jobDesc);
   const requiredYears = experienceMatch ? parseInt(experienceMatch[1]) : 0;
-  const candidateYears = resumeData.employment_history.full_time.length * 1.5; // Estimate years
   
   return {
     required_skills_found,
@@ -122,62 +212,250 @@ const analyzeJobMatch = (resumeData: RefinedResumeData, jobDesc: string): JobMat
     bonus_skills_found,
     bonus_skills_missing,
     quantifiable_requirements: {
-      found: candidateYears >= requiredYears ? [`${candidateYears} years experience`] : [],
-      missing: candidateYears < requiredYears ? [`${requiredYears}+ years experience required`] : []
+      found: totalYears >= requiredYears ? [`${totalYears} years experience`] : [],
+      missing: totalYears < requiredYears ? [`${requiredYears}+ years experience required`] : []
     },
-    experience_level_match: candidateYears >= requiredYears,
+    experience_level_match: totalYears >= requiredYears,
     industry_alignment: Math.min(100, (required_skills_found.length / Math.max(1, requiredSkills.length)) * 100)
   };
 };
 
-const analyzeFormatting = (text: string): FormattingAnalysis => {
+const analyzeFormatting = (text: string, resumeData?: RefinedResumeData): FormattingAnalysis => {
+  const issues = [];
+  const warnings = [];
+  const suggestions = [];
+
+  // Font analysis
+  const fontPatterns = {
+    'Arial': /arial/gi,
+    'Calibri': /calibri/gi,
+    'Times New Roman': /times new roman|times/gi,
+    'Helvetica': /helvetica/gi,
+    'Georgia': /georgia/gi,
+    'Verdana': /verdana/gi
+  };
+
+  const detectedFonts = Object.entries(fontPatterns)
+    .filter(([font, pattern]) => pattern.test(text))
+    .map(([font]) => font);
+
+  const atsFriendlyFonts = ['Arial', 'Calibri', 'Times New Roman', 'Helvetica', 'Georgia', 'Verdana'];
+  const atsFriendly = detectedFonts.every(font => atsFriendlyFonts.includes(font));
+
+  if (!atsFriendly) {
+    warnings.push('Some fonts may not be ATS-friendly');
+  }
+
+  // Layout analysis
+  if (text.includes('|') || text.includes('┃') || text.includes('│')) {
+    issues.push('Table formatting detected - may not parse correctly in ATS');
+  }
+
+  if (text.includes('•') && text.includes('○') && text.includes('▪')) {
+    issues.push('Mixed bullet point styles detected');
+  }
+
+  if (text.includes('  ') || text.includes('\t\t')) {
+    issues.push('Excessive spacing detected - may cause parsing issues');
+  }
+
+  // Date format analysis
+  const datePatterns = [
+    /\b\d{1,2}\/\d{1,2}\/\d{4}\b/g,  // MM/DD/YYYY
+    /\b\d{1,2}-\d{1,2}-\d{4}\b/g,    // MM-DD-YYYY
+    /\b\d{4}-\d{1,2}-\d{1,2}\b/g,    // YYYY-MM-DD
+    /\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{4}\b/gi, // Month YYYY
+    /\b\d{4}\b/g                      // YYYY only
+  ];
+
+  const dates = text.match(/\b\d{4}\b/g) || [];
+  const uniqueYears = Array.from(new Set(dates)).sort();
+  
+  if (uniqueYears.length > 0) {
+    const currentYear = new Date().getFullYear();
+    const futureYears = uniqueYears.filter(year => parseInt(year) > currentYear);
+    if (futureYears.length > 0) {
+      issues.push('Future dates detected - please verify');
+    }
+  }
+
+  // Section structure analysis
+  const sectionHeaders = ['experience', 'education', 'skills', 'summary', 'objective', 'contact', 'work history', 'employment'];
+  const foundSections = sectionHeaders.filter(header => 
+    text.toLowerCase().includes(header)
+  );
+
+  if (foundSections.length < 3) {
+    warnings.push('Limited section headers detected');
+  }
+
+  // Contact information analysis
+  const emailPattern = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g;
+  const phonePattern = /\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/g;
+  
+  const emails = text.match(emailPattern) || [];
+  const phones = text.match(phonePattern) || [];
+
+  if (emails.length === 0) {
+    issues.push('No email address detected');
+  }
+  if (phones.length === 0) {
+    warnings.push('No phone number detected');
+  }
+
+  // Bullet point analysis
+  const bulletPatterns = ['•', '○', '▪', '▫', '-', '*', '→', '⇒'];
+  const bulletCount = bulletPatterns.reduce((count, bullet) => 
+    count + (text.match(new RegExp(bullet, 'g')) || []).length, 0
+  );
+
+  const avgBulletsPerSection = bulletCount / Math.max(1, foundSections.length);
+  if (avgBulletsPerSection < 2) {
+    suggestions.push('Consider adding more bullet points to highlight achievements');
+  }
+
   return {
     font_analysis: {
-      fonts_detected: ['Arial', 'Calibri'],
-      ats_friendly: true,
-      warnings: []
+      fonts_detected: detectedFonts.length > 0 ? detectedFonts : ['Unknown'],
+      ats_friendly: atsFriendly,
+      warnings: warnings
     },
-    layout_issues: text.includes('|') ? ['Potential table formatting detected'] : [],
+    layout_issues: issues,
     bullet_style_analysis: {
-      style: 'standard',
+      style: bulletCount > 0 ? 'standard' : 'none',
       ats_compatible: true,
-      suggestions: []
+      suggestions: suggestions
     },
     date_format_consistency: {
-      consistent: true,
-      issues: []
+      consistent: issues.length === 0,
+      issues: issues
     }
   };
 };
 
 const analyzeActionVerbs = (text: string): ActionVerbAnalysis => {
-  const strongVerbs = ['achieved', 'implemented', 'led', 'managed', 'developed', 'created', 'optimized', 'increased'];
-  const weakVerbs = ['responsible for', 'involved in', 'worked on', 'helped with'];
-  
+  const strongVerbs = [
+    'achieved', 'implemented', 'led', 'managed', 'developed', 'created', 'optimized', 'increased', 
+    'improved', 'designed', 'built', 'launched', 'delivered', 'executed', 'coordinated', 'facilitated',
+    'mentored', 'trained', 'supervised', 'orchestrated', 'streamlined', 'enhanced', 'expanded',
+    'established', 'founded', 'initiated', 'pioneered', 'revolutionized', 'transformed', 'modernized',
+    'automated', 'integrated', 'consolidated', 'standardized', 'scaled', 'accelerated', 'boosted',
+    'maximized', 'minimized', 'reduced', 'eliminated', 'resolved', 'solved', 'addressed', 'mitigated'
+  ];
+
+  const weakVerbs = [
+    'responsible for', 'involved in', 'worked on', 'helped with', 'assisted with', 'participated in',
+    'contributed to', 'supported', 'maintained', 'monitored', 'observed', 'watched', 'saw', 'looked at',
+    'reviewed', 'examined', 'studied', 'analyzed', 'researched', 'investigated', 'explored', 'considered',
+    'thought about', 'planned', 'prepared', 'organized', 'arranged', 'scheduled', 'coordinated'
+  ];
+
+  const passivePatterns = [
+    /\b(?:was|were|is|are|been|being)\s+(?:responsible|involved|working|helping|assisting|participating|contributing|supporting|maintaining|monitoring|observing|watching|seeing|looking|reviewing|examining|studying|analyzing|researching|investigating|exploring|considering|thinking|planning|preparing|organizing|arranging|scheduling|coordinating)\b/gi
+  ];
+
   const strongVerbsFound = strongVerbs.filter(verb => text.toLowerCase().includes(verb));
   const weakVerbsFound = weakVerbs.filter(verb => text.toLowerCase().includes(verb));
   
+  const passiveInstances = passivePatterns.flatMap(pattern => 
+    text.match(pattern) || []
+  );
+
+  const suggestedReplacements = {
+    'responsible for': 'managed',
+    'involved in': 'contributed to',
+    'worked on': 'developed',
+    'helped with': 'supported',
+    'assisted with': 'facilitated',
+    'participated in': 'led',
+    'supported': 'enabled',
+    'maintained': 'optimized',
+    'monitored': 'analyzed',
+    'observed': 'evaluated',
+    'reviewed': 'assessed',
+    'examined': 'investigated',
+    'studied': 'researched',
+    'analyzed': 'evaluated',
+    'researched': 'investigated',
+    'investigated': 'explored',
+    'explored': 'pioneered',
+    'considered': 'evaluated',
+    'thought about': 'strategized',
+    'planned': 'orchestrated',
+    'prepared': 'developed',
+    'organized': 'coordinated',
+    'arranged': 'facilitated',
+    'scheduled': 'coordinated'
+  };
+
   return {
     strong_verbs_count: strongVerbsFound.length,
     weak_verbs_found: weakVerbsFound,
-    passive_voice_instances: [],
-    suggested_replacements: {
-      'responsible for': 'managed',
-      'involved in': 'contributed to',
-      'worked on': 'developed'
-    }
+    passive_voice_instances: passiveInstances,
+    suggested_replacements: suggestedReplacements
   };
 };
 
 const analyzeQuantifiableResults = (text: string): QuantifiableResultsAudit => {
-  const numberPattern = /\d+[%$km]?/g;
-  const numbers = text.match(numberPattern) || [];
-  
+  // Enhanced number patterns for different types of metrics
+  const patterns = {
+    percentages: /\d+(?:\.\d+)?%/g,
+    currency: /\$[\d,]+(?:\.\d{2})?/g,
+    numbers: /\b\d+(?:,\d{3})*(?:\.\d+)?\b/g,
+    ranges: /\d+(?:\.\d+)?\s*[-–—]\s*\d+(?:\.\d+)?/g,
+    ratios: /\d+(?:\.\d+)?\s*:\s*\d+(?:\.\d+)?/g,
+    timeframes: /\d+\s*(?:days?|weeks?|months?|years?)/gi,
+    sizes: /\d+\s*(?:users?|customers?|clients?|employees?|team members?)/gi,
+    improvements: /(?:increased|improved|reduced|decreased|boosted|enhanced|optimized|streamlined)\s+(?:by\s+)?\d+(?:\.\d+)?%/gi
+  };
+
+  const allNumbers = Object.entries(patterns).flatMap(([type, pattern]) => 
+    (text.match(pattern) || []).map(match => ({ type, value: match }))
+  );
+
+  // Extract quantified achievements
+  const quantifiedAchievements = allNumbers
+    .filter(item => ['percentages', 'currency', 'improvements'].includes(item.type))
+    .slice(0, 8)
+    .map(item => item.value);
+
+  // Identify unquantified opportunities
+  const unquantifiedOpportunities = [
+    'productivity improvements',
+    'team management',
+    'cost savings',
+    'revenue growth',
+    'customer satisfaction',
+    'process efficiency',
+    'quality improvements',
+    'time savings',
+    'resource optimization',
+    'risk reduction',
+    'compliance improvements',
+    'innovation initiatives'
+  ].filter(opportunity => 
+    text.toLowerCase().includes(opportunity.replace(' ', '')) ||
+    text.toLowerCase().includes(opportunity.split(' ')[0])
+  );
+
+  // Generate specific suggestions based on content
+  const suggestions = [];
+  if (allNumbers.length < 3) {
+    suggestions.push('Add specific metrics to achievements (e.g., "increased sales by 25%")');
+    suggestions.push('Include quantifiable results (e.g., "managed team of 15 developers")');
+  }
+  if (allNumbers.filter(item => item.type === 'percentages').length === 0) {
+    suggestions.push('Include percentage improvements to demonstrate impact');
+  }
+  if (allNumbers.filter(item => item.type === 'currency').length === 0) {
+    suggestions.push('Add monetary impact where possible (e.g., "saved $50K annually")');
+  }
+
   return {
-    quantified_achievements: numbers.slice(0, 5),
-    unquantified_opportunities: ['productivity improvements', 'team management', 'cost savings'],
-    metrics_found: numbers.length,
-    suggestions: numbers.length < 3 ? ['Add specific metrics to achievements', 'Quantify impact with percentages'] : []
+    quantified_achievements: quantifiedAchievements,
+    unquantified_opportunities: unquantifiedOpportunities,
+    metrics_found: allNumbers.length,
+    suggestions: suggestions
   };
 };
 
@@ -195,7 +473,7 @@ const analyzeReadability = (text: string): ReadabilityMetrics => {
 };
 
 const determineExperienceLevel = (resumeData: RefinedResumeData): 'entry' | 'mid' | 'senior' | 'executive' => {
-  const experienceYears = resumeData.employment_history.full_time.length;
+  const { totalYears: experienceYears } = calculateAccurateExperience(resumeData);
   if (experienceYears === 0) return 'entry';
   if (experienceYears <= 2) return 'entry';
   if (experienceYears <= 5) return 'mid';
@@ -255,7 +533,7 @@ export default function ATSAnalysis() {
       // Dynamic keyword analysis based on actual extracted skills
       const technicalSkills = refinedData.skills.technical.length;
       const totalSkills = technicalSkills + refinedData.skills.soft_skills.length;
-      const experienceYears = refinedData.employment_history.full_time.length;
+      const { totalYears: experienceYears } = calculateAccurateExperience(refinedData);
       const educationLevel = refinedData.education.academics.length;
       
       // Advanced keyword scoring based on content richness
@@ -272,7 +550,7 @@ export default function ATSAnalysis() {
         refinedData.personal_information.full_name !== "Professional Candidate" ? 1 : 0, // Real name extracted
         refinedData.personal_information.contact.email.includes('@') ? 1 : 0, // Real email
         refinedData.professional_profile.summary && refinedData.professional_profile.summary.length > 50 ? 1 : 0, // Meaningful summary
-        refinedData.employment_history.full_time.length > 0 ? 1 : 0, // Has experience
+        experienceYears > 0 ? 1 : 0, // Has experience
         refinedData.education.academics.length > 0 ? 1 : 0, // Has education
         refinedData.skills.technical.length >= 3 ? 1 : 0 // Adequate skills
       ].reduce((sum, val) => sum + val, 0);
@@ -298,7 +576,7 @@ export default function ATSAnalysis() {
       
       // Enhanced production-level analysis
       const jobMatchAnalysis = jobDesc ? analyzeJobMatch(refinedData, jobDesc) : undefined;
-      const formattingAnalysis = analyzeFormatting(text);
+      const formattingAnalysis = analyzeFormatting(text, refinedData);
       const actionVerbAnalysis = analyzeActionVerbs(text);
       const quantifiableResults = analyzeQuantifiableResults(text);
       const readabilityMetrics = analyzeReadability(text);
@@ -325,8 +603,9 @@ export default function ATSAnalysis() {
       if (technicalSkills >= 7) strengths.push(`Excellent technical skill range (${technicalSkills} skills listed)`);
       else if (technicalSkills >= 4) strengths.push(`Good technical skill diversity (${technicalSkills} skills)`);
       
-      if (refinedData.employment_history.full_time.length >= 3) strengths.push(`Extensive work history (${experienceYears} positions)`);
-      else if (refinedData.employment_history.full_time.length >= 2) strengths.push('Solid professional experience');
+      if (experienceYears >= 5) strengths.push(`Extensive work history (${experienceYears} years experience)`);
+      else if (experienceYears >= 2) strengths.push(`Solid professional experience (${experienceYears} years)`);
+      else if (experienceYears > 0) strengths.push(`Professional experience (${experienceYears} years)`);
       
       if (refinedData.education.academics.length > 1) strengths.push('Multiple educational qualifications');
       else if (refinedData.education.academics.length > 0) strengths.push('Educational background included');
@@ -344,8 +623,8 @@ export default function ATSAnalysis() {
       if (overallScore < 70) weaknesses.push(`ATS score needs improvement (currently ${overallScore}%)`);
       if (!metadata.is_ats_compatible) weaknesses.push('Resume format may not parse optimally in ATS systems');
       if (technicalSkills < 3) weaknesses.push(`Limited technical skills listed (only ${technicalSkills})`);
-      if (refinedData.employment_history.full_time.length === 0) weaknesses.push('No work experience detected');
-      else if (refinedData.employment_history.full_time.length === 1) weaknesses.push('Limited work experience history');
+      if (experienceYears === 0) weaknesses.push('No work experience detected');
+      else if (experienceYears < 1) weaknesses.push('Limited work experience history');
       
       if (!refinedData.professional_profile.summary) weaknesses.push('Missing professional summary section');
       else if (refinedData.professional_profile.summary.length < 50) weaknesses.push('Professional summary too brief');
@@ -374,7 +653,7 @@ export default function ATSAnalysis() {
         recommendations.push('Expand professional summary with quantifiable accomplishments');
       }
       
-      if (refinedData.employment_history.full_time.length < 2) {
+      if (experienceYears < 2) {
         recommendations.push('Include more detailed work experience with measurable results');
       }
       if (refinedData.employment_history.full_time.some(exp => exp.description.length === 0)) {
@@ -736,123 +1015,195 @@ export default function ATSAnalysis() {
       font-family: Arial, sans-serif;
       max-width: 800px;
       margin: 0 auto;
-      padding: 40px;
-      line-height: 1.6;
+      padding: 20px;
+      line-height: 1.4;
       color: #333;
       background: white;
     `;
     
     reportDiv.innerHTML = `
-      <div style="text-align: center; margin-bottom: 40px; border-bottom: 2px solid #3b82f6; padding-bottom: 20px;">
-        <h1 style="color: #1e40af; margin: 0; font-size: 28px;">ATS Resume Analysis Report</h1>
-        <p style="color: #64748b; margin: 10px 0 0 0;">Generated: ${reportData.generated_on}</p>
-        <p style="color: #64748b; margin: 5px 0 0 0;">File: ${reportData.file_name}</p>
+      <div style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid #3b82f6; padding-bottom: 15px;">
+        <h1 style="color: #1e40af; margin: 0; font-size: 24px;">ATS Resume Analysis Report</h1>
+        <p style="color: #64748b; margin: 8px 0 0 0; font-size: 14px;">Generated: ${reportData.generated_on}</p>
+        <p style="color: #64748b; margin: 3px 0 0 0; font-size: 14px;">File: ${reportData.file_name}</p>
       </div>
       
-      <div style="text-align: center; margin-bottom: 40px; padding: 20px; background: #f8fafc; border-radius: 8px;">
-        <h2 style="color: ${reportData.overall_score >= 80 ? '#059669' : reportData.overall_score >= 60 ? '#d97706' : '#dc2626'}; font-size: 48px; margin: 0;">${reportData.overall_score}/100</h2>
-        <p style="color: #64748b; margin: 10px 0 0 0; font-size: 18px;">${reportData.ats_verdict}</p>
+      <div style="text-align: center; margin-bottom: 20px; padding: 15px; background: #f8fafc; border-radius: 8px;">
+        <h2 style="color: ${reportData.overall_score >= 80 ? '#059669' : reportData.overall_score >= 60 ? '#d97706' : '#dc2626'}; font-size: 36px; margin: 0;">${reportData.overall_score}/100</h2>
+        <p style="color: #64748b; margin: 8px 0 0 0; font-size: 16px;">${reportData.ats_verdict}</p>
       </div>
       
-      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 40px;">
-        <div style="padding: 15px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #3b82f6;">
-          <h3 style="color: #1e40af; margin: 0 0 10px 0;">Keyword Density</h3>
-          <p style="font-size: 24px; font-weight: bold; color: #3b82f6; margin: 0;">${reportData.detailed_scores.keyword_density}%</p>
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;">
+        <div style="padding: 12px; background: #f0f9ff; border-radius: 6px; border-left: 4px solid #3b82f6;">
+          <h3 style="color: #1e40af; margin: 0 0 8px 0; font-size: 16px;">Keyword Density</h3>
+          <p style="font-size: 20px; font-weight: bold; color: #3b82f6; margin: 0;">${reportData.detailed_scores.keyword_density}%</p>
         </div>
-        <div style="padding: 15px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #3b82f6;">
-          <h3 style="color: #1e40af; margin: 0 0 10px 0;">Format Quality</h3>
-          <p style="font-size: 24px; font-weight: bold; color: #3b82f6; margin: 0;">${reportData.detailed_scores.format_score}%</p>
+        <div style="padding: 12px; background: #f0f9ff; border-radius: 6px; border-left: 4px solid #3b82f6;">
+          <h3 style="color: #1e40af; margin: 0 0 8px 0; font-size: 16px;">Format Quality</h3>
+          <p style="font-size: 20px; font-weight: bold; color: #3b82f6; margin: 0;">${reportData.detailed_scores.format_score}%</p>
         </div>
-        <div style="padding: 15px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #3b82f6;">
-          <h3 style="color: #1e40af; margin: 0 0 10px 0;">Section Completeness</h3>
-          <p style="font-size: 24px; font-weight: bold; color: #3b82f6; margin: 0;">${reportData.detailed_scores.section_score}%</p>
+        <div style="padding: 12px; background: #f0f9ff; border-radius: 6px; border-left: 4px solid #3b82f6;">
+          <h3 style="color: #1e40af; margin: 0 0 8px 0; font-size: 16px;">Section Completeness</h3>
+          <p style="font-size: 20px; font-weight: bold; color: #3b82f6; margin: 0;">${reportData.detailed_scores.section_score}%</p>
         </div>
-        <div style="padding: 15px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #3b82f6;">
-          <h3 style="color: #1e40af; margin: 0 0 10px 0;">Readability</h3>
-          <p style="font-size: 24px; font-weight: bold; color: #3b82f6; margin: 0;">${reportData.detailed_scores.readability}%</p>
+        <div style="padding: 12px; background: #f0f9ff; border-radius: 6px; border-left: 4px solid #3b82f6;">
+          <h3 style="color: #1e40af; margin: 0 0 8px 0; font-size: 16px;">Readability</h3>
+          <p style="font-size: 20px; font-weight: bold; color: #3b82f6; margin: 0;">${reportData.detailed_scores.readability}%</p>
         </div>
       </div>
       
-      <div style="margin-bottom: 30px;">
-        <h3 style="color: #059669; border-bottom: 2px solid #059669; padding-bottom: 10px;">✓ Strengths</h3>
-        <ul style="color: #374151; padding-left: 20px;">
-          ${reportData.strengths.map(strength => `<li style="margin-bottom: 8px;">${strength}</li>`).join('')}
+      <div style="margin-bottom: 20px;">
+        <h3 style="color: #059669; border-bottom: 2px solid #059669; padding-bottom: 8px; font-size: 18px;">✓ Strengths</h3>
+        <ul style="color: #374151; padding-left: 18px; margin: 8px 0;">
+          ${reportData.strengths.map(strength => `<li style="margin-bottom: 6px; font-size: 14px;">${strength}</li>`).join('')}
         </ul>
       </div>
       
-      <div style="margin-bottom: 30px;">
-        <h3 style="color: #dc2626; border-bottom: 2px solid #dc2626; padding-bottom: 10px;">⚠ Areas for Improvement</h3>
-        <ul style="color: #374151; padding-left: 20px;">
-          ${reportData.weaknesses.map(weakness => `<li style="margin-bottom: 8px;">${weakness}</li>`).join('')}
+      <div style="margin-bottom: 20px;">
+        <h3 style="color: #dc2626; border-bottom: 2px solid #dc2626; padding-bottom: 8px; font-size: 18px;">⚠ Areas for Improvement</h3>
+        <ul style="color: #374151; padding-left: 18px; margin: 8px 0;">
+          ${reportData.weaknesses.map(weakness => `<li style="margin-bottom: 6px; font-size: 14px;">${weakness}</li>`).join('')}
         </ul>
       </div>
       
-      <div style="margin-bottom: 30px;">
-        <h3 style="color: #3b82f6; border-bottom: 2px solid #3b82f6; padding-bottom: 10px;">🎯 Recommendations</h3>
-        <ul style="color: #374151; padding-left: 20px;">
-          ${reportData.recommendations.map(rec => `<li style="margin-bottom: 8px;">${rec}</li>`).join('')}
+      <div style="margin-bottom: 20px;">
+        <h3 style="color: #3b82f6; border-bottom: 2px solid #3b82f6; padding-bottom: 8px; font-size: 18px;">🎯 Recommendations</h3>
+        <ul style="color: #374151; padding-left: 18px; margin: 8px 0;">
+          ${reportData.recommendations.map(rec => `<li style="margin-bottom: 6px; font-size: 14px;">${rec}</li>`).join('')}
         </ul>
       </div>
       
-      <div style="margin-bottom: 30px;">
-        <h3 style="color: #1e40af; border-bottom: 2px solid #1e40af; padding-bottom: 10px;">📊 Resume Statistics</h3>
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-          <div><strong>Word Count:</strong> ${reportData.analysis_summary.word_count}</div>
-          <div><strong>Read Time:</strong> ${reportData.analysis_summary.estimated_read_time}</div>
-          <div><strong>Sections Detected:</strong> ${reportData.analysis_summary.sections_detected}</div>
-          <div><strong>Keywords Found:</strong> ${reportData.keyword_analysis.total_keywords_found}</div>
+      <div style="margin-bottom: 20px;">
+        <h3 style="color: #1e40af; border-bottom: 2px solid #1e40af; padding-bottom: 8px; font-size: 18px;">📊 Resume Statistics</h3>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 8px 0;">
+          <div style="font-size: 14px;"><strong>Word Count:</strong> ${reportData.analysis_summary.word_count}</div>
+          <div style="font-size: 14px;"><strong>Read Time:</strong> ${reportData.analysis_summary.estimated_read_time}</div>
+          <div style="font-size: 14px;"><strong>Sections Detected:</strong> ${reportData.analysis_summary.sections_detected}</div>
+          <div style="font-size: 14px;"><strong>Keywords Found:</strong> ${reportData.keyword_analysis.total_keywords_found}</div>
         </div>
       </div>
       
-      <div style="margin-bottom: 30px;">
-        <h3 style="color: #059669; border-bottom: 2px solid #059669; padding-bottom: 10px;">🔍 Keyword Analysis</h3>
-        <div style="margin-bottom: 15px;">
-          <strong style="color: #059669;">Found Keywords (${reportData.keyword_analysis.total_keywords_found}):</strong>
-          <p style="color: #374151; margin: 5px 0;">${reportData.keyword_analysis.keywords_found.join(', ')}</p>
+      <div style="margin-bottom: 20px;">
+        <h3 style="color: #059669; border-bottom: 2px solid #059669; padding-bottom: 8px; font-size: 18px;">🔍 Keyword Analysis</h3>
+        <div style="margin-bottom: 12px;">
+          <strong style="color: #059669; font-size: 14px;">Found Keywords (${reportData.keyword_analysis.total_keywords_found}):</strong>
+          <p style="color: #374151; margin: 4px 0; font-size: 13px;">${reportData.keyword_analysis.keywords_found.join(', ')}</p>
         </div>
         <div>
-          <strong style="color: #dc2626;">Suggested Keywords (${reportData.keyword_analysis.suggested_keywords_count}):</strong>
-          <p style="color: #374151; margin: 5px 0;">${reportData.keyword_analysis.keywords_missing.join(', ')}</p>
+          <strong style="color: #dc2626; font-size: 14px;">Suggested Keywords (${reportData.keyword_analysis.suggested_keywords_count}):</strong>
+          <p style="color: #374151; margin: 4px 0; font-size: 13px;">${reportData.keyword_analysis.keywords_missing.join(', ')}</p>
         </div>
       </div>
       
-      <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #9ca3af;">
-        <p>Report generated by ResumeBuilder Pro ATS Analysis</p>
+      <div style="text-align: center; margin-top: 20px; padding-top: 15px; border-top: 1px solid #e5e7eb; color: #9ca3af;">
+        <p style="font-size: 12px; margin: 0;">Report generated by ResumeBuilder Pro ATS Analysis</p>
       </div>
     `;
     
     document.body.appendChild(reportDiv);
     
-    // Use Puppeteer PDF generation via server API
+    // Use a simpler approach - print to PDF using browser's print functionality
     try {
-      const response = await fetch('/api/pdf/generate-puppeteer', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          resumeData: { content: reportDiv.innerHTML },
-          templateId: 'ats-report',
-          filename: `ats-analysis-report-${new Date().toISOString().split('T')[0]}`
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to generate PDF');
+      // Create a new window for printing
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        throw new Error('Popup blocked. Please allow popups for this site.');
       }
-
-      const pdfBlob = await response.blob();
-      const url = window.URL.createObjectURL(pdfBlob);
+      
+      // Add the report content to the new window
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>ATS Analysis Report</title>
+          <style>
+            @media print {
+              body { 
+                margin: 0; 
+                padding: 15px; 
+                font-size: 12px;
+                line-height: 1.3;
+              }
+              .no-print { display: none; }
+              h1 { font-size: 20px !important; margin-bottom: 15px !important; }
+              h2 { font-size: 32px !important; margin-bottom: 10px !important; }
+              h3 { font-size: 16px !important; margin-bottom: 8px !important; }
+              p { margin-bottom: 6px !important; }
+              ul { margin-bottom: 10px !important; }
+              li { margin-bottom: 4px !important; }
+              div[style*="margin-bottom: 20px"] { margin-bottom: 15px !important; }
+              div[style*="padding: 12px"] { padding: 8px !important; }
+            }
+            body { 
+              font-family: Arial, sans-serif; 
+              font-size: 12px;
+              line-height: 1.3;
+            }
+          </style>
+        </head>
+        <body>
+          ${reportDiv.innerHTML}
+          <div class="no-print" style="text-align: center; margin-top: 20px;">
+            <button onclick="window.print()">Print/Save as PDF</button>
+            <button onclick="window.close()">Close</button>
+          </div>
+        </body>
+        </html>
+      `);
+      
+      printWindow.document.close();
+      
+      // Auto-trigger print dialog after a short delay
+      setTimeout(() => {
+        printWindow.print();
+      }, 500);
+      
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      
+      // Fallback: Create downloadable HTML file
+      try {
+        const htmlContent = `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>ATS Analysis Report</title>
+            <style>
+              body { 
+                font-family: Arial, sans-serif; 
+                max-width: 800px; 
+                margin: 0 auto; 
+                padding: 40px; 
+                line-height: 1.6; 
+                color: #333; 
+                background: white; 
+              }
+              @media print {
+                body { margin: 0; padding: 20px; }
+              }
+            </style>
+          </head>
+          <body>
+            ${reportDiv.innerHTML}
+          </body>
+          </html>
+        `;
+        
+        const blob = new Blob([htmlContent], { type: 'text/html' });
+        const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `ats-analysis-report-${new Date().toISOString().split('T')[0]}.pdf`;
+        link.download = `ats-analysis-report-${new Date().toISOString().split('T')[0]}.html`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-      alert('Failed to generate PDF report. Please try again.');
+        
+        alert('PDF generation failed. An HTML report has been downloaded instead. You can open it in your browser and use "Print to PDF" to save as PDF.');
+      } catch (fallbackError) {
+        console.error('Fallback also failed:', fallbackError);
+        alert('Failed to generate PDF report. Please try again or use the browser\'s print function (Ctrl+P) to save as PDF.');
+      }
     } finally {
       document.body.removeChild(reportDiv);
     }
@@ -1747,7 +2098,7 @@ export default function ATSAnalysis() {
                                 isDarkMode ? 'border-white/20 text-[#CBD5E1] hover:bg-white/10 hover:border-white/40 bg-transparent' : 'border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 bg-white'
                               }`}
                             >
-                              Add Job Description
+                          Add Job Description
                             </Button>
                           </>
                         ) : (
@@ -1780,7 +2131,7 @@ export default function ATSAnalysis() {
                                   }`}
                                 >
                                   Cancel
-                                </Button>
+                        </Button>
                               </div>
                             </div>
                           </div>

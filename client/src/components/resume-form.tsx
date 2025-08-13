@@ -201,7 +201,7 @@ export function ResumeForm({ resumeData, onChange }: ResumeFormProps) {
                   value={resumeData.personalInfo.firstName}
                   onChange={(e) => updatePersonalInfo("firstName", e.target.value)}
                   placeholder="John"
-                  className="bg-background dark:bg-slate-700 border-border dark:border-slate-600 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-slate-400"
+                  className="bg-background dark:bg-slate-700 border-border dark:border-slate-600 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
                 />
               </div>
               <div>
@@ -441,7 +441,7 @@ export function ResumeForm({ resumeData, onChange }: ResumeFormProps) {
                 type="button"
                 variant="outline"
                 onClick={addEducation}
-                className="w-full"
+                className="w-full dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700 dark:bg-transparent"
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Add Education
@@ -565,7 +565,7 @@ export function ResumeForm({ resumeData, onChange }: ResumeFormProps) {
                 type="button"
                 variant="outline"
                 onClick={addExperience}
-                className="w-full"
+                className="w-full dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700 dark:bg-transparent"
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Add Experience
@@ -666,7 +666,7 @@ export function ResumeForm({ resumeData, onChange }: ResumeFormProps) {
                 type="button"
                 variant="outline"
                 onClick={() => addArrayItem("languages", { language: "", proficiency: "" })}
-                className="w-full"
+                className="w-full dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700 dark:bg-transparent"
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Add Language
@@ -749,7 +749,7 @@ export function ResumeForm({ resumeData, onChange }: ResumeFormProps) {
                 type="button"
                 variant="outline"
                 onClick={() => addArrayItem("projects", { title: "", description: "", technologies: [], link: "" })}
-                className="w-full"
+                className="w-full dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700 dark:bg-transparent"
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Add Project
@@ -824,7 +824,7 @@ export function ResumeForm({ resumeData, onChange }: ResumeFormProps) {
                 type="button"
                 variant="outline"
                 onClick={() => addArrayItem("certifications", { name: "", issuer: "", date: "", expiry: "" })}
-                className="w-full"
+                className="w-full dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700 dark:bg-transparent"
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Add Certification
@@ -862,7 +862,7 @@ export function ResumeForm({ resumeData, onChange }: ResumeFormProps) {
                       <div>
                         <Label className="text-foreground dark:text-white">Title</Label>
                         <Input
-                          className="w-full"
+                          className="w-full bg-background dark:bg-slate-700 border-border dark:border-slate-600 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
                           value={award.title || ""}
                           onChange={e => updateArrayField("awards", index, "title", e.target.value)}
                           placeholder="Award Title"
@@ -871,7 +871,7 @@ export function ResumeForm({ resumeData, onChange }: ResumeFormProps) {
                       <div>
                         <Label className="text-foreground dark:text-white">Issuer</Label>
                         <Input
-                          className="w-full"
+                          className="w-full bg-background dark:bg-slate-700 border-border dark:border-slate-600 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
                           value={award.issuer || ""}
                           onChange={e => updateArrayField("awards", index, "issuer", e.target.value)}
                           placeholder="Awarding Organization"
@@ -880,7 +880,7 @@ export function ResumeForm({ resumeData, onChange }: ResumeFormProps) {
                       <div>
                         <Label className="text-foreground dark:text-white">Date</Label>
                         <Input
-                          className="w-full"
+                          className="w-full bg-background dark:bg-slate-700 border-border dark:border-slate-600 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
                           value={award.date || ""}
                           onChange={e => updateArrayField("awards", index, "date", e.target.value)}
                           placeholder="2023"
@@ -889,7 +889,7 @@ export function ResumeForm({ resumeData, onChange }: ResumeFormProps) {
                       <div className="md:col-span-2">
                         <Label className="text-foreground dark:text-white">Description</Label>
                         <Textarea
-                          className="w-full resize-none"
+                          className="w-full resize-none bg-background dark:bg-slate-700 border-border dark:border-slate-600 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
                           value={award.description || ""}
                           onChange={e => updateArrayField("awards", index, "description", e.target.value)}
                           placeholder="Description of the award..."
@@ -903,7 +903,7 @@ export function ResumeForm({ resumeData, onChange }: ResumeFormProps) {
                 type="button"
                 variant="outline"
                 onClick={() => addArrayItem("awards", { title: "", issuer: "", date: "", description: "" })}
-                className="w-full"
+                className="w-full dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700 dark:bg-transparent"
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Add Award
@@ -987,7 +987,7 @@ export function ResumeForm({ resumeData, onChange }: ResumeFormProps) {
                 type="button"
                 variant="outline"
                 onClick={() => addArrayItem("volunteerWork", { role: "", organization: "", startDate: "", endDate: "", description: "" })}
-                className="w-full"
+                className="w-full dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700 dark:bg-transparent"
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Add Volunteering
@@ -1024,7 +1024,7 @@ export function ResumeForm({ resumeData, onChange }: ResumeFormProps) {
                           value={pub.title || ""}
                           onChange={e => updateArrayField("publications", index, "title", e.target.value)}
                           placeholder="Publication Title"
-                          className="bg-background dark:bg-slate-700 border-border dark:border-slate-600 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-slate-400"
+                          className="bg-background dark:bg-slate-700 border-border dark:border-slate-600 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
                         />
                       </div>
                       <div>
@@ -1033,7 +1033,7 @@ export function ResumeForm({ resumeData, onChange }: ResumeFormProps) {
                           value={pub.publisher || ""}
                           onChange={e => updateArrayField("publications", index, "publisher", e.target.value)}
                           placeholder="Publisher Name"
-                          className="bg-background dark:bg-slate-700 border-border dark:border-slate-600 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-slate-400"
+                          className="bg-background dark:bg-slate-700 border-border dark:border-slate-600 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
                         />
                       </div>
                       <div>
@@ -1042,7 +1042,7 @@ export function ResumeForm({ resumeData, onChange }: ResumeFormProps) {
                           value={pub.date || ""}
                           onChange={e => updateArrayField("publications", index, "date", e.target.value)}
                           placeholder="2023-01"
-                          className="bg-background dark:bg-slate-700 border-border dark:border-slate-600 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-slate-400"
+                          className="bg-background dark:bg-slate-700 border-border dark:border-slate-600 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
                         />
                       </div>
                       <div>
@@ -1051,7 +1051,7 @@ export function ResumeForm({ resumeData, onChange }: ResumeFormProps) {
                           value={pub.link || ""}
                           onChange={e => updateArrayField("publications", index, "link", e.target.value)}
                           placeholder="https://publication-link.com"
-                          className="bg-background dark:bg-slate-700 border-border dark:border-slate-600 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-slate-400"
+                          className="bg-background dark:bg-slate-700 border-border dark:border-slate-600 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
                         />
                       </div>
                     </div>
@@ -1062,7 +1062,7 @@ export function ResumeForm({ resumeData, onChange }: ResumeFormProps) {
                 type="button"
                 variant="outline"
                 onClick={() => addArrayItem("publications", { title: "", publisher: "", date: "", link: "" })}
-                className="w-full"
+                className="w-full dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700 dark:bg-transparent"
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Add Publication

@@ -178,7 +178,7 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({ className, userName = 
   return (
     <Card className={`${className} transition-all duration-200 ${
       isDarkMode 
-        ? 'bg-[#1E293B] border-white/10' 
+        ? 'bg-slate-800 border-slate-700' 
         : 'bg-white border-gray-200'
     }`}>
       <CardContent className="p-4">
@@ -193,7 +193,7 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({ className, userName = 
                     src={picture.url}
                     alt="Profile preview"
                     className={`w-12 h-12 rounded-full object-cover border-2 ${
-                      isDarkMode ? 'border-white/20' : 'border-gray-200'
+                      isDarkMode ? 'border-slate-600' : 'border-gray-200'
                     }`}
                     style={{
                       filter: picture.effects?.grayscale ? 'grayscale(100%)' : 'none',
@@ -202,7 +202,7 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({ className, userName = 
                 ) : (
                   <div className={`w-12 h-12 rounded-full border-2 flex items-center justify-center ${
                     isDarkMode 
-                      ? 'bg-[#334155] border-white/20' 
+                      ? 'bg-slate-700 border-slate-600' 
                       : 'bg-gray-100 border-gray-300'
                   }`}>
                     <span className={`font-medium text-lg ${
@@ -214,10 +214,10 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({ className, userName = 
               
               <div>
                 <h3 className={`text-sm font-medium ${
-                  isDarkMode ? 'text-white' : 'text-[#1E293B]'
+                  isDarkMode ? 'text-white' : 'text-gray-900'
                 }`}>Profile Photo</h3>
                 <p className={`text-xs ${
-                  isDarkMode ? 'text-[#CBD5E1]' : 'text-gray-500'
+                  isDarkMode ? 'text-slate-400' : 'text-gray-500'
                 }`}>
                   {picture.url ? 'Photo uploaded' : 'Optional - adds personal touch'}
                 </p>
@@ -248,7 +248,7 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({ className, userName = 
                   size="sm"
                   className={`${
                     isDarkMode 
-                      ? 'text-[#CBD5E1] hover:text-white hover:bg-white/10' 
+                      ? 'text-slate-400 hover:text-white hover:bg-slate-700' 
                       : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
                   }`}
                 >
@@ -264,8 +264,8 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({ className, userName = 
                 size="sm"
                 className={`${
                   isDarkMode 
-                    ? 'text-[#3B82F6] border-[#3B82F6]/30 hover:bg-[#3B82F6]/10 hover:border-[#3B82F6]/50' 
-                    : 'text-[#14B8A6] border-[#14B8A6]/30 hover:bg-[#14B8A6]/10 hover:border-[#14B8A6]/50'
+                    ? 'text-blue-400 border-blue-400/30 hover:bg-blue-400/10 hover:border-blue-400/50 bg-transparent' 
+                    : 'text-blue-600 border-blue-600/30 hover:bg-blue-50 hover:border-blue-600/50 bg-transparent'
                 }`}
               >
                 <Camera className="h-3 w-3 mr-1" />
@@ -280,10 +280,10 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({ className, userName = 
               className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors cursor-pointer ${
                 isDragging
                   ? isDarkMode 
-                    ? 'border-[#3B82F6] bg-[#3B82F6]/10' 
-                    : 'border-[#14B8A6] bg-[#14B8A6]/10'
+                    ? 'border-blue-400 bg-blue-400/10' 
+                    : 'border-blue-600 bg-blue-50'
                   : isDarkMode 
-                    ? 'border-white/20 hover:border-white/40' 
+                    ? 'border-slate-600 hover:border-slate-500' 
                     : 'border-gray-300 hover:border-gray-400'
               }`}
               onDrop={handleDrop}
@@ -295,15 +295,15 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({ className, userName = 
               onClick={() => fileInputRef.current?.click()}
             >
               <Upload className={`h-6 w-6 mx-auto mb-2 ${
-                isDarkMode ? 'text-[#CBD5E1]' : 'text-gray-400'
+                isDarkMode ? 'text-slate-400' : 'text-gray-400'
               }`} />
               <p className={`text-xs ${
-                isDarkMode ? 'text-[#CBD5E1]' : 'text-gray-600'
+                isDarkMode ? 'text-slate-400' : 'text-gray-600'
               }`}>
                 Drag & drop or click to upload
               </p>
               <p className={`text-xs ${
-                isDarkMode ? 'text-[#94A3B8]' : 'text-gray-400'
+                isDarkMode ? 'text-slate-500' : 'text-gray-400'
               }`}>
                 JPG, PNG, GIF, WebP (max 5MB)
               </p>
@@ -313,12 +313,12 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({ className, userName = 
           {/* Settings - only show when expanded */}
           {picture.url && isExpanded && (
             <div className={`space-y-3 pt-2 border-t ${
-              isDarkMode ? 'border-white/10' : 'border-gray-200'
+              isDarkMode ? 'border-slate-700' : 'border-gray-200'
             }`}>
               {/* Size */}
               <div>
                 <Label className={`text-xs font-medium ${
-                  isDarkMode ? 'text-[#CBD5E1]' : 'text-gray-700'
+                  isDarkMode ? 'text-slate-300' : 'text-gray-700'
                 }`}>
                   Size: {picture.size || 120}px
                 </Label>
@@ -335,7 +335,7 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({ className, userName = 
               {/* Shape */}
               <div>
                 <Label className={`text-xs font-medium mb-2 block ${
-                  isDarkMode ? 'text-[#CBD5E1]' : 'text-gray-700'
+                  isDarkMode ? 'text-slate-300' : 'text-gray-700'
                 }`}>Shape</Label>
                 <div className="flex items-center space-x-2">
                   <Button
@@ -345,11 +345,11 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({ className, userName = 
                     className={`text-xs ${
                       picture.borderRadius === 0 
                         ? isDarkMode 
-                          ? 'bg-[#3B82F6]/20 border-[#3B82F6] text-[#3B82F6]' 
-                          : 'bg-[#14B8A6]/20 border-[#14B8A6] text-[#14B8A6]'
+                          ? 'bg-blue-400/20 border-blue-400 text-blue-400' 
+                          : 'bg-blue-600/20 border-blue-600 text-blue-600'
                         : isDarkMode 
-                          ? 'border-white/20 text-[#CBD5E1] hover:bg-white/10' 
-                          : 'border-gray-300 text-gray-600 hover:bg-gray-50'
+                          ? 'border-slate-600 text-slate-400 hover:bg-slate-700 bg-transparent' 
+                          : 'border-gray-300 text-gray-600 hover:bg-gray-50 bg-transparent'
                     }`}
                   >
                     <Square className="h-3 w-3 mr-1" />
@@ -362,11 +362,11 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({ className, userName = 
                     className={`text-xs ${
                       picture.borderRadius === 50 
                         ? isDarkMode 
-                          ? 'bg-[#3B82F6]/20 border-[#3B82F6] text-[#3B82F6]' 
-                          : 'bg-[#14B8A6]/20 border-[#14B8A6] text-[#14B8A6]'
+                          ? 'bg-blue-400/20 border-blue-400 text-blue-400' 
+                          : 'bg-blue-600/20 border-blue-600 text-blue-600'
                         : isDarkMode 
-                          ? 'border-white/20 text-[#CBD5E1] hover:bg-white/10' 
-                          : 'border-gray-300 text-gray-600 hover:bg-gray-50'
+                          ? 'border-slate-600 text-slate-400 hover:bg-slate-700 bg-transparent' 
+                          : 'border-gray-300 text-gray-600 hover:bg-gray-50 bg-transparent'
                     }`}
                   >
                     <Circle className="h-3 w-3 mr-1" />
@@ -378,12 +378,12 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({ className, userName = 
               {/* Effects */}
               <div className="space-y-2">
                 <Label className={`text-xs font-medium ${
-                  isDarkMode ? 'text-[#CBD5E1]' : 'text-gray-700'
+                  isDarkMode ? 'text-slate-300' : 'text-gray-700'
                 }`}>Effects</Label>
                 
                 <div className="flex items-center justify-between">
                   <span className={`text-xs ${
-                    isDarkMode ? 'text-[#94A3B8]' : 'text-gray-600'
+                    isDarkMode ? 'text-slate-400' : 'text-gray-600'
                   }`}>Add border</span>
                   <Switch
                     checked={picture.effects?.border || false}
@@ -397,7 +397,7 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({ className, userName = 
                 
                 <div className="flex items-center justify-between">
                   <span className={`text-xs ${
-                    isDarkMode ? 'text-[#94A3B8]' : 'text-gray-600'
+                    isDarkMode ? 'text-slate-400' : 'text-gray-600'
                   }`}>Grayscale</span>
                   <Switch
                     checked={picture.effects?.grayscale || false}
@@ -411,7 +411,7 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({ className, userName = 
                 
                 <div className="flex items-center justify-between">
                   <span className={`text-xs ${
-                    isDarkMode ? 'text-[#94A3B8]' : 'text-gray-600'
+                    isDarkMode ? 'text-slate-400' : 'text-gray-600'
                   }`}>Hide photo</span>
                   <Switch
                     checked={picture.effects?.hidden || false}
@@ -431,8 +431,8 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({ className, userName = 
                 size="sm"
                 className={`w-full text-xs ${
                   isDarkMode 
-                    ? 'text-[#3B82F6] border-[#3B82F6]/30 hover:bg-[#3B82F6]/10 hover:border-[#3B82F6]/50' 
-                    : 'text-[#14B8A6] border-[#14B8A6]/30 hover:bg-[#14B8A6]/10 hover:border-[#14B8A6]/50'
+                    ? 'text-blue-400 border-blue-400/30 hover:bg-blue-400/10 hover:border-blue-400/50 bg-transparent' 
+                    : 'text-blue-600 border-blue-600/30 hover:bg-blue-50 hover:border-blue-600/50 bg-transparent'
                 }`}
               >
                 <RotateCcw className="h-3 w-3 mr-1" />
