@@ -76,10 +76,11 @@ export const LoginSignupButton: React.FC = () => {
             isDarkMode 
               ? 'bg-[#1E293B] border-white/20 text-white' 
               : 'bg-white border-gray-300 text-[#1E293B]'
-          } font-medium shadow-sm hover:shadow-md transition-all duration-200`}
+          } font-medium shadow-sm hover:shadow-md transition-all duration-200 px-2 sm:px-3`}
         >
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Loading...
+          <Loader2 className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 animate-spin flex-shrink-0" />
+          <span className="hidden sm:inline">Loading...</span>
+          <span className="sm:hidden">...</span>
         </Button>
       </motion.div>
     );
@@ -104,33 +105,37 @@ export const LoginSignupButton: React.FC = () => {
               isDarkMode 
                 ? 'bg-[#1E293B] hover:bg-[#334155] border-white/20 hover:border-white/30 text-white hover:text-white' 
                 : 'bg-white hover:bg-[#F1F5F9] border-gray-300 hover:border-gray-400 text-[#1E293B] hover:text-[#0F172A]'
-            } flex items-center gap-2 shadow-sm hover:shadow-md transition-all duration-200`}
+            } flex items-center gap-1 sm:gap-2 shadow-sm hover:shadow-md transition-all duration-200 px-2 sm:px-3`}
           >
             {shouldShowImage ? (
               <img
                 src={userProfile.avatar}
                 alt={userProfile.display_name || user.displayName || 'User'}
-                className={`h-6 w-6 rounded-full object-cover ring-2 ${
+                className={`h-5 w-5 sm:h-6 sm:w-6 rounded-full object-cover ring-2 flex-shrink-0 ${
                   isDarkMode ? 'ring-white/20' : 'ring-gray-300'
                 }`}
                 onError={() => setImageError(true)}
                 onLoad={() => setImageError(false)}
               />
             ) : (
-              <div className={`h-6 w-6 rounded-full bg-gradient-to-br from-[#3B82F6] to-[#2563EB] flex items-center justify-center ring-2 ${
+              <div className={`h-5 w-5 sm:h-6 sm:w-6 rounded-full bg-gradient-to-br from-[#3B82F6] to-[#2563EB] flex items-center justify-center ring-2 flex-shrink-0 ${
                 isDarkMode ? 'ring-white/20' : 'ring-gray-300'
               }`}>
-                <User className="h-3 w-3 text-white" />
+                <User className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white" />
               </div>
             )}
-            <span className="text-sm font-medium">
+            <span className="text-xs sm:text-sm font-medium hidden sm:inline">
+              {userProfile?.display_name || user.displayName || user.email?.split('@')[0] || 'User'}
+            </span>
+            <span className="text-xs font-medium sm:hidden">
               {userProfile?.display_name || user.displayName || user.email?.split('@')[0] || 'User'}
             </span>
             <motion.div
               animate={{ rotate: showDropdown ? 180 : 0 }}
               transition={{ duration: 0.2 }}
+              className="flex-shrink-0"
             >
-              <ChevronDown className="h-4 w-4" />
+              <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4" />
             </motion.div>
           </Button>
         </motion.div>
@@ -143,7 +148,7 @@ export const LoginSignupButton: React.FC = () => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className={`absolute right-0 mt-2 w-64 rounded-lg shadow-xl border z-50 overflow-hidden ${
+              className={`absolute right-0 mt-2 w-56 sm:w-64 rounded-lg shadow-xl border z-50 overflow-hidden ${
                 isDarkMode 
                   ? 'bg-[#1E293B] border-white/10' 
                   : 'bg-white border-gray-200'
@@ -226,20 +231,22 @@ export const LoginSignupButton: React.FC = () => {
             isDarkMode 
               ? 'bg-[#1E293B] hover:bg-[#334155] border-white/20 hover:border-white/30 text-white hover:text-white' 
               : 'bg-white hover:bg-[#F1F5F9] border-gray-300 hover:border-gray-400 text-[#1E293B] hover:text-[#0F172A]'
-          } flex items-center gap-2 shadow-sm hover:shadow-md transition-all duration-200`}
+          } flex items-center gap-1 sm:gap-2 shadow-sm hover:shadow-md transition-all duration-200 px-2 sm:px-3`}
           disabled={isSigningIn}
         >
           {isSigningIn ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <Loader2 className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 animate-spin flex-shrink-0" />
           ) : (
-            <User className="h-4 w-4" />
+            <User className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
           )}
-          {isSigningIn ? 'Signing in...' : 'Login/Signup'}
+          <span className="hidden sm:inline">{isSigningIn ? 'Signing in...' : 'Login/Signup'}</span>
+          <span className="sm:hidden">{isSigningIn ? '...' : 'Login'}</span>
           <motion.div
             animate={{ rotate: showDropdown ? 180 : 0 }}
             transition={{ duration: 0.2 }}
+            className="flex-shrink-0"
           >
-            <ChevronDown className="h-4 w-4" />
+            <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4" />
           </motion.div>
         </Button>
       </motion.div>
@@ -252,11 +259,11 @@ export const LoginSignupButton: React.FC = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className={`absolute right-0 mt-2 w-56 rounded-lg shadow-xl border z-50 overflow-hidden ${
-              isDarkMode 
-                ? 'bg-[#1E293B] border-white/10' 
-                : 'bg-white border-gray-200'
-            }`}
+                          className={`absolute right-0 mt-2 w-48 sm:w-56 rounded-lg shadow-xl border z-50 overflow-hidden ${
+                isDarkMode 
+                  ? 'bg-[#1E293B] border-white/10' 
+                  : 'bg-white border-gray-200'
+              }`}
           >
             <div className="py-1">
               {/* Quick Google Sign In */}
