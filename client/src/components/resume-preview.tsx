@@ -28,11 +28,11 @@ export function ResumePreview({ resumeData }: ResumePreviewProps) {
 
   const customTemplates = ['classic', 'modern', 'stylish', 'compact', 'overleaf', 'elegant'];
 
-  // Remount key to force full refresh on data/template changes
+  // Remount key to force full refresh on template changes only
   const [remountId, setRemountId] = useState(0);
   useEffect(() => {
     setRemountId((id) => id + 1);
-  }, [template, resumeData]);
+  }, [template]); // Only remount when template changes, not on every resumeData change
   
   // Compute mapped data for custom templates
   const mappedCustomData = useMemo(() => {
@@ -51,16 +51,16 @@ export function ResumePreview({ resumeData }: ResumePreviewProps) {
   }, [mappedCustomData, setArtboardResume]);
 
   // For reactive templates, ensure store does not cause stale data
-  useEffect(() => {
-    if (!customTemplates.includes(template)) {
-      setArtboardResume(null as any);
-    }
-  }, [template, setArtboardResume]);
-  useEffect(() => {
-    if (!customTemplates.includes(template)) {
-      setArtboardResume(null as any);
-    }
-  }, [resumeData, template, setArtboardResume]);
+  // useEffect(() => {
+  //   if (!customTemplates.includes(template)) {
+  //     setArtboardResume(null as any);
+  //   }
+  // }, [template, setArtboardResume]);
+  // useEffect(() => {
+  //   if (!customTemplates.includes(template)) {
+  //     setArtboardResume(null as any);
+  //   }
+  // }, [resumeData, template, setArtboardResume]);
 
   const isReactiveResumeTemplate = useMemo(() => {
     try {
@@ -71,9 +71,10 @@ export function ResumePreview({ resumeData }: ResumePreviewProps) {
     }
   }, [template]);
 
-  if (isReactiveResumeTemplate) {
-    const latestData = resumeData;
+  // Memoize the latest data to prevent unnecessary re-renders
+  const latestData = useMemo(() => resumeData, [resumeData]);
 
+  if (isReactiveResumeTemplate) {
     return (
       <TemplateErrorBoundary>
         <div id="resume-preview" className="w-full h-full p-0 m-0" key={`reactive-${template}-${remountId}`}>

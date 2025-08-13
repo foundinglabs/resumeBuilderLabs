@@ -619,9 +619,7 @@ console.log("templateParam:", templateParam);
              </div>
              
              {/* Center Section - Page Title (hidden on mobile) */}
-             <div className="hidden md:flex items-center">
-               <h1 className="text-lg font-semibold text-[#111827] dark:text-white">Resume Builder</h1>
-             </div>
+             
              
              {/* Right Section - Action Buttons */}
              <div className="flex items-center gap-1 sm:gap-2">

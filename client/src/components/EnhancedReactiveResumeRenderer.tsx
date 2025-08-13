@@ -82,7 +82,6 @@ export const EnhancedReactiveResumeRenderer: React.FC<ReactiveResumeRendererProp
         setIsLoading(false);
       }
     };
-
     if (templateId && resumeData) loadTemplate();
     else { setError('Missing template ID or resume data'); setIsLoading(false); }
   }, [templateId, resumeData, setResume]);

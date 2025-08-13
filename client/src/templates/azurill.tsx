@@ -1,5 +1,5 @@
 import type React from "react"
-import { Fragment } from "react"
+import { Fragment, memo, useMemo } from "react"
 import {
   Mail,
   Phone,
@@ -22,6 +22,7 @@ import { sanitize, isEmptyString } from "../utils/reactive-resume-utils"
 import type { TemplateProps } from "../types/template"
 import type { SectionWithItem, CustomSectionGroup } from "../utils/reactive-resume-schema"
 import { cn } from "../utils/reactive-resume-utils"
+import { resumes } from "@shared/schema"
 
 // Safe helpers
 function getHref(url: string | any | undefined): string {
@@ -102,7 +103,7 @@ const MAX_ACHIEVEMENTS_TOTAL = 2
 const MAX_LANGUAGES = 2
 
 // Compact Header for A4
-const Header = ({ resumeData }: { resumeData: any }) => {
+const Header = memo(({ resumeData }: { resumeData: any }) => {
   const basics = resumeData?.basics
   const profiles = resumeData?.sections?.profiles?.items?.filter((i: any) => i?.visible) ?? []
 
@@ -254,7 +255,9 @@ const Header = ({ resumeData }: { resumeData: any }) => {
       </div>
     </div>
   )
-}
+})
+
+Header.displayName = 'Header';
 
 const SectionTitle = ({ children, icon }: { children: React.ReactNode; icon?: React.ReactNode }) => (
   <h2 className="text-sm font-bold text-gray-800 mb-1 flex items-center gap-2 border-b border-emerald-200 pb-0.5">
@@ -572,14 +575,32 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
   }
 }
 
-export const Azurill = ({ columns, isFirstPage = false, resumeData: resumeDataProp }: TemplateProps) => {
+export const Azurill = memo(({ columns, isFirstPage = false, resumeData: resumeDataProp }: TemplateProps) => {
+  // Only subscribe to resume data, not the entire store
   const resumeDataFromStore = useArtboardStore((state) => state.resume)
-  const resumeData = resumeDataProp ?? resumeDataFromStore
-  const [main = [], sidebar = []] = columns
+  
+  // Memoize the final resume data to prevent unnecessary re-renders
+  const resumeData = useMemo(() => {
+    return resumeDataProp ?? resumeDataFromStore;
+  }, [resumeDataProp, resumeDataFromStore]);
+
+  // Memoize columns to prevent re-renders
+  const [main = [], sidebar = []] = useMemo(() => columns, [columns]);
 
   // Entry-level focused layout: Education first, then experience, then skills
-  const mainSections = ["summary", "education", "experience", "projects"]
-  const sidebarSections = ["skills", "awards", "interests"]
+  const mainSections = useMemo(() => ["summary", "education", "experience", "projects"], []);
+  const sidebarSections = useMemo(() => ["skills", "awards", "interests"], []);
+
+  // Memoize the final sections to render
+  const finalMainSections = useMemo(() => 
+    main.length > 0 ? main : mainSections, 
+    [main, mainSections]
+  );
+  
+  const finalSidebarSections = useMemo(() => 
+    sidebar.length > 0 ? sidebar : sidebarSections, 
+    [sidebar, sidebarSections]
+  );
 
   return (
     <div className="w-full max-w-[794px] min-h-[1123px] mx-auto bg-white shadow-xl print:shadow-none print:w-full print:min-h-0 print:max-w-none rounded-lg overflow-hidden">
@@ -589,14 +610,14 @@ export const Azurill = ({ columns, isFirstPage = false, resumeData: resumeDataPr
         <div className="grid gap-3 print:gap-1 grid-cols-1 lg:grid-cols-3">
           {/* Main Content - Education First for Entry-Level */}
           <main className="lg:col-span-2 space-y-2 print:space-y-1">
-            {(main.length > 0 ? main : mainSections).map((section: string) => (
+            {finalMainSections.map((section: string) => (
               <Fragment key={section}>{mapSectionToComponent(section, resumeData)}</Fragment>
             ))}
           </main>
 
           {/* Sidebar */}
           <aside className="lg:col-span-1 space-y-2 print:space-y-1">
-            {(sidebar.length > 0 ? sidebar : sidebarSections).map((section: string) => (
+            {finalSidebarSections.map((section: string) => (
               <Fragment key={section}>{mapSectionToComponent(section, resumeData)}</Fragment>
             ))}
           </aside>
@@ -604,4 +625,6 @@ export const Azurill = ({ columns, isFirstPage = false, resumeData: resumeDataPr
       </div>
     </div>
   )
-}
+})
+
+Azurill.displayName = 'Azurill';
