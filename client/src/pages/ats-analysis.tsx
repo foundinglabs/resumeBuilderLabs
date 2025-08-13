@@ -237,6 +237,7 @@ export default function ATSAnalysis() {
   const [error, setError] = useState<string | null>(null);
   const [jobDescription, setJobDescription] = useState('');
   const [resumeText, setResumeText] = useState('');
+  const [showJobDescInput, setShowJobDescInput] = useState(false);
 
   // Enhanced ATS analysis function with job matching
   const performATSAnalysis = async (text: string, jobDesc?: string): Promise<ATSAnalysis> => {
@@ -635,6 +636,7 @@ export default function ATSAnalysis() {
     setIsAnalyzing(false);
     setJobDescription('');
     setResumeText('');
+    setShowJobDescInput(false);
   };
 
   const handleReanalyze = async () => {
@@ -649,6 +651,24 @@ export default function ATSAnalysis() {
     } catch (error) {
       console.error('Error reanalyzing resume:', error);
       setError(error instanceof Error ? error.message : 'Failed to reanalyze resume');
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  const handleAnalyze = async () => {
+    if (!resumeText || !jobDescription.trim()) return;
+    
+    setIsAnalyzing(true);
+    setError(null);
+    
+    try {
+      const analysisResult = await performATSAnalysis(resumeText, jobDescription);
+      setAnalysis(analysisResult);
+      setShowJobDescInput(false); // Hide the input after successful analysis
+    } catch (error) {
+      console.error('Error analyzing resume with job description:', error);
+      setError(error instanceof Error ? error.message : 'Failed to analyze resume');
     } finally {
       setIsAnalyzing(false);
     }
@@ -839,9 +859,9 @@ export default function ATSAnalysis() {
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-600 dark:text-green-400';
-    if (score >= 60) return 'text-yellow-600 dark:text-yellow-400';
-    return 'text-red-600 dark:text-red-400';
+    if (score >= 80) return isDarkMode ? 'text-green-400' : 'text-green-600';
+    if (score >= 60) return isDarkMode ? 'text-yellow-400' : 'text-yellow-600';
+    return isDarkMode ? 'text-red-400' : 'text-red-600';
   };
 
   const getScoreBadgeVariant = (score: number) => {
@@ -951,11 +971,7 @@ export default function ATSAnalysis() {
                 }`}>ATS Analysis</Link>
 
                 <LoginSignupButton />
-                <span className={`transition-colors cursor-pointer ${
-                  isDarkMode 
-                    ? 'text-[#CBD5E1] hover:text-[#60A5FA]' 
-                    : 'text-[#334155] hover:text-[#2DD4BF]'
-                }`}>Help</span>
+              
               </div>
             </div>
           </div>
@@ -964,7 +980,7 @@ export default function ATSAnalysis() {
 
         {/* Title Section */}
         <div className="text-center mb-8 animate-fadeInUp">
-          <h1 className={`text-4xl font-bold mb-4 animate-typewriter ${
+          <h1 className={`text-4xl font-bold mb-4 ${
             isDarkMode 
               ? 'bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent' 
               : 'text-[#1E293B]'
@@ -1264,18 +1280,24 @@ export default function ATSAnalysis() {
                     score={analysis.score.section_score} 
                     className={`text-2xl font-bold ${getScoreColor(analysis.score.section_score)}`}
                   />
-                  <div className="text-sm text-muted-foreground dark:text-muted-foreground/90">Section Completeness</div>
+                  <div className={`text-sm ${
+                    isDarkMode ? 'text-[#94A3B8]' : 'text-gray-600'
+                  }`}>Section Completeness</div>
                   <AnimatedProgress value={analysis.score.section_score} className="mt-2" />
                 </CardContent>
               </Card>
 
-              <Card className="dark:bg-card/60 animate-fadeInUp animation-delay-4000">
+              <Card className={`animate-fadeInUp animation-delay-4000 ${
+                isDarkMode ? 'bg-[#1E293B] border-white/10' : 'bg-white'
+              }`}>
                 <CardContent className="p-6 text-center">
                   <AnimatedScore 
                     score={analysis.score.readability} 
                     className={`text-2xl font-bold ${getScoreColor(analysis.score.readability)}`}
                   />
-                  <div className="text-sm text-muted-foreground dark:text-muted-foreground/90">Readability</div>
+                  <div className={`text-sm ${
+                    isDarkMode ? 'text-[#94A3B8]' : 'text-gray-600'
+                  }`}>Readability</div>
                   <AnimatedProgress value={analysis.score.readability} className="mt-2" />
                 </CardContent>
               </Card>
@@ -1285,9 +1307,11 @@ export default function ATSAnalysis() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Strengths & Weaknesses */}
               <div className="space-y-6">
-                <Card>
+                <Card className={isDarkMode ? 'bg-[#1E293B] border-white/10' : 'bg-white'}>
                   <CardHeader>
-                    <CardTitle className="flex items-center text-green-700">
+                    <CardTitle className={`flex items-center ${
+                      isDarkMode ? 'text-green-400' : 'text-green-700'
+                    }`}>
                       <CheckCircle2 className="mr-2 h-5 w-5" />
                       Strengths
                     </CardTitle>
@@ -1298,19 +1322,23 @@ export default function ATSAnalysis() {
                         {analysis.strengths.map((strength, index) => (
                           <li key={index} className="flex items-start">
                             <CheckCircle2 className="mr-2 h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                            <span className="text-sm">{strength}</span>
+                            <span className={`text-sm ${
+                              isDarkMode ? 'text-[#CBD5E1]' : 'text-gray-700'
+                            }`}>{strength}</span>
                           </li>
                         ))}
                       </ul>
                     ) : (
-                      <p className="text-slate-500">No significant strengths identified</p>
+                      <p className={isDarkMode ? 'text-[#94A3B8]' : 'text-slate-500'}>No significant strengths identified</p>
                     )}
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className={isDarkMode ? 'bg-[#1E293B] border-white/10' : 'bg-white'}>
                   <CardHeader>
-                    <CardTitle className="flex items-center text-red-700">
+                    <CardTitle className={`flex items-center ${
+                      isDarkMode ? 'text-red-400' : 'text-red-700'
+                    }`}>
                       <AlertTriangle className="mr-2 h-5 w-5" />
                       Areas for Improvement
                     </CardTitle>
@@ -1321,12 +1349,14 @@ export default function ATSAnalysis() {
                         {analysis.weaknesses.map((weakness, index) => (
                           <li key={index} className="flex items-start">
                             <AlertTriangle className="mr-2 h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
-                            <span className="text-sm">{weakness}</span>
+                            <span className={`text-sm ${
+                              isDarkMode ? 'text-[#CBD5E1]' : 'text-gray-700'
+                            }`}>{weakness}</span>
                           </li>
                         ))}
                       </ul>
                     ) : (
-                      <p className="text-slate-500">No significant weaknesses identified</p>
+                      <p className={isDarkMode ? 'text-[#94A3B8]' : 'text-slate-500'}>No significant weaknesses identified</p>
                     )}
                   </CardContent>
                 </Card>
@@ -1334,9 +1364,11 @@ export default function ATSAnalysis() {
 
               {/* Recommendations & Keywords */}
               <div className="space-y-6">
-                <Card>
+                <Card className={isDarkMode ? 'bg-[#1E293B] border-white/10' : 'bg-white'}>
                   <CardHeader>
-                    <CardTitle className="flex items-center text-blue-700">
+                    <CardTitle className={`flex items-center ${
+                      isDarkMode ? 'text-blue-400' : 'text-blue-700'
+                    }`}>
                       <TrendingUp className="mr-2 h-5 w-5" />
                       Recommendations
                     </CardTitle>
@@ -1347,39 +1379,51 @@ export default function ATSAnalysis() {
                         {analysis.recommendations.map((recommendation, index) => (
                           <li key={index} className="flex items-start">
                             <TrendingUp className="mr-2 h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                            <span className="text-sm">{recommendation}</span>
+                            <span className={`text-sm ${
+                              isDarkMode ? 'text-[#CBD5E1]' : 'text-gray-700'
+                            }`}>{recommendation}</span>
                           </li>
                         ))}
                       </ul>
                     ) : (
-                      <p className="text-slate-500">No specific recommendations at this time</p>
+                      <p className={isDarkMode ? 'text-[#94A3B8]' : 'text-slate-500'}>No specific recommendations at this time</p>
                     )}
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className={isDarkMode ? 'bg-[#1E293B] border-white/10' : 'bg-white'}>
                   <CardHeader>
-                    <CardTitle>Resume Statistics</CardTitle>
+                    <CardTitle className={isDarkMode ? 'text-white' : 'text-[#1E293B]'}>Resume Statistics</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="flex justify-between">
-                      <span className="text-slate-600">Word Count:</span>
-                      <span className="font-medium">{analysis.word_count}</span>
+                      <span className={isDarkMode ? 'text-[#94A3B8]' : 'text-slate-600'}>Word Count:</span>
+                      <span className={`font-medium ${
+                        isDarkMode ? 'text-white' : 'text-[#1E293B]'
+                      }`}>{analysis.word_count}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-600">Estimated Read Time:</span>
-                      <span className="font-medium">{analysis.estimated_read_time}</span>
+                      <span className={isDarkMode ? 'text-[#94A3B8]' : 'text-slate-600'}>Estimated Read Time:</span>
+                      <span className={`font-medium ${
+                        isDarkMode ? 'text-white' : 'text-[#1E293B]'
+                      }`}>{analysis.estimated_read_time}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-600">Sections Detected:</span>
-                      <span className="font-medium">{analysis.sections_detected.length}</span>
+                      <span className={isDarkMode ? 'text-[#94A3B8]' : 'text-slate-600'}>Sections Detected:</span>
+                      <span className={`font-medium ${
+                        isDarkMode ? 'text-white' : 'text-[#1E293B]'
+                      }`}>{analysis.sections_detected.length}</span>
                     </div>
-                    <Separator />
+                    <Separator className={isDarkMode ? 'bg-white/10' : 'bg-gray-200'} />
                     <div>
-                      <div className="text-slate-600 mb-2">Detected Sections:</div>
+                      <div className={`mb-2 ${
+                        isDarkMode ? 'text-[#94A3B8]' : 'text-slate-600'
+                      }`}>Detected Sections:</div>
                       <div className="flex flex-wrap gap-1">
                         {analysis.sections_detected.map((section, index) => (
-                          <Badge key={index} variant="outline" className="text-xs">
+                          <Badge key={index} variant="outline" className={`text-xs ${
+                            isDarkMode ? 'border-white/20 text-[#CBD5E1]' : 'border-gray-300 text-gray-700'
+                          }`}>
                             {section}
                           </Badge>
                         ))}
@@ -1391,35 +1435,49 @@ export default function ATSAnalysis() {
             </div>
 
             {/* Keywords Analysis */}
-            <Card>
+            <Card className={isDarkMode ? 'bg-[#1E293B] border-white/10' : 'bg-white'}>
               <CardHeader>
-                <CardTitle>Keyword Analysis</CardTitle>
+                <CardTitle className={isDarkMode ? 'text-white' : 'text-[#1E293B]'}>Keyword Analysis</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <div className="text-sm font-medium text-green-700 mb-2">
+                  <div className={`text-sm font-medium mb-2 ${
+                    isDarkMode ? 'text-green-400' : 'text-green-700'
+                  }`}>
                     Keywords Found ({analysis.keywords_found.length})
                   </div>
                   <div className="flex flex-wrap gap-1">
                     {analysis.keywords_found.map((keyword, index) => (
-                      <Badge key={index} variant="default" className="text-xs bg-green-100 text-green-800">
+                      <Badge key={index} variant="default" className={`text-xs ${
+                        isDarkMode 
+                          ? 'bg-green-900/40 text-green-300 border-green-700/50' 
+                          : 'bg-green-100 text-green-800'
+                      }`}>
                         {keyword}
                       </Badge>
                     ))}
                     {analysis.keywords_found.length === 0 && (
-                      <span className="text-slate-500 text-sm">No relevant keywords found</span>
+                      <span className={`text-sm ${
+                        isDarkMode ? 'text-[#94A3B8]' : 'text-slate-500'
+                      }`}>No relevant keywords found</span>
                     )}
                   </div>
                 </div>
 
                 {analysis.keywords_missing.length > 0 && (
                   <div>
-                    <div className="text-sm font-medium text-red-700 mb-2">
+                    <div className={`text-sm font-medium mb-2 ${
+                      isDarkMode ? 'text-red-400' : 'text-red-700'
+                    }`}>
                       Suggested Keywords ({analysis.keywords_missing.length})
                     </div>
                     <div className="flex flex-wrap gap-1">
                       {analysis.keywords_missing.map((keyword, index) => (
-                        <Badge key={index} variant="outline" className="text-xs border-red-200 text-red-700">
+                        <Badge key={index} variant="outline" className={`text-xs ${
+                          isDarkMode 
+                            ? 'border-red-700/50 text-red-300' 
+                            : 'border-red-200 text-red-700'
+                        }`}>
                           {keyword}
                         </Badge>
                       ))}
@@ -1430,48 +1488,66 @@ export default function ATSAnalysis() {
             </Card>
 
             {/* Production-Level Advanced Analysis */}
-            <Card className="max-w-6xl mx-auto dark:bg-card/60">
+            <Card className={`max-w-6xl mx-auto ${
+              isDarkMode ? 'bg-[#1E293B] border-white/10' : 'bg-white'
+            }`}>
               <CardHeader>
-                <CardTitle className="text-center dark:text-foreground/95">Advanced Production-Level Analysis</CardTitle>
-                <p className="text-center text-sm text-muted-foreground dark:text-muted-foreground/90">
+                <CardTitle className={`text-center ${
+                  isDarkMode ? 'text-white' : 'text-[#1E293B]'
+                }`}>Advanced Production-Level Analysis</CardTitle>
+                <p className={`text-center text-sm ${
+                  isDarkMode ? 'text-[#94A3B8]' : 'text-gray-600'
+                }`}>
                   Comprehensive insights with job matching, formatting analysis, and optimization recommendations
                 </p>
               </CardHeader>
               <CardContent className="p-0">
                 <Tabs defaultValue="overview" className="w-full">
-                  <TabsList className="grid w-full grid-cols-6 dark:bg-muted/50">
-                    <TabsTrigger value="overview">Overview</TabsTrigger>
-                    <TabsTrigger value="job-match">Job Match</TabsTrigger>
-                    <TabsTrigger value="formatting">Formatting</TabsTrigger>
-                    <TabsTrigger value="action-verbs">Action Verbs</TabsTrigger>
-                    <TabsTrigger value="metrics">Metrics</TabsTrigger>
-                    <TabsTrigger value="readability">Readability</TabsTrigger>
+                  <TabsList className={`grid w-full grid-cols-6 ${
+                    isDarkMode ? 'bg-[#0D1B2A] border-white/10' : 'bg-gray-100'
+                  }`}>
+                    <TabsTrigger value="overview" className={isDarkMode ? 'data-[state=active]:bg-[#1E293B] data-[state=active]:text-white' : ''}>Overview</TabsTrigger>
+                    <TabsTrigger value="job-match" className={isDarkMode ? 'data-[state=active]:bg-[#1E293B] data-[state=active]:text-white' : ''}>Job Match</TabsTrigger>
+                    <TabsTrigger value="formatting" className={isDarkMode ? 'data-[state=active]:bg-[#1E293B] data-[state=active]:text-white' : ''}>Formatting</TabsTrigger>
+                    <TabsTrigger value="action-verbs" className={isDarkMode ? 'data-[state=active]:bg-[#1E293B] data-[state=active]:text-white' : ''}>Action Verbs</TabsTrigger>
+                    <TabsTrigger value="metrics" className={isDarkMode ? 'data-[state=active]:bg-[#1E293B] data-[state=active]:text-white' : ''}>Metrics</TabsTrigger>
+                    <TabsTrigger value="readability" className={isDarkMode ? 'data-[state=active]:bg-[#1E293B] data-[state=active]:text-white' : ''}>Readability</TabsTrigger>
                   </TabsList>
 
                   {/* Overview Tab */}
                   <TabsContent value="overview" className="mt-6 p-6">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      <Card className="dark:bg-card/50">
+                      <Card className={isDarkMode ? 'bg-[#0D1B2A] border-white/10' : 'bg-white'}>
                         <CardHeader>
                           <CardTitle className="flex items-center space-x-2">
-                            <Users className="h-5 w-5 text-primary dark:text-primary/90" />
-                            <span className="dark:text-foreground/95">Experience Level Analysis</span>
+                            <Users className={`h-5 w-5 ${
+                              isDarkMode ? 'text-[#3B82F6]' : 'text-[#14B8A6]'
+                            }`} />
+                            <span className={isDarkMode ? 'text-white' : 'text-[#1E293B]'}>Experience Level Analysis</span>
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
                           <div className="space-y-4">
                             <div className="flex items-center justify-between">
-                              <span className="dark:text-foreground/90">Experience Level:</span>
-                              <Badge variant="outline" className="text-sm dark:border-border">
+                              <span className={isDarkMode ? 'text-[#CBD5E1]' : 'text-gray-700'}>Experience Level:</span>
+                              <Badge variant="outline" className={`text-sm ${
+                                isDarkMode ? 'border-white/20 text-[#CBD5E1]' : 'border-gray-300 text-gray-700'
+                              }`}>
                                 {analysis.experience_level.charAt(0).toUpperCase() + analysis.experience_level.slice(1)}
                               </Badge>
                             </div>
                             <div className="space-y-2">
-                              <h4 className="font-medium dark:text-foreground/95">Contextual Advice:</h4>
+                              <h4 className={`font-medium ${
+                                isDarkMode ? 'text-white' : 'text-[#1E293B]'
+                              }`}>Contextual Advice:</h4>
                               {analysis.contextual_advice?.map((advice, index) => (
                                 <div key={index} className="flex items-start space-x-2">
-                                  <Eye className="h-4 w-4 text-primary dark:text-primary/90 mt-0.5 flex-shrink-0" />
-                                  <span className="text-sm text-muted-foreground dark:text-muted-foreground/90">{advice}</span>
+                                  <Eye className={`h-4 w-4 mt-0.5 flex-shrink-0 ${
+                                    isDarkMode ? 'text-[#3B82F6]' : 'text-[#14B8A6]'
+                                  }`} />
+                                  <span className={`text-sm ${
+                                    isDarkMode ? 'text-[#94A3B8]' : 'text-gray-600'
+                                  }`}>{advice}</span>
                                 </div>
                               ))}
                             </div>
@@ -1479,39 +1555,65 @@ export default function ATSAnalysis() {
                         </CardContent>
                       </Card>
 
-                      <Card className="dark:bg-card/50">
+                      <Card className={isDarkMode ? 'bg-[#0D1B2A] border-white/10' : 'bg-white'}>
                         <CardHeader>
                           <CardTitle className="flex items-center space-x-2">
-                            <BarChart3 className="h-5 w-5 text-green-600 dark:text-green-400" />
-                            <span className="dark:text-foreground/95">Resume Statistics</span>
+                            <BarChart3 className={`h-5 w-5 ${
+                              isDarkMode ? 'text-green-400' : 'text-green-600'
+                            }`} />
+                            <span className={isDarkMode ? 'text-white' : 'text-[#1E293B]'}>Resume Statistics</span>
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                           <div className="grid grid-cols-2 gap-4">
-                            <div className="text-center p-3 bg-blue-50 dark:bg-blue-950/40 rounded animate-fadeInUp animation-delay-2000">
+                            <div className={`text-center p-3 rounded animate-fadeInUp animation-delay-2000 ${
+                              isDarkMode ? 'bg-blue-950/40' : 'bg-blue-50'
+                            }`}>
                               <AnimatedScore 
                                 score={analysis.word_count} 
-                                className="text-2xl font-bold text-blue-600 dark:text-blue-400"
+                                className={`text-2xl font-bold ${
+                                  isDarkMode ? 'text-blue-400' : 'text-blue-600'
+                                }`}
                               />
-                              <div className="text-xs text-muted-foreground dark:text-muted-foreground/90">Words</div>
+                              <div className={`text-xs ${
+                                isDarkMode ? 'text-[#94A3B8]' : 'text-gray-500'
+                              }`}>Words</div>
                             </div>
-                            <div className="text-center p-3 bg-green-50 dark:bg-green-950/40 rounded animate-fadeInUp animation-delay-4000">
-                              <div className="text-2xl font-bold text-green-600 dark:text-green-400 animate-pulse-slow">{analysis.estimated_read_time}</div>
-                              <div className="text-xs text-muted-foreground dark:text-muted-foreground/90">Read Time</div>
+                            <div className={`text-center p-3 rounded animate-fadeInUp animation-delay-4000 ${
+                              isDarkMode ? 'bg-green-950/40' : 'bg-green-50'
+                            }`}>
+                              <div className={`text-2xl font-bold animate-pulse-slow ${
+                                isDarkMode ? 'text-green-400' : 'text-green-600'
+                              }`}>{analysis.estimated_read_time}</div>
+                              <div className={`text-xs ${
+                                isDarkMode ? 'text-[#94A3B8]' : 'text-gray-500'
+                              }`}>Read Time</div>
                             </div>
-                            <div className="text-center p-3 bg-purple-50 dark:bg-purple-950/40 rounded animate-fadeInUp animation-delay-2000">
+                            <div className={`text-center p-3 rounded animate-fadeInUp animation-delay-2000 ${
+                              isDarkMode ? 'bg-purple-950/40' : 'bg-purple-50'
+                            }`}>
                               <AnimatedScore 
                                 score={analysis.sections_detected.length} 
-                                className="text-2xl font-bold text-purple-600 dark:text-purple-400"
+                                className={`text-2xl font-bold ${
+                                  isDarkMode ? 'text-purple-400' : 'text-purple-600'
+                                }`}
                               />
-                              <div className="text-xs text-muted-foreground dark:text-muted-foreground/90">Sections</div>
+                              <div className={`text-xs ${
+                                isDarkMode ? 'text-[#94A3B8]' : 'text-gray-500'
+                              }`}>Sections</div>
                             </div>
-                            <div className="text-center p-3 bg-orange-50 dark:bg-orange-950/40 rounded animate-fadeInUp animation-delay-4000">
+                            <div className={`text-center p-3 rounded animate-fadeInUp animation-delay-4000 ${
+                              isDarkMode ? 'bg-orange-950/40' : 'bg-orange-50'
+                            }`}>
                               <AnimatedScore 
                                 score={analysis.keywords_found.length} 
-                                className="text-2xl font-bold text-orange-600 dark:text-orange-400"
+                                className={`text-2xl font-bold ${
+                                  isDarkMode ? 'text-orange-400' : 'text-orange-600'
+                                }`}
                               />
-                              <div className="text-xs text-muted-foreground dark:text-muted-foreground/90">Keywords</div>
+                              <div className={`text-xs ${
+                                isDarkMode ? 'text-[#94A3B8]' : 'text-gray-500'
+                              }`}>Keywords</div>
                             </div>
                           </div>
                         </CardContent>
@@ -1524,32 +1626,46 @@ export default function ATSAnalysis() {
                     {analysis.job_match_analysis ? (
                       <div className="space-y-6">
                         <div className="text-center">
-                          <h3 className="text-2xl font-bold mb-2 dark:text-foreground/95">Job Match Analysis</h3>
-                          <p className="text-muted-foreground dark:text-muted-foreground/90">How well does your resume align with the job requirements?</p>
+                          <h3 className={`text-2xl font-bold mb-2 ${
+                            isDarkMode ? 'text-white' : 'text-[#1E293B]'
+                          }`}>Job Match Analysis</h3>
+                          <p className={isDarkMode ? 'text-[#94A3B8]' : 'text-gray-600'}>How well does your resume align with the job requirements?</p>
                         </div>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <Card className="dark:bg-card/50">
+                          <Card className={isDarkMode ? 'bg-[#0D1B2A] border-white/10' : 'bg-white'}>
                             <CardHeader>
-                              <CardTitle className="text-green-700 dark:text-green-400">Required Skills Match</CardTitle>
+                              <CardTitle className={isDarkMode ? 'text-green-400' : 'text-green-700'}>Required Skills Match</CardTitle>
                             </CardHeader>
                             <CardContent>
                               <div className="space-y-4">
                                 <div>
-                                  <h4 className="font-medium text-green-600 dark:text-green-400 mb-2">Found Skills ({analysis.job_match_analysis.required_skills_found.length})</h4>
+                                  <h4 className={`font-medium mb-2 ${
+                                    isDarkMode ? 'text-green-400' : 'text-green-600'
+                                  }`}>Found Skills ({analysis.job_match_analysis.required_skills_found.length})</h4>
                                   <div className="flex flex-wrap gap-1">
                                     {analysis.job_match_analysis.required_skills_found.map((skill, index) => (
-                                      <Badge key={index} variant="default" className="text-xs bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200">
+                                      <Badge key={index} variant="default" className={`text-xs ${
+                                        isDarkMode 
+                                          ? 'bg-green-900/40 text-green-300 border-green-700/50' 
+                                          : 'bg-green-100 text-green-800'
+                                      }`}>
                                         {skill}
                                       </Badge>
                                     ))}
                                   </div>
                                 </div>
                                 <div>
-                                  <h4 className="font-medium text-red-600 dark:text-red-400 mb-2">Missing Skills ({analysis.job_match_analysis.required_skills_missing.length})</h4>
+                                  <h4 className={`font-medium mb-2 ${
+                                    isDarkMode ? 'text-red-400' : 'text-red-600'
+                                  }`}>Missing Skills ({analysis.job_match_analysis.required_skills_missing.length})</h4>
                                   <div className="flex flex-wrap gap-1">
                                     {analysis.job_match_analysis.required_skills_missing.map((skill, index) => (
-                                      <Badge key={index} variant="outline" className="text-xs border-red-200 dark:border-red-800 text-red-700 dark:text-red-300">
+                                      <Badge key={index} variant="outline" className={`text-xs ${
+                                        isDarkMode 
+                                          ? 'border-red-700/50 text-red-300' 
+                                          : 'border-red-200 text-red-700'
+                                      }`}>
                                         {skill}
                                       </Badge>
                                     ))}
@@ -1559,37 +1675,49 @@ export default function ATSAnalysis() {
                             </CardContent>
                           </Card>
 
-                          <Card className="dark:bg-card/50">
+                          <Card className={isDarkMode ? 'bg-[#0D1B2A] border-white/10' : 'bg-white'}>
                             <CardHeader>
-                              <CardTitle className="text-blue-700 dark:text-blue-400">Experience Requirements</CardTitle>
+                              <CardTitle className={isDarkMode ? 'text-blue-400' : 'text-blue-700'}>Experience Requirements</CardTitle>
                             </CardHeader>
                             <CardContent>
                               <div className="space-y-4">
                                 <div className="flex items-center justify-between">
-                                  <span className="dark:text-foreground/90">Experience Match:</span>
+                                  <span className={isDarkMode ? 'text-[#CBD5E1]' : 'text-gray-700'}>Experience Match:</span>
                                   <Badge variant={analysis.job_match_analysis.experience_level_match ? "default" : "destructive"}>
                                     {analysis.job_match_analysis.experience_level_match ? "✓ Meets Requirements" : "✗ Below Requirements"}
                                   </Badge>
                                 </div>
                                 <div className="flex items-center justify-between">
-                                  <span className="dark:text-foreground/90">Industry Alignment:</span>
-                                  <span className="font-medium dark:text-foreground/95">{analysis.job_match_analysis.industry_alignment}%</span>
+                                  <span className={isDarkMode ? 'text-[#CBD5E1]' : 'text-gray-700'}>Industry Alignment:</span>
+                                  <span className={`font-medium ${
+                                    isDarkMode ? 'text-white' : 'text-[#1E293B]'
+                                  }`}>{analysis.job_match_analysis.industry_alignment}%</span>
                                 </div>
                                 <div>
-                                  <h4 className="font-medium mb-2 dark:text-foreground/95">Quantifiable Requirements</h4>
+                                  <h4 className={`font-medium mb-2 ${
+                                    isDarkMode ? 'text-white' : 'text-[#1E293B]'
+                                  }`}>Quantifiable Requirements</h4>
                                   {analysis.job_match_analysis.quantifiable_requirements.found.length > 0 && (
                                     <div className="mb-2">
-                                      <span className="text-sm text-green-600 dark:text-green-400">Found:</span>
+                                      <span className={`text-sm ${
+                                        isDarkMode ? 'text-green-400' : 'text-green-600'
+                                      }`}>Found:</span>
                                       {analysis.job_match_analysis.quantifiable_requirements.found.map((req, index) => (
-                                        <div key={index} className="text-sm ml-2 text-muted-foreground dark:text-muted-foreground/90">• {req}</div>
+                                        <div key={index} className={`text-sm ml-2 ${
+                                          isDarkMode ? 'text-[#94A3B8]' : 'text-gray-600'
+                                        }`}>• {req}</div>
                                       ))}
                                     </div>
                                   )}
                                   {analysis.job_match_analysis.quantifiable_requirements.missing.length > 0 && (
                                     <div>
-                                      <span className="text-sm text-red-600 dark:text-red-400">Missing:</span>
+                                      <span className={`text-sm ${
+                                        isDarkMode ? 'text-red-400' : 'text-red-600'
+                                      }`}>Missing:</span>
                                       {analysis.job_match_analysis.quantifiable_requirements.missing.map((req, index) => (
-                                        <div key={index} className="text-sm ml-2 text-muted-foreground dark:text-muted-foreground/90">• {req}</div>
+                                        <div key={index} className={`text-sm ml-2 ${
+                                          isDarkMode ? 'text-[#94A3B8]' : 'text-gray-600'
+                                        }`}>• {req}</div>
                                       ))}
                                     </div>
                                   )}
@@ -1601,12 +1729,62 @@ export default function ATSAnalysis() {
                       </div>
                     ) : (
                       <div className="text-center py-8">
-                        <Briefcase className="h-12 w-12 text-muted-foreground dark:text-muted-foreground/80 mx-auto mb-4" />
-                        <h3 className="text-lg font-medium text-foreground dark:text-foreground/95 mb-2">No Job Description Provided</h3>
-                        <p className="text-muted-foreground dark:text-muted-foreground/90 mb-4">Add a job description above to unlock detailed job matching analysis</p>
-                        <Button onClick={() => window.scrollTo(0, 0)} variant="outline" className="dark:border-border dark:text-foreground/90">
-                          Add Job Description
-                        </Button>
+                        {!showJobDescInput ? (
+                          <>
+                            <Briefcase className={`h-12 w-12 mx-auto mb-4 ${
+                              isDarkMode ? 'text-[#94A3B8]' : 'text-gray-400'
+                            }`} />
+                            <h3 className={`text-lg font-medium mb-2 ${
+                              isDarkMode ? 'text-white' : 'text-[#1E293B]'
+                            }`}>No Job Description Provided</h3>
+                            <p className={`mb-4 ${
+                              isDarkMode ? 'text-[#94A3B8]' : 'text-gray-600'
+                            }`}>Add a job description to unlock detailed job matching analysis</p>
+                            <Button 
+                              onClick={() => setShowJobDescInput(true)} 
+                              variant="outline" 
+                              className={`transition-all duration-200 ${
+                                isDarkMode ? 'border-white/20 text-[#CBD5E1] hover:bg-white/10 hover:border-white/40 bg-transparent' : 'border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 bg-white'
+                              }`}
+                            >
+                              Add Job Description
+                            </Button>
+                          </>
+                        ) : (
+                          <div className="max-w-md mx-auto">
+                            <h3 className={`text-lg font-medium mb-4 ${
+                              isDarkMode ? 'text-white' : 'text-[#1E293B]'
+                            }`}>Enter Job Description</h3>
+                            <div className="space-y-4">
+                              <Textarea
+                                placeholder="Paste the job description here..."
+                                value={jobDescription}
+                                onChange={(e) => setJobDescription(e.target.value)}
+                                className={`min-h-[120px] ${
+                                  isDarkMode ? 'bg-[#1E293B] border-white/20 text-white placeholder:text-[#94A3B8]' : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-500'
+                                }`}
+                              />
+                              <div className="flex gap-2">
+                                <Button 
+                                  onClick={handleAnalyze} 
+                                  disabled={!jobDescription.trim() || isAnalyzing}
+                                  className="flex-1"
+                                >
+                                  {isAnalyzing ? 'Analyzing...' : 'Analyze with Job Description'}
+                                </Button>
+                                <Button 
+                                  onClick={() => setShowJobDescInput(false)} 
+                                  variant="outline"
+                                  className={`${
+                                    isDarkMode ? 'border-white/20 text-[#CBD5E1] hover:bg-white/10 hover:border-white/40 bg-transparent' : 'border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 bg-white'
+                                  }`}
+                                >
+                                  Cancel
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </TabsContent>
@@ -1615,28 +1793,34 @@ export default function ATSAnalysis() {
                   <TabsContent value="formatting" className="mt-6 p-6">
                     <div className="space-y-6">
                       <div className="text-center">
-                        <h3 className="text-2xl font-bold mb-2">Formatting Analysis</h3>
-                        <p className="text-muted-foreground">ATS-friendly formatting assessment</p>
+                        <h3 className={`text-2xl font-bold mb-2 ${
+                          isDarkMode ? 'text-white' : 'text-[#1E293B]'
+                        }`}>Formatting Analysis</h3>
+                        <p className={isDarkMode ? 'text-[#94A3B8]' : 'text-gray-600'}>ATS-friendly formatting assessment</p>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <Card>
+                        <Card className={isDarkMode ? 'bg-[#0D1B2A] border-white/10' : 'bg-white'}>
                           <CardHeader>
-                            <CardTitle>Font Analysis</CardTitle>
+                            <CardTitle className={isDarkMode ? 'text-white' : 'text-[#1E293B]'}>Font Analysis</CardTitle>
                           </CardHeader>
                           <CardContent>
                             <div className="space-y-3">
                               <div className="flex items-center justify-between">
-                                <span>ATS Friendly Fonts:</span>
+                                <span className={isDarkMode ? 'text-[#CBD5E1]' : 'text-gray-700'}>ATS Friendly Fonts:</span>
                                 <Badge variant={analysis.formatting_analysis?.font_analysis.ats_friendly ? "default" : "destructive"}>
                                   {analysis.formatting_analysis?.font_analysis.ats_friendly ? "✓ Compatible" : "✗ Issues Found"}
                                 </Badge>
                               </div>
                               <div>
-                                <span className="font-medium">Detected Fonts:</span>
+                                <span className={`font-medium ${
+                                  isDarkMode ? 'text-white' : 'text-[#1E293B]'
+                                }`}>Detected Fonts:</span>
                                 <div className="mt-1">
                                   {analysis.formatting_analysis?.font_analysis.fonts_detected.map((font, index) => (
-                                    <Badge key={index} variant="outline" className="mr-1 text-xs">
+                                    <Badge key={index} variant="outline" className={`mr-1 text-xs ${
+                                      isDarkMode ? 'border-white/20 text-[#CBD5E1]' : 'border-gray-300 text-gray-700'
+                                    }`}>
                                       {font}
                                     </Badge>
                                   ))}
@@ -1646,9 +1830,9 @@ export default function ATSAnalysis() {
                           </CardContent>
                         </Card>
 
-                        <Card>
+                        <Card className={isDarkMode ? 'bg-[#0D1B2A] border-white/10' : 'bg-white'}>
                           <CardHeader>
-                            <CardTitle>Layout Issues</CardTitle>
+                            <CardTitle className={isDarkMode ? 'text-white' : 'text-[#1E293B]'}>Layout Issues</CardTitle>
                           </CardHeader>
                           <CardContent>
                             <div className="space-y-3">
@@ -1656,13 +1840,17 @@ export default function ATSAnalysis() {
                                 analysis.formatting_analysis.layout_issues.map((issue, index) => (
                                   <div key={index} className="flex items-start space-x-2">
                                     <AlertTriangle className="h-4 w-4 text-orange-600 mt-0.5" />
-                                    <span className="text-sm">{issue}</span>
+                                    <span className={`text-sm ${
+                                      isDarkMode ? 'text-[#CBD5E1]' : 'text-gray-700'
+                                    }`}>{issue}</span>
                                   </div>
                                 ))
                               ) : (
                                 <div className="flex items-center space-x-2 text-green-600">
                                   <CheckCircle2 className="h-4 w-4" />
-                                  <span className="text-sm">No layout issues detected</span>
+                                  <span className={`text-sm ${
+                                    isDarkMode ? 'text-[#CBD5E1]' : 'text-gray-700'
+                                  }`}>No layout issues detected</span>
                                 </div>
                               )}
                             </div>
@@ -1676,37 +1864,49 @@ export default function ATSAnalysis() {
                   <TabsContent value="action-verbs" className="mt-6 p-6">
                     <div className="space-y-6">
                       <div className="text-center">
-                        <h3 className="text-2xl font-bold mb-2">Action Verb Analysis</h3>
-                        <p className="text-gray-600">Strength of language and impact assessment</p>
+                        <h3 className={`text-2xl font-bold mb-2 ${
+                          isDarkMode ? 'text-white' : 'text-[#1E293B]'
+                        }`}>Action Verb Analysis</h3>
+                        <p className={isDarkMode ? 'text-[#94A3B8]' : 'text-gray-600'}>Strength of language and impact assessment</p>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <Card>
+                        <Card className={isDarkMode ? 'bg-[#0D1B2A] border-white/10' : 'bg-white'}>
                           <CardHeader>
-                            <CardTitle className="text-green-700">Strong Action Verbs</CardTitle>
+                            <CardTitle className={isDarkMode ? 'text-green-400' : 'text-green-700'}>Strong Action Verbs</CardTitle>
                           </CardHeader>
                           <CardContent>
                             <div className="text-center mb-4">
-                              <div className="text-3xl font-bold text-green-600">{analysis.action_verb_analysis?.strong_verbs_count || 0}</div>
-                              <div className="text-sm text-gray-600">Strong verbs found</div>
+                              <div className={`text-3xl font-bold ${
+                                isDarkMode ? 'text-green-400' : 'text-green-600'
+                              }`}>{analysis.action_verb_analysis?.strong_verbs_count || 0}</div>
+                              <div className={`text-sm ${
+                                isDarkMode ? 'text-[#94A3B8]' : 'text-gray-600'
+                              }`}>Strong verbs found</div>
                             </div>
                             <div className="space-y-2">
-                              <p className="text-sm text-gray-600">Strong action verbs make your resume more impactful and memorable.</p>
+                              <p className={`text-sm ${
+                                isDarkMode ? 'text-[#94A3B8]' : 'text-gray-600'
+                              }`}>Strong action verbs make your resume more impactful and memorable.</p>
                             </div>
                           </CardContent>
                         </Card>
 
-                        <Card>
+                        <Card className={isDarkMode ? 'bg-[#0D1B2A] border-white/10' : 'bg-white'}>
                           <CardHeader>
-                            <CardTitle className="text-red-700">Weak Phrases</CardTitle>
+                            <CardTitle className={isDarkMode ? 'text-red-400' : 'text-red-700'}>Weak Phrases</CardTitle>
                           </CardHeader>
                           <CardContent>
                             <div className="space-y-3">
                               {analysis.action_verb_analysis?.weak_verbs_found.length > 0 ? (
                                 analysis.action_verb_analysis.weak_verbs_found.map((weak, index) => (
                                   <div key={index} className="flex items-center justify-between">
-                                    <span className="text-sm text-red-600">"{weak}"</span>
-                                    <span className="text-xs text-gray-500">
+                                    <span className={`text-sm ${
+                                      isDarkMode ? 'text-red-400' : 'text-red-600'
+                                    }`}>"{weak}"</span>
+                                    <span className={`text-xs ${
+                                      isDarkMode ? 'text-[#94A3B8]' : 'text-gray-500'
+                                    }`}>
                                       → {analysis.action_verb_analysis?.suggested_replacements[weak] || 'Strengthen'}
                                     </span>
                                   </div>
@@ -1714,7 +1914,9 @@ export default function ATSAnalysis() {
                               ) : (
                                 <div className="flex items-center space-x-2 text-green-600">
                                   <CheckCircle2 className="h-4 w-4" />
-                                  <span className="text-sm">No weak phrases detected</span>
+                                  <span className={`text-sm ${
+                                    isDarkMode ? 'text-[#CBD5E1]' : 'text-gray-700'
+                                  }`}>No weak phrases detected</span>
                                 </div>
                               )}
                             </div>
@@ -1728,23 +1930,33 @@ export default function ATSAnalysis() {
                   <TabsContent value="metrics" className="mt-6 p-6">
                     <div className="space-y-6">
                       <div className="text-center">
-                        <h3 className="text-2xl font-bold mb-2">Quantifiable Results Audit</h3>
-                        <p className="text-gray-600">Numbers and metrics strengthen your impact</p>
+                        <h3 className={`text-2xl font-bold mb-2 ${
+                          isDarkMode ? 'text-white' : 'text-[#1E293B]'
+                        }`}>Quantifiable Results Audit</h3>
+                        <p className={isDarkMode ? 'text-[#94A3B8]' : 'text-gray-600'}>Numbers and metrics strengthen your impact</p>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <Card>
+                        <Card className={isDarkMode ? 'bg-[#0D1B2A] border-white/10' : 'bg-white'}>
                           <CardHeader>
-                            <CardTitle className="text-green-700">Quantified Achievements</CardTitle>
+                            <CardTitle className={isDarkMode ? 'text-green-400' : 'text-green-700'}>Quantified Achievements</CardTitle>
                           </CardHeader>
                           <CardContent>
                             <div className="text-center mb-4">
-                              <div className="text-3xl font-bold text-green-600">{analysis.quantifiable_results?.metrics_found || 0}</div>
-                              <div className="text-sm text-gray-600">Metrics found</div>
+                              <div className={`text-3xl font-bold ${
+                                isDarkMode ? 'text-green-400' : 'text-green-600'
+                              }`}>{analysis.quantifiable_results?.metrics_found || 0}</div>
+                              <div className={`text-sm ${
+                                isDarkMode ? 'text-[#94A3B8]' : 'text-gray-600'
+                              }`}>Metrics found</div>
                             </div>
                             <div className="space-y-2">
                               {analysis.quantifiable_results?.quantified_achievements.map((achievement, index) => (
-                                <Badge key={index} variant="outline" className="mr-1 text-xs bg-green-50">
+                                <Badge key={index} variant="outline" className={`mr-1 text-xs ${
+                                  isDarkMode 
+                                    ? 'bg-green-900/40 text-green-300 border-green-700/50' 
+                                    : 'bg-green-50 text-green-800'
+                                }`}>
                                   {achievement}
                                 </Badge>
                               ))}
@@ -1752,17 +1964,21 @@ export default function ATSAnalysis() {
                           </CardContent>
                         </Card>
 
-                        <Card>
+                        <Card className={isDarkMode ? 'bg-[#0D1B2A] border-white/10' : 'bg-white'}>
                           <CardHeader>
-                            <CardTitle className="text-orange-700">Opportunities</CardTitle>
+                            <CardTitle className={isDarkMode ? 'text-orange-400' : 'text-orange-700'}>Opportunities</CardTitle>
                           </CardHeader>
                           <CardContent>
                             <div className="space-y-3">
-                              <p className="text-sm text-gray-600 mb-3">Areas where you could add specific numbers:</p>
+                              <p className={`text-sm mb-3 ${
+                                isDarkMode ? 'text-[#94A3B8]' : 'text-gray-600'
+                              }`}>Areas where you could add specific numbers:</p>
                               {analysis.quantifiable_results?.unquantified_opportunities.map((opportunity, index) => (
                                 <div key={index} className="flex items-start space-x-2">
                                   <TrendingUp className="h-4 w-4 text-orange-600 mt-0.5" />
-                                  <span className="text-sm">{opportunity}</span>
+                                  <span className={`text-sm ${
+                                    isDarkMode ? 'text-[#CBD5E1]' : 'text-gray-700'
+                                  }`}>{opportunity}</span>
                                 </div>
                               ))}
                             </div>
@@ -1776,50 +1992,76 @@ export default function ATSAnalysis() {
                   <TabsContent value="readability" className="mt-6 p-6">
                     <div className="space-y-6">
                       <div className="text-center">
-                        <h3 className="text-2xl font-bold mb-2 dark:text-foreground/95">Readability Metrics</h3>
-                        <p className="text-muted-foreground dark:text-muted-foreground/90">How easy is your resume to read and understand?</p>
+                        <h3 className={`text-2xl font-bold mb-2 ${
+                          isDarkMode ? 'text-white' : 'text-[#1E293B]'
+                        }`}>Readability Metrics</h3>
+                        <p className={isDarkMode ? 'text-[#94A3B8]' : 'text-gray-600'}>How easy is your resume to read and understand?</p>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <Card className="dark:bg-card/50 animate-fadeInUp animation-delay-2000">
+                        <Card className={`animate-fadeInUp animation-delay-2000 ${
+                          isDarkMode ? 'bg-[#0D1B2A] border-white/10' : 'bg-white'
+                        }`}>
                           <CardHeader>
-                            <CardTitle className="dark:text-foreground/95">Grade Level</CardTitle>
+                            <CardTitle className={isDarkMode ? 'text-white' : 'text-[#1E293B]'}>Grade Level</CardTitle>
                           </CardHeader>
                           <CardContent className="text-center">
                             <AnimatedScore 
                               score={analysis.readability_metrics?.flesch_kincaid_grade || 0} 
-                              className="text-3xl font-bold text-blue-600 dark:text-blue-400"
+                              className={`text-3xl font-bold ${
+                                isDarkMode ? 'text-blue-400' : 'text-blue-600'
+                              }`}
                             />
-                            <div className="text-sm text-muted-foreground dark:text-muted-foreground/90">Flesch-Kincaid Grade</div>
-                            <p className="text-xs text-muted-foreground/70 dark:text-muted-foreground/80 mt-2">Ideal: 8-12th grade level</p>
+                            <div className={`text-sm ${
+                              isDarkMode ? 'text-[#94A3B8]' : 'text-gray-500'
+                            }`}>Flesch-Kincaid Grade</div>
+                            <p className={`text-xs mt-2 ${
+                              isDarkMode ? 'text-[#64748B]' : 'text-gray-400'
+                            }`}>Ideal: 8-12th grade level</p>
                           </CardContent>
                         </Card>
 
-                        <Card className="dark:bg-card/50 animate-fadeInUp animation-delay-4000">
+                        <Card className={`animate-fadeInUp animation-delay-4000 ${
+                          isDarkMode ? 'bg-[#0D1B2A] border-white/10' : 'bg-white'
+                        }`}>
                           <CardHeader>
-                            <CardTitle className="dark:text-foreground/95">Sentence Length</CardTitle>
+                            <CardTitle className={isDarkMode ? 'text-white' : 'text-[#1E293B]'}>Sentence Length</CardTitle>
                           </CardHeader>
                           <CardContent className="text-center">
                             <AnimatedScore 
                               score={analysis.readability_metrics?.average_sentence_length || 0} 
-                              className="text-3xl font-bold text-purple-600 dark:text-purple-400"
+                              className={`text-3xl font-bold ${
+                                isDarkMode ? 'text-purple-400' : 'text-purple-600'
+                              }`}
                             />
-                            <div className="text-sm text-muted-foreground dark:text-muted-foreground/90">Words per sentence</div>
-                            <p className="text-xs text-muted-foreground/70 dark:text-muted-foreground/80 mt-2">Ideal: 15-20 words</p>
+                            <div className={`text-sm ${
+                              isDarkMode ? 'text-[#94A3B8]' : 'text-gray-500'
+                            }`}>Words per sentence</div>
+                            <p className={`text-xs mt-2 ${
+                              isDarkMode ? 'text-[#64748B]' : 'text-gray-400'
+                            }`}>Ideal: 15-20 words</p>
                           </CardContent>
                         </Card>
 
-                        <Card className="dark:bg-card/50 animate-fadeInUp animation-delay-2000">
+                        <Card className={`animate-fadeInUp animation-delay-2000 ${
+                          isDarkMode ? 'bg-[#0D1B2A] border-white/10' : 'bg-white'
+                        }`}>
                           <CardHeader>
-                            <CardTitle className="dark:text-foreground/95">Passive Voice</CardTitle>
+                            <CardTitle className={isDarkMode ? 'text-white' : 'text-[#1E293B]'}>Passive Voice</CardTitle>
                           </CardHeader>
                           <CardContent className="text-center">
                             <AnimatedScore 
                               score={analysis.readability_metrics?.passive_voice_percentage || 0} 
-                              className="text-3xl font-bold text-orange-600 dark:text-orange-400"
+                              className={`text-3xl font-bold ${
+                                isDarkMode ? 'text-orange-400' : 'text-orange-600'
+                              }`}
                             />
-                            <div className="text-sm text-muted-foreground dark:text-muted-foreground/90">Passive voice usage</div>
-                            <p className="text-xs text-muted-foreground/70 dark:text-muted-foreground/80 mt-2">Ideal: Under 10%</p>
+                            <div className={`text-sm ${
+                              isDarkMode ? 'text-[#94A3B8]' : 'text-gray-500'
+                            }`}>Passive voice usage</div>
+                            <p className={`text-xs mt-2 ${
+                              isDarkMode ? 'text-[#64748B]' : 'text-gray-400'
+                            }`}>Ideal: Under 10%</p>
                           </CardContent>
                         </Card>
                       </div>
@@ -1831,22 +2073,38 @@ export default function ATSAnalysis() {
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4 animate-fadeInUp animation-delay-4000">
-              <Button onClick={handleReset} variant="outline" className="w-full sm:w-auto dark:border-border dark:text-foreground/90 dark:hover:bg-muted/50 hover:scale-105 transition-transform">
+              <Button onClick={handleReset} variant="outline" className={`w-full sm:w-auto hover:scale-105 transition-all duration-200 ${
+                isDarkMode 
+                  ? 'border-white/20 text-[#CBD5E1] hover:bg-white/10 hover:border-white/40 bg-transparent' 
+                  : 'border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 bg-white'
+              }`}>
                 <RefreshCcw className="mr-2 h-4 w-4" />
                 Analyze Another Resume
               </Button>
               <div className="flex space-x-2">
-                <Button onClick={downloadPDFReport} variant="outline" className="flex items-center dark:border-border dark:text-foreground/90 dark:hover:bg-muted/50 hover:scale-105 transition-transform">
+                <Button onClick={downloadPDFReport} variant="outline" className={`flex items-center hover:scale-105 transition-all duration-200 ${
+                  isDarkMode 
+                    ? 'border-white/20 text-[#CBD5E1] hover:bg-white/10 hover:border-white/40 bg-transparent' 
+                    : 'border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 bg-white'
+                }`}>
                   <Download className="mr-2 h-4 w-4" />
                   PDF Report
                 </Button>
-                <Button onClick={downloadJSONReport} variant="outline" className="flex items-center dark:border-border dark:text-foreground/90 dark:hover:bg-muted/50 hover:scale-105 transition-transform">
+                <Button onClick={downloadJSONReport} variant="outline" className={`flex items-center hover:scale-105 transition-all duration-200 ${
+                  isDarkMode 
+                    ? 'border-white/20 text-[#CBD5E1] hover:bg-white/10 hover:border-white/40 bg-transparent' 
+                    : 'border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 bg-white'
+                }`}>
                   <Download className="mr-2 h-4 w-4" />
                   JSON Report
                 </Button>
               </div>
               <Link href="/builder">
-                <Button className="w-full sm:w-auto bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90 hover:scale-105 transition-transform">
+                <Button className={`w-full sm:w-auto hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl ${
+                  isDarkMode 
+                    ? 'bg-gradient-to-r from-[#3B82F6] to-[#2563EB] hover:from-[#60A5FA] hover:to-[#3B82F6] text-white' 
+                    : 'bg-gradient-to-r from-[#14B8A6] to-[#0D9488] hover:from-[#2DD4BF] hover:to-[#14B8A6] text-white'
+                }`}>
                   <Edit className="mr-2 h-4 w-4" />
                   Edit Resume
                 </Button>
