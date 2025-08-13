@@ -13,7 +13,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import Footer from "@/components/Footer";
 
 // Template Slider Component with Horizontal Scroll
-const TemplateSlider = () => {
+const TemplateSlider = ({ isDarkMode }: { isDarkMode: boolean }) => {
   const templates = allTemplates;
   const ref = useRef<HTMLDivElement>(null);
   const { scrollXProgress } = useScroll({ container: ref });
@@ -77,9 +77,9 @@ const TemplateSlider = () => {
   }, []);
 
     return (
-    <div className="w-full h-full flex flex-col">
-      {/* Templates Container */}
-      <div className="relative w-full flex-1 flex items-center justify-center">
+         <div className="w-full h-full flex flex-col">
+       {/* Templates Container */}
+       <div className="relative w-full flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8">
         <motion.div 
           ref={ref}
           style={{ 
@@ -87,12 +87,16 @@ const TemplateSlider = () => {
             scrollbarWidth: 'none',
             msOverflowStyle: 'none'
           }}
-          className="flex gap-4 md:gap-6 lg:gap-8 overflow-x-auto pb-4 px-4 w-full max-w-full [&::-webkit-scrollbar]:hidden"
+                     className="flex gap-4 md:gap-6 lg:gap-8 overflow-x-auto pb-4 px-8 md:px-12 lg:px-16 w-full max-w-full [&::-webkit-scrollbar]:hidden"
         >
           {templates.map((template, index) => (
                          <motion.div
                key={template.id}
-                              className="flex-shrink-0 w-64 md:w-72 lg:w-80 bg-slate-800/80 backdrop-blur-sm border border-white/10 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer group"
+                                                             className={`flex-shrink-0 w-64 md:w-72 lg:w-80 backdrop-blur-sm border rounded-[10px] shadow-lg transition-all duration-200 cursor-pointer group hover:scale-[1.02] min-h-[500px] ${
+                                 isDarkMode 
+                                   ? 'bg-slate-800/80 border-white/10 hover:shadow-[0_6px_20px_rgba(0,0,0,0.12)]' 
+                                   : 'bg-white border-[#E5E7EB] hover:shadow-[0_6px_20px_rgba(0,0,0,0.08)]'
+                               }`}
                initial={{ opacity: 0, x: 30, y: 20 }}
                animate={{ 
                  opacity: 1, 
@@ -115,13 +119,13 @@ const TemplateSlider = () => {
                 window.location.href = `/builder?template=${template.id}&source=${template.isReactiveResume ? 'reactive-resume' : 'custom'}`;
               }}
             >
-                             {/* Template Preview */}
-                               <div className="relative h-64 md:h-72 lg:h-80 overflow-hidden rounded-t-lg">
+                                                                                                                       {/* Template Preview */}
+                                 <div className="relative h-[380px] overflow-hidden rounded-t-lg template-preview bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
                 {template.previewImage ? (
                   <img 
                     src={template.previewImage} 
                     alt={`${template.name} template preview`}
-                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover object-top transition-transform duration-300"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
                       const nextSibling = e.currentTarget.nextElementSibling as HTMLElement;
@@ -131,31 +135,42 @@ const TemplateSlider = () => {
                     }}
                   />
                 ) : null}
-                <div 
-                  className="w-full h-full bg-gradient-to-br p-4 items-center justify-center absolute inset-0" 
-                  style={{
-                    display: template.previewImage ? 'none' : 'flex',
-                    background: `linear-gradient(to bottom right, ${template.color.includes('blue') ? '#dbeafe' : template.color.includes('gray') ? '#f3f4f6' : template.color.includes('green') ? '#d1fae5' : template.color.includes('purple') ? '#e9d5ff' : template.color.includes('indigo') ? '#e0e7ff' : template.color.includes('cyan') ? '#cffafe' : template.color.includes('yellow') ? '#fef3c7' : template.color.includes('emerald') ? '#d1fae5' : template.color.includes('stone') ? '#f5f5f4' : template.color.includes('slate') ? '#f1f5f9' : template.color.includes('amber') ? '#fef3c7' : '#fed7aa'}, ${template.color.includes('blue') ? '#60a5fa' : template.color.includes('gray') ? '#9ca3af' : template.color.includes('green') ? '#34d399' : template.color.includes('purple') ? '#a78bfa' : template.color.includes('indigo') ? '#818cf8' : template.color.includes('cyan') ? '#22d3ee' : template.color.includes('yellow') ? '#fbbf24' : template.color.includes('emerald') ? '#34d399' : template.color.includes('stone') ? '#a8a29e' : template.color.includes('slate') ? '#64748b' : template.color.includes('amber') ? '#f59e0b' : '#fb923c'})`
-                  }}
-                >
+                                 <div 
+                   className={`w-full h-full p-4 items-center justify-center absolute inset-0 flex ${
+                     isDarkMode 
+                       ? 'bg-gradient-to-br from-slate-700 to-slate-800' 
+                       : 'bg-gradient-to-br from-gray-100 to-gray-200'
+                   }`}
+                   style={{
+                     display: template.previewImage ? 'none' : 'flex'
+                   }}
+                 >
                   <div className="text-center">
-                    <div className="w-16 h-16 mx-auto mb-3 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-                      <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className={`w-16 h-16 mx-auto mb-3 rounded-lg flex items-center justify-center backdrop-blur-sm ${
+                      isDarkMode ? 'bg-white/20' : 'bg-gray-800/20'
+                    }`}>
+                      <svg className={`w-8 h-8 ${isDarkMode ? 'text-white' : 'text-gray-700'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                     </div>
-                    <span className="text-sm font-semibold text-white text-center block">{template.name}</span>
+                    <span className={`text-sm font-semibold text-center block ${
+                      isDarkMode ? 'text-white' : 'text-gray-700'
+                    }`}>{template.name}</span>
                   </div>
                 </div>
                 
 
               </div>
               
-              {/* Template Info */}
-              <div className="p-4">
-                                 <h4 className="text-sm font-semibold text-gray-200 mb-1 line-clamp-1">{template.name}</h4>
-                 <p className="text-xs text-gray-400 mb-3 line-clamp-2">{template.description}</p>
-                 <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-xs group-hover:scale-105 transition-transform py-2 border-0 rounded-lg">
+                             {/* Template Info */}
+               <div className="p-4">
+                                  <h4 className={`text-lg font-bold mb-2 line-clamp-1 ${
+                                    isDarkMode ? 'text-gray-200' : 'text-[#0F172A]'
+                                  }`}>{template.name}</h4>
+                  <p className={`text-sm mb-4 line-clamp-2 ${
+                    isDarkMode ? 'text-gray-400' : 'text-[#64748B]'
+                  }`}>{template.description}</p>
+                                    <Button className="w-full bg-[#3B82F6] hover:bg-[#2563EB] hover:shadow-[0_4px_12px_rgba(59,130,246,0.3)] hover:scale-[1.03] text-white text-sm transition-all duration-200 py-2.5 px-5 border-0 rounded-lg shadow-[0_4px_12px_rgba(59,130,246,0.3)]">
                    Use Template
                  </Button>
               </div>
@@ -167,89 +182,57 @@ const TemplateSlider = () => {
   );
 };
 
-// Scroll Overflow Mask Hook
-const left = `0%`;
-const right = `100%`;
-const leftInset = `20%`;
-const rightInset = `80%`;
-const transparent = `#0000`;
-const opaque = `#000`;
-
+// Scroll Overflow Mask Hook - Removed fade for better visibility
 function useScrollOverflowMask(scrollXProgress: MotionValue<number>) {
-  const maskImage = useMotionValue(
-    `linear-gradient(90deg, ${opaque}, ${opaque} ${left}, ${opaque} ${rightInset}, ${transparent})`
-  );
-
-  useMotionValueEvent(scrollXProgress, "change", (value) => {
-    if (value === 0) {
-      animate(
-        maskImage,
-        `linear-gradient(90deg, ${opaque}, ${opaque} ${left}, ${opaque} ${rightInset}, ${transparent})`
-      );
-    } else if (value === 1) {
-      animate(
-        maskImage,
-        `linear-gradient(90deg, ${transparent}, ${opaque} ${leftInset}, ${opaque} ${right}, ${opaque})`
-      );
-    } else if (
-      scrollXProgress.getPrevious() === 0 ||
-      scrollXProgress.getPrevious() === 1
-    ) {
-      animate(
-        maskImage,
-        `linear-gradient(90deg, ${transparent}, ${opaque} ${leftInset}, ${opaque} ${rightInset}, ${transparent})`
-      );
-    }
-  });
-
-  return maskImage;
+  // Return a transparent mask to disable the fade effect
+  return useMotionValue('none');
 }
 
-// Animated Templates Section Component
-const AnimatedTemplatesSection = () => {
-  const targetRef = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: targetRef,
-    offset: ["start end", "end start"]
-  });
 
-  // Create smoother spring animations with better easing
-  const scale = useSpring(useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0.9, 1, 1, 0.9]), {
-    stiffness: 80,
-    damping: 30
-  });
-
-  const opacity = useTransform(scrollYProgress, [0, 0.1, 0.9, 1], [0, 1, 1, 0]);
-  
-  const backgroundY = useTransform(scrollYProgress, [0, 1], ["-10%", "10%"]);
-  const backgroundScale = useTransform(scrollYProgress, [0, 0.5, 1], [1.1, 1, 1.1]);
-
-  return (
-    <div ref={targetRef} className="relative h-16 overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Background Image with Parallax */}
-      <motion.div
-        style={{
-          backgroundImage: `url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYwMCIgaGVpZ2h0PSIxMjAwIiB2aWV3Qm94PSIwIDAgMTYwMCAxMjAwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMTYwMCIgaGVpZ2h0PSIxMjAwIiBmaWxsPSJ1cmwoI2dyYWRpZW50KSIvPgo8ZGVmcz4KPGxpbmVhckdyYWRpZW50IGlkPSJncmFkaWVudCIgeDE9IjAiIHkxPSIwIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgo8c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojNjE3ZGI3O3N0b3Atb3BhY2l0eToxIiAvPgo8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiM0YzFkOTU7c3RvcC1vcGFjaXR5OjEiIC8+CjwvbGluZWFyR3JhZGllbnQ+CjwvZGVmcz4KPC9zdmc+')`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          height: "120%",
-          width: "100%",
-          y: backgroundY,
-          scale: backgroundScale,
-          position: "absolute",
-          top: 0,
-          left: 0,
-          filter: "brightness(0.3) blur(1px)",
-        }}
-      />
-
-      {/* Overlay Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-900/50 to-slate-900"></div>
-    </div>
-  );
-};
 
 export default function Home() {
+  // Add styles for template preview normalization
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      .template-preview img {
+        filter: contrast(105%) brightness(105%);
+        object-fit: cover;
+        object-position: top;
+        width: 100%;
+        height: 100%;
+        transition: transform 0.3s ease;
+      }
+      
+      .template-preview {
+        position: relative;
+        overflow: hidden;
+        border-radius: 8px 8px 0 0;
+      }
+      
+      .template-preview::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, transparent 20%, transparent 80%, rgba(0,0,0,0.1) 100%);
+        pointer-events: none;
+        z-index: 1;
+      }
+      
+      .template-preview img:hover {
+        transform: scale(1.05);
+      }
+    `;
+    document.head.appendChild(style);
+    return () => {
+      if (document.head.contains(style)) {
+        document.head.removeChild(style);
+      }
+    };
+  }, []);
   const [typedText, setTypedText] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTyping, setIsTyping] = useState(true);
@@ -316,13 +299,17 @@ export default function Home() {
   const isDarkMode = resolvedTheme === 'dark';
 
   return (
-    <div className="min-h-screen overflow-x-hidden relative transition-colors duration-300 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-foreground">
+    <div className={`min-h-screen overflow-x-hidden relative transition-colors duration-300 ${
+      isDarkMode 
+        ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900' 
+        : 'bg-[#F8F9FA]'
+    } text-foreground`}>
       {/* Navigation */}
                     <motion.nav 
           className={`fixed top-0 w-full z-50 border-b transition-all duration-300 backdrop-blur-md ${
             isDarkMode 
               ? 'bg-gradient-to-r from-[#0D1B2A] to-[#1B263B]/95 border-white/10' 
-              : 'bg-white/95 border-gray-200/50'
+              : 'bg-white/95 border-[#E5E7EB]'
           } ${isScrolled ? 'shadow-lg' : ''}`}
          initial={{ y: -50, opacity: 0 }}
          animate={{ y: 0, opacity: 1 }}
@@ -357,10 +344,10 @@ export default function Home() {
                    stiffness: 150
                  }}
                >
-                                  <FileText className={`h-8 w-8 mr-3 ${isDarkMode ? 'text-[#3B82F6]' : 'text-[#14B8A6]'}`} />
+                                  <FileText className={`h-8 w-8 mr-3 ${isDarkMode ? 'text-[#3B82F6]' : 'text-[#3B82F6]'}`} />
                </motion.div>
                                               <motion.span 
-                  className={`text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-[#1E293B]'}`}
+                  className={`text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-[#1A1A1A]'}`}
                  initial={{ opacity: 0 }}
                  animate={{ opacity: 1 }}
                  transition={{ 
@@ -379,8 +366,8 @@ export default function Home() {
                  href="#templates" 
                  className={`relative transition-colors duration-200 ${
                    isActiveLink('templates') 
-                     ? isDarkMode ? 'text-white font-semibold' : 'text-[#0F172A] font-semibold'
-                     : isDarkMode ? 'text-[#CBD5E1] hover:text-[#60A5FA]' : 'text-[#334155] hover:text-[#2DD4BF]'
+                     ? isDarkMode ? 'text-white font-semibold' : 'text-[#1A1A1A] font-semibold'
+                     : isDarkMode ? 'text-[#CBD5E1] hover:text-[#60A5FA]' : 'text-[#4B5563] hover:text-[#3B82F6]'
                  }`}
                  initial={{ y: -15, opacity: 0 }}
                  animate={{ y: 0, opacity: 1 }}
@@ -395,7 +382,7 @@ export default function Home() {
                 Templates
                 {isActiveLink('templates') && (
                   <motion.div
-                    className={`absolute -bottom-1 left-0 right-0 h-0.5 ${isDarkMode ? 'bg-white' : 'bg-[#0F172A]'}`}
+                    className={`absolute -bottom-1 left-0 right-0 h-0.5 ${isDarkMode ? 'bg-white' : 'bg-[#3B82F6]'}`}
                     layoutId="activeTab"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -407,7 +394,7 @@ export default function Home() {
               {/* ATS Analysis Link */}
               <Link href="/ats-analysis">
                                  <motion.a 
-                   className={`transition-colors ${isDarkMode ? 'text-[#CBD5E1] hover:text-[#60A5FA]' : 'text-[#334155] hover:text-[#2DD4BF]'}`}
+                   className={`transition-colors ${isDarkMode ? 'text-[#CBD5E1] hover:text-[#60A5FA]' : 'text-[#4B5563] hover:text-[#3B82F6]'}`}
                    initial={{ y: -15, opacity: 0 }}
                    animate={{ y: 0, opacity: 1 }}
                    transition={{ 
@@ -465,8 +452,8 @@ export default function Home() {
                    }}
                    whileTap={{ scale: 0.98 }}
                  >
-                                 <Button 
-                     className={`bg-gradient-to-r ${isDarkMode ? 'from-[#3B82F6] to-[#2563EB] hover:from-[#60A5FA] hover:to-[#3B82F6]' : 'from-[#14B8A6] to-[#0D9488] hover:from-[#2DD4BF] hover:to-[#14B8A6]'} text-white shadow-lg hover:shadow-xl transition-all duration-300 border-0`}
+                                                                                                                                       <Button 
+                       className={`bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-lg hover:shadow-[0_4px_12px_rgba(0,0,0,0.15)] transition-all duration-300 border-0 rounded-[10px]`}
                   onClick={() => {
                     // Clear any URL hash before navigation
                     if (window.location.hash) {
@@ -484,16 +471,28 @@ export default function Home() {
       </motion.nav>
 
             {/* Hero Section */}
-      <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      <section id="home" className={`relative min-h-screen flex items-center justify-center overflow-hidden pt-16 ${
+        isDarkMode 
+          ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900' 
+          : 'bg-[#F1F5F9]'
+      }`}>
         {/* Subtle background pattern */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.02),transparent_50%)]"></div>
+        <div className={`absolute inset-0 ${
+          isDarkMode 
+            ? 'bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.02),transparent_50%)]' 
+            : 'bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.03),transparent_50%)]'
+        }`}></div>
          
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Left Column - Text Content */}
             <div className="animate-fadeInUp text-center lg:text-left">
                               <motion.h1 
-                                  className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent"
+                                  className={`text-4xl md:text-6xl font-bold mb-6 ${
+                                    isDarkMode 
+                                      ? 'bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent' 
+                                      : 'text-[#1A1A1A]'
+                                  }`}
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: 0.2 }}
@@ -503,7 +502,9 @@ export default function Home() {
               </span>
                 </motion.h1>
               <motion.p 
-                className="text-xl md:text-2xl mb-8 max-w-2xl text-gray-300 leading-relaxed"
+                className={`text-xl md:text-2xl mb-8 max-w-2xl leading-relaxed ${
+                  isDarkMode ? 'text-gray-300' : 'text-[#4B5563]'
+                }`}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.4 }}
@@ -519,35 +520,51 @@ export default function Home() {
                  transition={{ duration: 0.8, delay: 0.6 }}
                >
                  <motion.div
-                   className="flex items-center px-4 py-2 rounded-lg text-sm font-medium bg-white/10 backdrop-blur-sm border border-white/20 text-gray-200 hover:bg-white/15 transition-colors"
+                   className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium backdrop-blur-sm transition-colors ${
+                     isDarkMode 
+                       ? 'bg-white/10 border border-white/20 text-gray-200 hover:bg-white/15' 
+                       : 'bg-white/80 border border-[#E5E7EB] text-[#4B5563] hover:bg-white hover:border-[#3B82F6]'
+                   }`}
                    whileHover={{ scale: 1.02 }}
                    transition={{ type: "spring", stiffness: 400 }}
                  >
-                   <Check className="w-4 h-4 mr-2 text-emerald-400" />
+                   <Check className="w-4 h-4 mr-2 text-[#22C55E]" />
                    ATS-Friendly
                  </motion.div>
                  <motion.div
-                   className="flex items-center px-4 py-2 rounded-lg text-sm font-medium bg-white/10 backdrop-blur-sm border border-white/20 text-gray-200 hover:bg-white/15 transition-colors"
+                   className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium backdrop-blur-sm transition-colors ${
+                     isDarkMode 
+                       ? 'bg-white/10 border border-white/20 text-gray-200 hover:bg-white/15' 
+                       : 'bg-white/80 border border-[#E5E7EB] text-[#4B5563] hover:bg-white hover:border-[#3B82F6]'
+                   }`}
                    whileHover={{ scale: 1.02 }}
                    transition={{ type: "spring", stiffness: 400 }}
                  >
-                   <Eye className="w-4 h-4 mr-2 text-blue-400" />
+                   <Eye className="w-4 h-4 mr-2 text-[#3B82F6]" />
                    Live Preview
                  </motion.div>
                  <motion.div
-                   className="flex items-center px-4 py-2 rounded-lg text-sm font-medium bg-white/10 backdrop-blur-sm border border-white/20 text-gray-200 hover:bg-white/15 transition-colors"
+                   className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium backdrop-blur-sm transition-colors ${
+                     isDarkMode 
+                       ? 'bg-white/10 border border-white/20 text-gray-200 hover:bg-white/15' 
+                       : 'bg-white/80 border border-[#E5E7EB] text-[#4B5563] hover:bg-white hover:border-[#3B82F6]'
+                   }`}
                    whileHover={{ scale: 1.02 }}
                    transition={{ type: "spring", stiffness: 400 }}
                  >
-                   <Sparkles className="w-4 h-4 mr-2 text-purple-400" />
+                   <Sparkles className="w-4 h-4 mr-2 text-[#10B981]" />
                    AI-Powered
                  </motion.div>
                  <motion.div
-                   className="flex items-center px-4 py-2 rounded-lg text-sm font-medium bg-white/10 backdrop-blur-sm border border-white/20 text-gray-200 hover:bg-white/15 transition-colors"
+                   className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium backdrop-blur-sm transition-colors ${
+                     isDarkMode 
+                       ? 'bg-white/10 border border-white/20 text-gray-200 hover:bg-white/15' 
+                       : 'bg-white/80 border border-[#E5E7EB] text-[#4B5563] hover:bg-white hover:border-[#3B82F6]'
+                   }`}
                    whileHover={{ scale: 1.02 }}
                    transition={{ type: "spring", stiffness: 400 }}
                  >
-                   <FileText className="w-4 h-4 mr-2 text-cyan-400" />
+                   <FileText className="w-4 h-4 mr-2 text-[#0EA5E9]" />
                    PDF Export
                  </motion.div>
                </motion.div>
@@ -568,7 +585,7 @@ export default function Home() {
                     }}
                   >
                                  <Button 
-                       className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-0"
+                       className="w-full sm:w-auto bg-[#3B82F6] hover:bg-[#2563EB] text-white px-6 py-4 text-lg font-semibold rounded-[10px] shadow-lg hover:shadow-[0_4px_12px_rgba(0,0,0,0.15)] transition-all duration-300 border-0"
                   onClick={() => {
                     // Clear any URL hash before navigation
                     if (window.location.hash) {
@@ -597,9 +614,13 @@ export default function Home() {
                       damping: 25 
                     }}
                   >
-                                         <Button 
-                       variant="outline" 
-                       className="w-full sm:w-auto border border-white/20 hover:border-white/40 text-gray-200 hover:text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm px-6 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                                                                                   <Button 
+                        variant="outline" 
+                        className={`w-full sm:w-auto backdrop-blur-sm px-6 py-4 text-lg font-semibold rounded-[10px] shadow-lg hover:shadow-[0_4px_12px_rgba(0,0,0,0.15)] transition-all duration-300 ${
+                          isDarkMode 
+                            ? 'border border-white/20 hover:border-white/40 text-gray-200 hover:text-white bg-white/10 hover:bg-white/20' 
+                            : 'border border-[#E5E7EB] hover:border-[#3B82F6] text-[#4B5563] hover:text-[#3B82F6] bg-white/80 hover:bg-white'
+                        }`}
                      >
                   <Target className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                   <span className="hidden sm:inline">ATS Checker</span>
@@ -618,17 +639,26 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Animated Templates Section */}
-      <AnimatedTemplatesSection />
-
-        {/* Templates Preview Section */}
-        <section id="templates" className="w-full h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-           <div className="w-full h-full flex flex-col">
-             {/* Fixed Header */}
-             <div className="sticky top-16 z-10 bg-slate-900/95 backdrop-blur-md border-b border-white/10 py-6">
+             {/* Templates Preview Section */}
+                  <section id="templates" className={`w-full min-h-screen ${
+            isDarkMode 
+              ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900' 
+              : 'bg-[#F1F5F9]'
+          }`}>
+                       <div className="w-full min-h-screen flex flex-col">
+              {/* Fixed Header */}
+              <div className={`sticky top-16 z-10 backdrop-blur-md py-6 ${
+                isDarkMode 
+                  ? 'bg-slate-900/95 border-b border-white/10' 
+                  : 'bg-white/95 border-b border-[#E5E7EB]'
+              }`}>
                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                  <motion.h2 
-                   className="text-3xl md:text-4xl lg:text-5xl font-bold text-center bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent mb-3"
+                   className={`text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-3 ${
+                     isDarkMode 
+                       ? 'bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent' 
+                       : 'text-[#1A1A1A]'
+                   }`}
                    initial={{ opacity: 0, y: 20 }}
                    whileInView={{ opacity: 1, y: 0 }}
                    transition={{ duration: 0.6, ease: "easeOut" }}
@@ -637,7 +667,9 @@ export default function Home() {
                    Professional Templates
                  </motion.h2>
                  <motion.p 
-                   className="text-lg md:text-xl text-gray-300 text-center max-w-3xl mx-auto leading-relaxed"
+                   className={`text-lg md:text-xl text-center max-w-3xl mx-auto leading-relaxed ${
+                     isDarkMode ? 'text-gray-300' : 'text-[#4B5563]'
+                   }`}
                    initial={{ opacity: 0, y: 20 }}
                    whileInView={{ opacity: 1, y: 0 }}
                    transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
@@ -648,89 +680,127 @@ export default function Home() {
                </div>
              </div>
              
-             {/* Animated Template Slider */}
-             <div className="flex-1 w-full pt-4">
-               <TemplateSlider />
-           </div>
+                           {/* Animated Template Slider */}
+                             <div className="flex-1 w-full pt-4 pb-8">
+                 <TemplateSlider isDarkMode={isDarkMode} />
+             </div>
          </div>
        </section>
 
 
 
              {/* Tools Section */}
-       <section className="py-20 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 mb-0">
+       <section className={`py-20 mb-0 ${
+         isDarkMode 
+           ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900' 
+           : 'bg-[#F1F5F9]'
+       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-                         <div className="inline-flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl mb-6 shadow-lg">
+                                                   <div className="inline-flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-[#3B82F6] rounded-[10px] mb-6 shadow-lg">
                <svg className="w-8 h-8 md:w-10 md:h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                </svg>
              </div>
-             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent mb-4">
+             <h2 className={`text-3xl md:text-4xl lg:text-5xl font-bold mb-4 ${
+               isDarkMode 
+                 ? 'bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent' 
+                 : 'text-[#1A1A1A]'
+             }`}>
                Complete Resume Toolkit
              </h2>
-             <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
+             <p className={`text-lg md:text-xl max-w-3xl mx-auto leading-relaxed ${
+               isDarkMode ? 'text-gray-300' : 'text-[#4B5563]'
+             }`}>
                Everything you need to create, extract, and optimize your resume content with professional-grade tools.
              </p>
              <div className="flex justify-center mt-6 space-x-2">
-               <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-               <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse animation-delay-2000"></div>
-               <div className="w-2 h-2 bg-blue-300 rounded-full animate-pulse animation-delay-4000"></div>
+               <div className="w-2 h-2 bg-[#3B82F6] rounded-full animate-pulse"></div>
+               <div className="w-2 h-2 bg-[#60A5FA] rounded-full animate-pulse animation-delay-2000"></div>
+               <div className="w-2 h-2 bg-[#93C5FD] rounded-full animate-pulse animation-delay-4000"></div>
              </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8 max-w-6xl mx-auto">
                          {/* Resume Builder */}
-             <Card className="group relative overflow-hidden border border-white/10 bg-slate-800/80 backdrop-blur-sm hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] h-full">
-               <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <CardContent className="relative p-6 md:p-8 flex flex-col h-full">
-                                                     <div className="flex items-center mb-6">
-                     <div className="relative">
-                       <div className="bg-gradient-to-br from-blue-600 to-blue-700 w-12 h-12 md:w-16 md:h-16 rounded-2xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                         <Edit className="text-white h-6 w-6 md:h-8 md:w-8" />
-                       </div>
-                     </div>
+             <Card className={`group relative overflow-hidden backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] h-full rounded-[10px] hover:shadow-[0_6px_16px_rgba(0,0,0,0.1)] ${
+               isDarkMode 
+                 ? 'border border-white/10 bg-slate-800/80' 
+                 : 'border border-[#E5E7EB] bg-white'
+             }`}>
+               <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${
+                 isDarkMode 
+                   ? 'bg-gradient-to-r from-blue-600/10 to-purple-600/10' 
+                   : 'bg-gradient-to-r from-[#3B82F6]/5 to-[#10B981]/5'
+               }`}></div>
+                             <CardContent className="relative p-4 md:p-6 lg:p-8 flex flex-col h-full">
+                                                      <div className="flex items-center mb-6">
+                      <div className="relative">
+                        <div className="bg-[#3B82F6] w-12 h-12 md:w-16 md:h-16 rounded-[10px] flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                          <Edit className="text-white h-6 w-6 md:h-8 md:w-8" />
+                        </div>
+                      </div>
                      <div>
-                       <h3 className="text-xl md:text-2xl font-bold text-gray-200 mb-1 transition-colors">
+                       <h3 className={`text-xl md:text-2xl font-bold mb-1 transition-colors ${
+                         isDarkMode ? 'text-gray-200' : 'text-[#1A1A1A]'
+                       }`}>
                          Resume Builder
                        </h3>
-                       <p className="text-blue-400 font-medium text-sm md:text-base">Interactive Editor</p>
+                       <p className="text-[#3B82F6] font-medium text-sm md:text-base">Interactive Editor</p>
                      </div>
                    </div>
                 
-                                 <p className="text-gray-300 mb-6 text-base md:text-lg flex-grow leading-relaxed">
+                                 <p className={`mb-6 text-base md:text-lg flex-grow leading-relaxed ${
+                   isDarkMode ? 'text-gray-300' : 'text-[#4B5563]'
+                 }`}>
                    Create professional resumes with live preview, 18+ templates, and instant PDF export. Perfect for crafting your perfect resume from scratch with real-time collaboration.
                  </p>
                 
                                  <div className="space-y-3 mb-8">
-                   <div className="flex items-center text-gray-200 group/item">
-                     <div className="bg-emerald-500/20 p-1 rounded-full mr-3 group-hover/item:scale-105 transition-transform">
-                       <Check className="w-4 h-4 text-emerald-400" />
+                   <div className={`flex items-center group/item ${
+                     isDarkMode ? 'text-gray-200' : 'text-[#4B5563]'
+                   }`}>
+                     <div className="bg-[#22C55E]/20 p-1 rounded-full mr-3 group-hover/item:scale-105 transition-transform">
+                       <Check className="w-4 h-4 text-[#22C55E]" />
                      </div>
-                     <span className="group-hover/item:text-gray-100 transition-colors">18+ Professional Templates</span>
+                     <span className={`transition-colors ${
+                       isDarkMode ? 'group-hover/item:text-gray-100' : 'group-hover/item:text-[#1A1A1A]'
+                     }`}>18+ Professional Templates</span>
                    </div>
-                   <div className="flex items-center text-gray-200 group/item">
-                     <div className="bg-blue-500/20 p-1 rounded-full mr-3 group-hover/item:scale-105 transition-transform">
-                       <Check className="w-4 h-4 text-blue-400" />
+                   <div className={`flex items-center group/item ${
+                     isDarkMode ? 'text-gray-200' : 'text-[#4B5563]'
+                   }`}>
+                     <div className="bg-[#3B82F6]/20 p-1 rounded-full mr-3 group-hover/item:scale-105 transition-transform">
+                       <Check className="w-4 h-4 text-[#3B82F6]" />
                      </div>
-                     <span className="group-hover/item:text-gray-100 transition-colors">Live Preview & Real-time Editing</span>
+                     <span className={`transition-colors ${
+                       isDarkMode ? 'group-hover/item:text-gray-100' : 'group-hover/item:text-[#1A1A1A]'
+                     }`}>Live Preview & Real-time Editing</span>
                    </div>
-                   <div className="flex items-center text-gray-200 group/item">
-                     <div className="bg-purple-500/20 p-1 rounded-full mr-3 group-hover/item:scale-105 transition-transform">
-                       <Check className="w-4 h-4 text-purple-400" />
+                   <div className={`flex items-center group/item ${
+                     isDarkMode ? 'text-gray-200' : 'text-[#4B5563]'
+                   }`}>
+                     <div className="bg-[#10B981]/20 p-1 rounded-full mr-3 group-hover/item:scale-105 transition-transform">
+                       <Check className="w-4 h-4 text-[#10B981]" />
                      </div>
-                     <span className="group-hover/item:text-gray-100 transition-colors">High-Quality PDF Export</span>
+                     <span className={`transition-colors ${
+                       isDarkMode ? 'group-hover/item:text-gray-100' : 'group-hover/item:text-[#1A1A1A]'
+                     }`}>High-Quality PDF Export</span>
                    </div>
-                   <div className="flex items-center text-gray-200 group/item">
-                     <div className="bg-cyan-500/20 p-1 rounded-full mr-3 group-hover/item:scale-105 transition-transform">
-                       <Check className="w-4 h-4 text-cyan-400" />
+                   <div className={`flex items-center group/item ${
+                     isDarkMode ? 'text-gray-200' : 'text-[#4B5563]'
+                   }`}>
+                     <div className="bg-[#0EA5E9]/20 p-1 rounded-full mr-3 group-hover/item:scale-105 transition-transform">
+                       <Check className="w-4 h-4 text-[#0EA5E9]" />
                      </div>
-                     <span className="group-hover/item:text-gray-100 transition-colors">Resume Upload & Auto-fill</span>
+                     <span className={`transition-colors ${
+                       isDarkMode ? 'group-hover/item:text-gray-100' : 'group-hover/item:text-[#1A1A1A]'
+                     }`}>Resume Upload & Auto-fill</span>
                    </div>
                  </div>
 
-                                 <Link href="/builder">
-                   <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-lg py-6 shadow-lg hover:shadow-xl transition-all duration-300 group/btn border-0 rounded-xl">
+                                                                                                                                       <Link href="/builder">
+                     <Button className="w-full bg-[#3B82F6] hover:bg-[#2563EB] text-white text-lg py-6 shadow-lg hover:shadow-[0_4px_12px_rgba(0,0,0,0.15)] transition-all duration-300 group/btn border-0 rounded-[10px]">
                      <Edit className="mr-2 h-5 w-5 group-hover/btn:scale-110 transition-transform" />
                      Start Building Resume
                    </Button>
@@ -738,57 +808,85 @@ export default function Home() {
               </CardContent>
             </Card>
 
-                         {/* ATS Analysis */}
-             <Card className="group relative overflow-hidden border border-white/10 bg-slate-800/80 backdrop-blur-sm hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] h-full">
-               <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-pink-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <CardContent className="relative p-6 md:p-8 flex flex-col h-full">
-                                 <div className="flex items-center mb-6">
+                                                   {/* ATS Analysis */}
+             <Card className={`group relative overflow-hidden backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] h-full rounded-[10px] hover:shadow-[0_6px_16px_rgba(0,0,0,0.1)] ${
+               isDarkMode 
+                 ? 'border border-white/10 bg-slate-800/80' 
+                 : 'border border-[#E5E7EB] bg-white'
+             }`}>
+               <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${
+                 isDarkMode 
+                   ? 'bg-gradient-to-r from-purple-600/10 to-pink-600/10' 
+                   : 'bg-gradient-to-r from-[#10B981]/5 to-[#3B82F6]/5'
+               }`}></div>
+                             <CardContent className="relative p-4 md:p-6 lg:p-8 flex flex-col h-full">
+                                  <div className="flex items-center mb-6">
                    <div className="relative">
-                     <div className="bg-gradient-to-br from-purple-600 to-purple-700 w-12 h-12 md:w-16 md:h-16 rounded-2xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                     <div className="bg-[#10B981] w-12 h-12 md:w-16 md:h-16 rounded-[10px] flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
                        <Target className="text-white h-6 w-6 md:h-8 md:w-8" />
                      </div>
                    </div>
                    <div>
-                     <h3 className="text-xl md:text-2xl font-bold text-gray-200 mb-1 transition-colors">
+                     <h3 className={`text-xl md:text-2xl font-bold mb-1 transition-colors ${
+                       isDarkMode ? 'text-gray-200' : 'text-[#1A1A1A]'
+                     }`}>
                        ATS Analysis
                      </h3>
-                     <p className="text-purple-400 font-medium text-sm md:text-base">Compatibility Scoring</p>
+                     <p className="text-[#10B981] font-medium text-sm md:text-base">Compatibility Scoring</p>
                    </div>
                  </div>
                 
-                                 <p className="text-gray-300 mb-6 text-base md:text-lg flex-grow leading-relaxed">
+                                 <p className={`mb-6 text-base md:text-lg flex-grow leading-relaxed ${
+                   isDarkMode ? 'text-gray-300' : 'text-[#4B5563]'
+                 }`}>
                    Get detailed ATS compatibility scoring and recommendations. Analyze your resume's performance with applicant tracking systems and optimize for maximum visibility.
                  </p>
                 
                                  <div className="space-y-3 mb-8">
-                   <div className="flex items-center text-gray-200 group/item">
-                     <div className="bg-emerald-500/20 p-1 rounded-full mr-3 group-hover/item:scale-105 transition-transform">
-                       <Check className="w-4 h-4 text-emerald-400" />
+                   <div className={`flex items-center group/item ${
+                     isDarkMode ? 'text-gray-200' : 'text-[#4B5563]'
+                   }`}>
+                     <div className="bg-[#22C55E]/20 p-1 rounded-full mr-3 group-hover/item:scale-105 transition-transform">
+                       <Check className="w-4 h-4 text-[#22C55E]" />
                      </div>
-                     <span className="group-hover/item:text-gray-100 transition-colors">ATS Compatibility Score</span>
+                     <span className={`transition-colors ${
+                       isDarkMode ? 'group-hover/item:text-gray-100' : 'group-hover/item:text-[#1A1A1A]'
+                     }`}>ATS Compatibility Score</span>
                    </div>
-                   <div className="flex items-center text-gray-200 group/item">
-                     <div className="bg-blue-500/20 p-1 rounded-full mr-3 group-hover/item:scale-105 transition-transform">
-                       <Check className="w-4 h-4 text-blue-400" />
+                   <div className={`flex items-center group/item ${
+                     isDarkMode ? 'text-gray-200' : 'text-[#4B5563]'
+                   }`}>
+                     <div className="bg-[#3B82F6]/20 p-1 rounded-full mr-3 group-hover/item:scale-105 transition-transform">
+                       <Check className="w-4 h-4 text-[#3B82F6]" />
                      </div>
-                     <span className="group-hover/item:text-gray-100 transition-colors">Keyword Analysis</span>
+                     <span className={`transition-colors ${
+                       isDarkMode ? 'group-hover/item:text-gray-100' : 'group-hover/item:text-[#1A1A1A]'
+                     }`}>Keyword Analysis</span>
                    </div>
-                   <div className="flex items-center text-gray-200 group/item">
-                     <div className="bg-purple-500/20 p-1 rounded-full mr-3 group-hover/item:scale-105 transition-transform">
-                       <Check className="w-4 h-4 text-purple-400" />
+                   <div className={`flex items-center group/item ${
+                     isDarkMode ? 'text-gray-200' : 'text-[#4B5563]'
+                   }`}>
+                     <div className="bg-[#10B981]/20 p-1 rounded-full mr-3 group-hover/item:scale-105 transition-transform">
+                       <Check className="w-4 h-4 text-[#10B981]" />
                      </div>
-                     <span className="group-hover/item:text-gray-100 transition-colors">Improvement Recommendations</span>
+                     <span className={`transition-colors ${
+                       isDarkMode ? 'group-hover/item:text-gray-100' : 'group-hover/item:text-[#1A1A1A]'
+                     }`}>Improvement Recommendations</span>
                    </div>
-                   <div className="flex items-center text-gray-200 group/item">
-                     <div className="bg-cyan-500/20 p-1 rounded-full mr-3 group-hover/item:scale-105 transition-transform">
-                       <Check className="w-4 h-4 text-cyan-400" />
+                   <div className={`flex items-center group/item ${
+                     isDarkMode ? 'text-gray-200' : 'text-[#4B5563]'
+                   }`}>
+                     <div className="bg-[#0EA5E9]/20 p-1 rounded-full mr-3 group-hover/item:scale-105 transition-transform">
+                       <Check className="w-4 h-4 text-[#0EA5E9]" />
                      </div>
-                     <span className="group-hover/item:text-gray-100 transition-colors">Format & Structure Analysis</span>
+                     <span className={`transition-colors ${
+                       isDarkMode ? 'group-hover/item:text-gray-100' : 'group-hover/item:text-[#1A1A1A]'
+                     }`}>Format & Structure Analysis</span>
                    </div>
                  </div>
 
-                                 <Link href="/ats-analysis">
-                   <Button className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white text-lg py-6 shadow-lg hover:shadow-xl transition-all duration-300 group/btn border-0 rounded-xl">
+                                                                   <Link href="/ats-analysis">
+                    <Button className="w-full bg-[#10B981] hover:bg-[#059669] text-white text-lg py-6 shadow-lg hover:shadow-[0_4px_12px_rgba(0,0,0,0.15)] transition-all duration-300 group/btn border-0 rounded-[10px]">
                      <Target className="mr-2 h-5 w-5 group-hover/btn:scale-110 transition-transform" />
                      Analyze Resume
                    </Button>
