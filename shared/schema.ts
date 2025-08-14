@@ -12,7 +12,7 @@ export const resumes = pgTable("resumes", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id),
   title: text("title").notNull(),
-  template: text("template").notNull().default("modern"),
+  template: text("template").notNull().default("azuril"),
   personalInfo: jsonb("personal_info").notNull(),
   summary: text("summary"),
   experience: jsonb("experience").notNull(),

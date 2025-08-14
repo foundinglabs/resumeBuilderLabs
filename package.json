@@ -4,14 +4,14 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-  "dev": "cross-env NODE_ENV=development tsx server/index.ts",
-  "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
-  "start": "cross-env NODE_ENV=production node dist/index.js",
-  "check": "tsc",
-  "db:push": "drizzle-kit push",
-  "local": "npm run dev",
-  "postinstall": "npx puppeteer browsers install chrome"
-},
+    "dev": "cross-env NODE_ENV=development tsx server/index.ts",
+    "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
+    "start": "cross-env NODE_ENV=production node dist/index.js",
+    "check": "tsc",
+    "db:push": "drizzle-kit push",
+    "local": "npm run dev",
+    "postinstall": "npx puppeteer browsers install chrome"
+  },
   "dependencies": {
     "@google/genai": "^1.9.0",
     "@hookform/resolvers": "^3.10.0",
@@ -106,6 +106,7 @@
     "react-hook-form": "^7.55.0",
     "react-icons": "^5.4.0",
     "react-resizable-panels": "^2.1.7",
+    "react-split": "^2.0.14",
     "recharts": "^2.15.2",
     "tailwind-merge": "^2.6.0",
     "tailwindcss": "^3.4.17",

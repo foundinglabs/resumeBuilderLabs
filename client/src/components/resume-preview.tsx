@@ -26,7 +26,8 @@ export function ResumePreview({ resumeData }: ResumePreviewProps) {
   const artboardResume = useArtboardStore((state) => state.resume);
   const setArtboardResume = useArtboardStore((state) => state.setResume);
 
-  const customTemplates = ['classic', 'modern', 'stylish', 'compact', 'overleaf', 'elegant'];
+  // const customTemplates = ['classic', 'modern', 'stylish', 'compact', 'overleaf', 'elegant']
+  const customTemplates = ['classic', 'stylish', 'compact', 'overleaf'];
 
   // Remount key to force full refresh on template changes only
   const [remountId, setRemountId] = useState(0);

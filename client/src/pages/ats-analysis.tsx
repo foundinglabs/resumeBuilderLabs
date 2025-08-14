@@ -1845,7 +1845,7 @@ export default function ATSAnalysis() {
               <CardHeader>
                 <CardTitle className={`text-center ${
                   isDarkMode ? 'text-white' : 'text-[#111827]'
-                }`}>Advanced Production-Level Analysis</CardTitle>
+                }`}>Advanced Level Analysis</CardTitle>
                 <p className={`text-center text-sm ${
                   isDarkMode ? 'text-[#94A3B8]' : 'text-[#4B5563]'
                 }`}>

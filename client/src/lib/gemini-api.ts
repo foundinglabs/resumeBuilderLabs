@@ -216,7 +216,7 @@ export function mapRefinedDataToResumeForm(refinedData: RefinedResumeData) {
       honors: '',
     }],
     skills: refinedData.skills.technical || [],
-    template: 'modern',
+    template: 'azurill',
     field: '',
     
     // Comprehensive data mapping
