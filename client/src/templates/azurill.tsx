@@ -122,7 +122,7 @@ const Header = memo(({ resumeData }: { resumeData: any }) => {
     label: string
   }) => {
     const hasHref = !!href
-    const baseClass = "flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-300 hover:scale-105"
+    const baseClass = "flex items-center gap-1 px-2 py-1 rounded-full transition-all duration-300 hover:scale-105"
     const enabledClass = "bg-white/20 hover:bg-white/30 print:hover:bg-white/20 shadow-lg hover:shadow-xl"
     const disabledClass = "bg-white/10 opacity-60 cursor-default"
     
@@ -130,32 +130,32 @@ const Header = memo(({ resumeData }: { resumeData: any }) => {
       return (
         <a href={href} target="_blank" rel="noreferrer noopener" className={`${baseClass} ${enabledClass}`}>
           {icon}
-          <span className="text-sm font-medium">{label}</span>
+          <span className="text-xs font-medium">{label}</span>
         </a>
       )
     }
     return (
       <div className={`${baseClass} ${disabledClass}`}>
         {icon}
-        <span className="text-sm font-medium">{label}</span>
+        <span className="text-xs font-medium">{label}</span>
       </div>
     )
   }
 
   return (
-    <div className="relative bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-700 text-white p-4 md:p-6 overflow-hidden">
+    <div className="relative bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-700 text-white p-2 md:p-3 overflow-hidden">
       {/* Animated gradient cursor effect (following Ditto's pattern) */}
       <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/20 via-teal-400/20 to-cyan-400/20 animate-pulse"></div>
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 animate-pulse"></div>
       
       <div className="relative z-10">
-        <div className="flex flex-row flex-wrap items-start gap-3 md:gap-4">
+        <div className="flex flex-row flex-wrap items-start gap-2 md:gap-3">
           {/* Profile Picture - Enhanced (following Ditto's pattern) */}
           <div 
             className="overflow-hidden border border-white/20 shadow-lg backdrop-blur-sm relative"
             style={{
-              width: `${basics?.picture?.size || 80}px`,
-              height: `${basics?.picture?.size || 80}px`,
+              width: `${basics?.picture?.size || 60}px`,
+              height: `${basics?.picture?.size || 60}px`,
               borderRadius: `${basics?.picture?.borderRadius || 50}%`,
               border: basics?.picture?.effects?.border ? '2px solid rgba(255,255,255,0.3)' : '1px solid rgba(255,255,255,0.2)'
             }}
@@ -197,7 +197,7 @@ const Header = memo(({ resumeData }: { resumeData: any }) => {
                 }}
               />
             )}
-            <div className="fallback-initials hidden absolute inset-0 w-full h-full bg-gradient-to-br from-emerald-400/30 to-cyan-400/30 flex items-center justify-center text-xl md:text-2xl font-serif font-bold"
+            <div className="fallback-initials hidden absolute inset-0 w-full h-full bg-gradient-to-br from-emerald-400/30 to-cyan-400/30 flex items-center justify-center text-lg md:text-xl font-serif font-bold"
                  style={{
                    borderRadius: `${basics?.picture?.borderRadius || 50}%`
                  }}>
@@ -206,15 +206,15 @@ const Header = memo(({ resumeData }: { resumeData: any }) => {
           </div>
 
           <div className="flex-1 min-w-0">
-            <h1 className="text-xl md:text-2xl lg:text-3xl font-serif font-bold mb-1 md:mb-2 text-white drop-shadow-sm">
+            <h1 className="text-lg md:text-xl lg:text-2xl font-serif font-bold mb-0.5 md:mb-1 text-white drop-shadow-sm">
               {basics?.name || ""}
             </h1>
-            <p className="text-sm md:text-base lg:text-lg text-emerald-100 mb-2 md:mb-3 font-medium">
+            <p className="text-xs md:text-sm lg:text-base text-emerald-100 mb-1 md:mb-2 font-medium">
               {basics?.headline || basics?.label || ""}
             </p>
-            <div className="flex flex-row items-center gap-3 md:gap-4 text-xs md:text-sm flex-nowrap overflow-x-auto">
+            <div className="flex flex-row items-center gap-2 md:gap-3 text-xs md:text-sm flex-nowrap overflow-x-auto">
               {basics?.email && (
-                <div className="flex items-center gap-1.5 md:gap-2">
+                <div className="flex items-center gap-1 md:gap-1.5">
                   <Mail className="w-3 h-3 md:w-4 md:h-4" />
                   <a href={`mailto:${basics.email}`} className="text-white hover:text-emerald-200 transition-colors" target="_blank" rel="noreferrer noopener">
                     {basics.email}
@@ -222,7 +222,7 @@ const Header = memo(({ resumeData }: { resumeData: any }) => {
                 </div>
               )}
               {basics?.phone && (
-                <div className="flex items-center gap-1.5 md:gap-2">
+                <div className="flex items-center gap-1 md:gap-1.5">
                   <Phone className="w-3 h-3 md:w-4 md:h-4" />
                   <a href={`tel:${basics.phone}`} className="text-white hover:text-emerald-200 transition-colors" target="_blank" rel="noreferrer noopener">
                     {basics.phone}
@@ -230,7 +230,7 @@ const Header = memo(({ resumeData }: { resumeData: any }) => {
                 </div>
               )}
               {basics?.location && (
-                <div className="flex items-center gap-1.5 md:gap-2">
+                <div className="flex items-center gap-1 md:gap-1.5">
                   <MapPin className="w-3 h-3 md:w-4 md:h-4" />
                   <span className="text-white">{formatLocation(basics.location)}</span>
                 </div>
@@ -240,7 +240,7 @@ const Header = memo(({ resumeData }: { resumeData: any }) => {
         </div>
 
         {/* Social Links (following Ditto's pattern) */}
-        <div className="flex flex-wrap gap-2 md:gap-3 mt-3 md:mt-4">
+        <div className="flex flex-wrap gap-1 md:gap-2 mt-2 md:mt-3">
           <SocialChip href={portfolioHref || undefined} icon={<Globe className="w-3 h-3 md:w-4 md:h-4" />} label="Portfolio" />
           <SocialChip href={getHref(linkedInProfile?.url) || undefined} icon={<Linkedin className="w-3 h-3 md:w-4 md:h-4" />} label="LinkedIn" />
           <SocialChip href={getHref(githubProfile?.url) || undefined} icon={<Github className="w-3 h-3 md:w-4 md:h-4" />} label="GitHub" />
@@ -254,7 +254,7 @@ Header.displayName = 'Header'
 
 // Enhanced Section Title (following Ditto's pattern)
 const SectionTitle = ({ children, icon }: { children: React.ReactNode; icon?: React.ReactNode }) => (
-  <h2 className="text-base sm:text-lg font-serif font-bold text-gray-800 mb-3 flex items-center gap-2 print:text-base print:mb-2">
+  <h2 className="text-sm sm:text-base font-serif font-bold text-gray-800 mb-1 flex items-center gap-1 print:text-sm print:mb-1">
     {icon && <div className="text-emerald-600">{icon}</div>}
     {children}
   </h2>
@@ -282,12 +282,12 @@ const Section = <T extends { visible?: boolean; id?: string }>(
 
   return (
     <section id={'id' in section ? section.id : section.name} className="grid">
-      <div className="mb-2 font-bold text-gray-700">
-        <h4 className="text-lg">{section.name}</h4>
+      <div className="mb-1 font-bold text-gray-700">
+        <h4 className="text-sm">{section.name}</h4>
       </div>
-      <div className={cn("grid gap-x-4 md:gap-x-6 gap-y-3", className)} style={{ gridTemplateColumns: `repeat(${"columns" in section ? section.columns : 1}, 1fr)` }}>
+      <div className={cn("grid gap-x-2 md:gap-x-3 gap-y-1", className)} style={{ gridTemplateColumns: `repeat(${"columns" in section ? section.columns : 1}, 1fr)` }}>
         {visibleItems.map((item) => (
-          <div key={item.id || Math.random()} className="relative space-y-2 border-gray-200 border-l-2 pl-4">
+          <div key={item.id || Math.random()} className="relative space-y-1 border-gray-200 border-l-2 pl-2">
             <div>{children?.(item as T)}</div>
           </div>
         ))}
@@ -305,12 +305,12 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
     case "summary": {
       if (!sec?.visible || isEmptyString(sec?.content)) return null
       return (
-        <section id={sec.id} className="mb-4 md:mb-6 print:mb-3">
+        <section id={sec.id} className="mb-2">
           <SectionTitle icon={<Target className="w-4 h-4 sm:w-5 sm:h-5" />}>
             About Me
           </SectionTitle>
           <div
-            className="text-gray-600 leading-relaxed text-sm sm:text-base print:text-xs print:leading-normal wysiwyg"
+            className="text-gray-600 leading-relaxed text-xs sm:text-sm print:text-xs print:leading-normal wysiwyg"
             dangerouslySetInnerHTML={{ __html: sanitize(sec.content) }} 
           />
         </section>
@@ -321,21 +321,21 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
       const { items: experienceItems, more: experienceMore } = capArray(sec.items.filter((item: any) => item?.visible !== false), MAX_EXPERIENCE)
       
       return (
-        <section key="experience" className="mb-7 md:mb-6 print:mb-3">
+        <section key="experience" className="mb-2">
           <SectionTitle icon={<Briefcase className="w-4 h-4 sm:w-5 sm:h-5" />}>
             Experience
           </SectionTitle>
-          <div className="space-y-2 print:space-y-1">
+          <div className="space-y-1">
             {experienceItems.map((item: any, idx: number) => {
               const expAccentColors = ["#10b981", "#059669", "#047857"] // Emerald shades
               return (
-                <div key={item.id || idx} className="relative pl-4 sm:pl-5 border-l-2 border-emerald-200 print:pl-4">
+                <div key={item.id || idx} className="relative pl-3 sm:pl-4 border-l-2 border-emerald-200 print:pl-3">
                   <div
-                    className="absolute -left-1.5 sm:-left-2 top-0 w-3 h-3 sm:w-4 sm:h-4 rounded-full print:w-3 print:h-3 print:-left-1.5"
+                    className="absolute -left-1 sm:-left-1.5 top-0 w-2 h-2 sm:w-3 sm:h-3 rounded-full print:w-2 print:h-2 print:-left-1"
                     style={{ backgroundColor: expAccentColors[idx % 3] }}
                   />
-                  <div className="flex items-center justify-between gap-2 mb-5 print:mb-0.5">
-                    <h3 className="text-sm sm:text-base font-semibold text-gray-800 print:text-sm flex-shrink-0">{item.position}</h3>
+                  <div className="flex items-center justify-between gap-1 mb-1 print:mb-0.5">
+                    <h3 className="text-xs sm:text-sm font-semibold text-gray-800 print:text-xs flex-shrink-0">{item.position}</h3>
                     <p className="font-medium text-xs print:text-xs" style={{ color: expAccentColors[idx % 3] }}>
                       {item.company}
                       {item.location && ` • ${formatLocation(item.location)}`}
@@ -346,7 +346,7 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
                     </span>
                   </div>
                   {item.summary && (
-                    <ul className="text-gray-600 space-y-0.5 text-xs print:text-xs print:space-y-0 list-disc pl-4">
+                    <ul className="text-gray-600 space-y-0.5 text-xs print:text-xs print:space-y-0 list-disc pl-3">
                       {extractBulletLines(item.summary).map((b, i) => (
                         <li key={i}>{b}</li>
                       ))}
@@ -365,55 +365,55 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
       const { items: projectItems, more: projectMore } = capArray(sec.items.filter((item: any) => item?.visible !== false), MAX_PROJECTS)
       
       return (
-        <section key="projects" className="mb-4 md:mb-6 print:mb-3">
+        <section key="projects" className="mb-2">
           <SectionTitle icon={<BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />}>
             Featured Projects
           </SectionTitle>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 print:gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 print:gap-1">
             {projectItems.map((proj: any, idx: number) => (
               <div
                 key={proj.id || idx}
-                className={`p-4 rounded-lg border print:p-3 ${idx % 2 === 0 ? "bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-100" : "bg-gradient-to-br from-cyan-50 to-blue-50 border-cyan-100"}`}
+                className={`p-2 rounded-lg border print:p-1 ${idx % 2 === 0 ? "bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-100" : "bg-gradient-to-br from-cyan-50 to-blue-50 border-cyan-100"}`}
               >
-                <div className="flex items-center justify-between gap-2">
-                  <h3 className="text-base font-semibold text-gray-800 mb-2 print:text-sm print:mb-1">{proj.name}</h3>
+                <div className="flex items-center justify-between gap-1">
+                  <h3 className="text-sm font-semibold text-gray-800 mb-1 print:text-xs print:mb-0.5">{proj.name}</h3>
                   {getHref(proj.url) && (
                     <a
                       href={getHref(proj.url)}
                       target="_blank"
                       rel="noreferrer noopener"
-                      className="inline-flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full"
+                      className="inline-flex items-center gap-1 text-xs text-emerald-700 bg-emerald-100 px-1 py-0.5 rounded-full"
                     >
-                      {isGitHubUrl(proj.url) ? <Github className="w-3.5 h-3.5" /> : <ExternalLink className="w-3.5 h-3.5" />}
+                      {isGitHubUrl(proj.url) ? <Github className="w-3 h-3" /> : <ExternalLink className="w-3 h-3" />}
                       <span>{isGitHubUrl(proj.url) ? "GitHub" : "Live"}</span>
                     </a>
                   )}
                 </div>
                 {proj.summary && (
-                  <div className="text-gray-600 text-sm mb-3 print:text-xs print:mb-2 wysiwyg" dangerouslySetInnerHTML={{ __html: sanitize(proj.summary) }} />
+                  <div className="text-gray-600 text-xs mb-1 print:text-xs print:mb-0.5 wysiwyg" dangerouslySetInnerHTML={{ __html: sanitize(proj.summary) }} />
                 )}
                 {!proj.summary && proj.description && (
-                  <p className="text-gray-600 text-sm mb-3 print:text-xs print:mb-2">{proj.description}</p>
+                  <p className="text-gray-600 text-xs mb-1 print:text-xs print:mb-0.5">{proj.description}</p>
                 )}
                 {Array.isArray(proj.keywords) && proj.keywords.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-1">
                     {proj.keywords.slice(0, MAX_KEYWORDS_PER_SKILL).map((k: string, i: number) => (
                       <span
                         key={i}
-                        className="px-1.5 py-0.5 text-xs bg-emerald-100 text-emerald-700 rounded"
+                        className="px-1 py-0.5 text-xs bg-emerald-100 text-emerald-700 rounded"
                       >
                         {k}
                       </span>
                     ))}
                     {proj.keywords.length > MAX_KEYWORDS_PER_SKILL && (
-                      <span className="px-1.5 py-0.5 text-xs rounded bg-cyan-100 text-cyan-700"></span>
+                      <span className="px-1 py-0.5 text-xs rounded bg-cyan-100 text-cyan-700"></span>
                     )}
                   </div>
                 )}
               </div>
             ))}
           </div>
-          {projectMore > 0 && <div className="text-xs text-gray-500 mt-2"></div>}
+          {projectMore > 0 && <div className="text-xs text-gray-500 mt-1"></div>}
         </section>
       )
     }
@@ -422,23 +422,23 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
       const { items: educationItems, more: educationMore } = capArray(sec.items.filter((item: any) => item?.visible !== false), MAX_EDUCATION)
       
       return (
-        <section key="education" className="mb-4 md:mb-6 print:mb-3">
+        <section key="education" className="mb-2">
           <SectionTitle icon={<GraduationCap className="w-4 h-4 sm:w-5 sm:h-5" />}>
             Education
           </SectionTitle>
-          <div className="space-y-3 print:space-y-2">
+          <div className="space-y-1">
             {educationItems.map((ed: any, idx: number) => (
               <div key={ed.id || idx}>
-                <h3 className="font-semibold text-gray-800 text-sm print:text-xs">{ed.area || ed.studyType || ed.degree}</h3>
-                <p className={`${idx % 2 === 0 ? "text-emerald-600" : "text-teal-600"} font-medium text-sm print:text-xs`}>{ed.institution || ed.school}</p>
+                <h3 className="font-semibold text-gray-800 text-xs print:text-xs">{ed.area || ed.studyType || ed.degree}</h3>
+                <p className={`${idx % 2 === 0 ? "text-emerald-600" : "text-teal-600"} font-medium text-xs print:text-xs`}>{ed.institution || ed.school}</p>
                 <p className="text-gray-500 text-xs">{ed.date || ed.graduationYear}</p>
-                {(ed.score || ed.gpa) && <p className="text-gray-600 text-xs mt-1">GPA: {ed.score || ed.gpa}</p>}
+                {(ed.score || ed.gpa) && <p className="text-gray-600 text-xs mt-0.5">GPA: {ed.score || ed.gpa}</p>}
                 {ed.location && <p className="text-gray-600 text-xs">{formatLocation(ed.location)}</p>}
                 {ed.honors && <p className="text-gray-600 text-xs">{ed.honors}</p>}
               </div>
             ))}
           </div>
-          {educationMore > 0 && <div className="text-xs text-gray-500 mt-2"></div>}
+          {educationMore > 0 && <div className="text-xs text-gray-500 mt-1"></div>}
         </section>
       )
     }
@@ -447,25 +447,25 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
       const { items: skillGroups, more: skillsMore } = capArray(sec.items.filter((item: any) => item?.visible !== false), MAX_SKILL_GROUPS)
       
       return (
-        <section key="skills" className="mb-4 md:mb-6 print:mb-3">
+        <section key="skills" className="mb-2">
           <SectionTitle icon={<AwardIcon className="w-4 h-4 sm:w-5 sm:h-5" />}>
             Skills
           </SectionTitle>
-          <div className="space-y-3 print:space-y-2">
+          <div className="space-y-1">
             {skillGroups.map((skill: any, idx: number) => (
               <div key={skill.id || idx}>
-                <h3 className="font-semibold text-gray-700 mb-2 text-sm print:text-xs print:mb-1">{skill.name}</h3>
+                <h3 className="font-semibold text-gray-700 mb-1 text-xs print:text-xs print:mb-0.5">{skill.name}</h3>
                 {Array.isArray(skill.keywords) && skill.keywords.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-wrap gap-1">
                     {skill.keywords.slice(0, MAX_KEYWORDS_PER_SKILL).map((kw: string, i: number) => (
-                      <span key={i} className={`px-2 py-1 text-xs rounded-full ${idx % 2 === 0 ? "bg-emerald-100 text-emerald-700" : "bg-teal-100 text-teal-700"}`}>{kw}</span>
+                      <span key={i} className={`px-1 py-0.5 text-xs rounded-full ${idx % 2 === 0 ? "bg-emerald-100 text-emerald-700" : "bg-teal-100 text-teal-700"}`}>{kw}</span>
                     ))}
                     {skill.keywords.length > MAX_KEYWORDS_PER_SKILL && (
-                      <span className={`px-2 py-1 text-xs rounded-full ${idx % 2 === 0 ? "bg-emerald-100 text-emerald-700" : "bg-teal-100 text-teal-700"}`}></span>
+                      <span className={`px-1 py-0.5 text-xs rounded-full ${idx % 2 === 0 ? "bg-emerald-100 text-emerald-700" : "bg-teal-100 text-teal-700"}`}></span>
                     )}
                   </div>
                 )}
-                {skill.description && <p className="text-xs text-gray-600 mt-1">{skill.description}</p>}
+                {skill.description && <p className="text-xs text-gray-600 mt-0.5">{skill.description}</p>}
               </div>
             ))}
             {skillsMore > 0 && <div className="text-xs text-gray-500"></div>}
@@ -478,12 +478,12 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
       const { items: languageItems, more: languageMore } = capArray(sec.items.filter((item: any) => item?.visible !== false), MAX_LANGUAGES)
       
       return (
-        <section key="languages" className="mb-4 md:mb-6 print:mb-3">
+        <section key="languages" className="mb-2">
           <SectionTitle>Languages</SectionTitle>
-          <div className="space-y-2 print:space-y-1">
+          <div className="space-y-1">
             {languageItems.map((lng: any, idx: number) => (
               <div key={lng.id || idx} className="flex justify-between items-center">
-                <span className="text-gray-700 text-sm print:text-xs">{lng.name}</span>
+                <span className="text-gray-700 text-xs print:text-xs">{lng.name}</span>
                 <span className="text-xs text-gray-500">{levelToLabel((lng as any).level, lng.description)}</span>
               </div>
             ))}
@@ -498,15 +498,15 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
       const { items: interestItems, more: interestMore } = capArray(sec.items.filter((item: any) => item?.visible !== false), 5)
       
       return (
-        <section key="interests" className="mb-4 md:mb-6 print:mb-3">
+        <section key="interests" className="mb-2">
           <SectionTitle icon={<Star className="w-4 h-4 sm:w-5 sm:h-5" />}>
             Interests
           </SectionTitle>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-1">
             {interestItems.map((item: any, idx: number) => (
               <span
                 key={item.id || idx}
-                className="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full text-xs"
+                className="px-1 py-0.5 bg-emerald-100 text-emerald-700 rounded-full text-xs"
               >
                 {item.name}
                 {Array.isArray(item.keywords) && item.keywords.length > 0 && (
@@ -534,14 +534,14 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
       const { items: achievementsItems, more: achievementsMore } = capArray(combinedAch, MAX_ACHIEVEMENTS_TOTAL)
       
       return (
-        <section key="achievements" className="mb-4 md:mb-6 print:mb-3">
+        <section key="achievements" className="mb-2">
           <SectionTitle icon={<Star className="w-4 h-4 sm:w-5 sm:h-5" />}>
             Achievements
           </SectionTitle>
-          <div className="space-y-2 print:space-y-1">
+          <div className="space-y-1">
             {achievementsItems.map((entry: any, idx: number) => (
-              <div key={(entry.value as any).id || idx} className="flex items-start gap-2">
-                <div className={`w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 ${idx % 4 === 0 ? "bg-emerald-500" : idx % 4 === 1 ? "bg-teal-500" : idx % 4 === 2 ? "bg-cyan-500" : "bg-blue-500"}`} />
+              <div key={(entry.value as any).id || idx} className="flex items-start gap-1">
+                <div className={`w-1 h-1 rounded-full mt-1 flex-shrink-0 ${idx % 4 === 0 ? "bg-emerald-500" : idx % 4 === 1 ? "bg-teal-500" : idx % 4 === 2 ? "bg-cyan-500" : "bg-blue-500"}`} />
                 {entry.type === "award" ? (
                   <p className="text-gray-600 text-xs">{[entry.value.title, entry.value.awarder, entry.value.date].filter(Boolean).join(" • ")}</p>
                 ) : (
@@ -560,16 +560,16 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
       const { items: certItems, more: certMore } = capArray(sec.items.filter((item: any) => item?.visible !== false), MAX_ACHIEVEMENTS_TOTAL)
       
       return (
-        <section key="certifications" className="mb-4 md:mb-6 print:mb-3">
+        <section key="certifications" className="mb-2">
           <SectionTitle icon={<AwardIcon className="w-4 h-4 sm:w-5 sm:h-5" />}>
             Certifications
           </SectionTitle>
-          <div className="space-y-2 print:space-y-1">
+          <div className="space-y-1">
             {certItems.map((item: any, idx: number) => (
-              <div key={item.id || idx} className="flex items-start gap-2">
-                <div className={`w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 ${idx % 4 === 0 ? "bg-emerald-500" : idx % 4 === 1 ? "bg-teal-500" : idx % 4 === 2 ? "bg-cyan-500" : "bg-blue-500"}`} />
+              <div key={item.id || idx} className="flex items-start gap-1">
+                <div className={`w-1 h-1 rounded-full mt-1 flex-shrink-0 ${idx % 4 === 0 ? "bg-emerald-500" : idx % 4 === 1 ? "bg-teal-500" : idx % 4 === 2 ? "bg-cyan-500" : "bg-blue-500"}`} />
                 <div>
-                  <p className="text-gray-700 text-sm font-medium">{item.name}</p>
+                  <p className="text-gray-700 text-xs font-medium">{item.name}</p>
                   <p className="text-gray-600 text-xs">
                     {[item.issuer, item.date].filter(Boolean).join(" • ")}
                   </p>
@@ -593,16 +593,16 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
       const { items: pubItems, more: pubMore } = capArray(sec.items.filter((item: any) => item?.visible !== false), 3)
       
       return (
-        <section key="publications" className="mb-4 md:mb-6 print:mb-3">
+        <section key="publications" className="mb-2">
           <SectionTitle icon={<BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />}>
             Publications
           </SectionTitle>
-          <div className="space-y-2 print:space-y-1">
+          <div className="space-y-1">
             {pubItems.map((item: any, idx: number) => (
-              <div key={item.id || idx} className="flex items-start gap-2">
-                <div className={`w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 ${idx % 4 === 0 ? "bg-emerald-500" : idx % 4 === 1 ? "bg-teal-500" : idx % 4 === 2 ? "bg-cyan-500" : "bg-blue-500"}`} />
+              <div key={item.id || idx} className="flex items-start gap-1">
+                <div className={`w-1 h-1 rounded-full mt-1 flex-shrink-0 ${idx % 4 === 0 ? "bg-emerald-500" : idx % 4 === 1 ? "bg-teal-500" : idx % 4 === 2 ? "bg-cyan-500" : "bg-blue-500"}`} />
                 <div>
-                  <p className="text-gray-700 text-sm font-medium">{item.name || item.title}</p>
+                  <p className="text-gray-700 text-xs font-medium">{item.name || item.title}</p>
                   <p className="text-gray-600 text-xs">
                     {[item.publisher, item.date].filter(Boolean).join(" • ")}
                   </p>
@@ -636,16 +636,16 @@ const mapSectionToComponent = (section: string, resumeData: any) => {
       const { items: refItems, more: refMore } = capArray(sec.items.filter((item: any) => item?.visible !== false), 3)
       
       return (
-        <section key="references" className="mb-4 md:mb-6 print:mb-3">
+        <section key="references" className="mb-2">
           <SectionTitle icon={<Users className="w-4 h-4 sm:w-5 sm:h-5" />}>
             References
           </SectionTitle>
-          <div className="space-y-2 print:space-y-1">
+          <div className="space-y-1">
             {refItems.map((item: any, idx: number) => (
-              <div key={item.id || idx} className="flex items-start gap-2">
-                <div className={`w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 ${idx % 4 === 0 ? "bg-emerald-500" : idx % 4 === 1 ? "bg-teal-500" : idx % 4 === 2 ? "bg-cyan-500" : "bg-blue-500"}`} />
+              <div key={item.id || idx} className="flex items-start gap-1">
+                <div className={`w-1 h-1 rounded-full mt-1 flex-shrink-0 ${idx % 4 === 0 ? "bg-emerald-500" : idx % 4 === 1 ? "bg-teal-500" : idx % 4 === 2 ? "bg-cyan-500" : "bg-blue-500"}`} />
                 <div>
-                  <p className="text-gray-700 text-sm font-medium">{item.name}</p>
+                  <p className="text-gray-700 text-xs font-medium">{item.name}</p>
                   {(item.summary || item.description) && (
                     <div
                       className="text-xs text-gray-600 mt-0.5 wysiwyg"
@@ -676,7 +676,7 @@ export const Azurill = memo(({ columns, isFirstPage = false, resumeData: resumeD
     <div className="w-full max-w-6xl mx-auto bg-white shadow-xl print:shadow-none print:w-full print:max-w-none rounded-lg overflow-hidden min-h-screen">
       {isFirstPage && <Header resumeData={resumeData} />}
 
-      <div className="p-4 md:p-6 print:p-4">
+      <div className="p-2 md:p-3 print:p-2">
         {/* About Me Section - Right below header */}
         {mapSectionToComponent("summary", resumeData)}
         
